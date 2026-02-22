@@ -1,0 +1,91 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# =========================
+# Virtual Environments
+# =========================
+venv/
+env/
+transify/
+.venv/
+conda-env/
+*.conda
+
+# =========================
+# HuggingFace & Model Caches
+# =========================
+.cache/
+.huggingface/
+hf_cache/
+models/
+checkpoints/
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# =========================
+# Whisper / XTTS Downloads
+# =========================
+whisper_models/
+tts_models/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Audio / Video Files
+# =========================
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.mp4
+*.mov
+*.mkv
+*.avi
+
+# =========================
+# Output Files
+# =========================
+outputs/
+generated/
+final_videos/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# VSCode / IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Mac Specific
+# =========================
+.AppleDouble
+.LSOverride
