@@ -20,7 +20,7 @@ transify/
 .venv/
 conda-env/
 *.conda
-
+.env
 # =========================
 # HuggingFace & Model Caches
 # =========================
