@@ -6,6 +6,7 @@
 
 <link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -18,7 +19,7 @@
     <div class="logo">Multiva.AI</div>
     <nav>
         <a href="index.html">Home</a>
-        <a href="login.html">Logout</a>
+        <a href="index.html">Logout</a>
     </nav>
 </header>
 
@@ -26,10 +27,30 @@
 
     <h2>AI Voice & Video Translator</h2>
 
-    <div class="upload-box">
-        <input type="file" id="videoUpload" accept="video/*">
+    <!-- <div class="upload-box"> -->
+       
+    <input type="file" id="videoUpload" style="display:none;">
+</div>
+    
+        <!-- <input type="file" id="videoUpload" accept="video/*"> -->
+         
+     <div class="upload-box"></div>
         <p id="fileName">No video selected</p>
     </div>
+
+    <!-- ✅ VIDEO PREVIEW -->
+    <div class="video-preview">
+    <label for="videoUpload" class="upload-icon">
+        <img 
+            src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
+            alt="Upload" 
+            width="40" 
+            height="40" 
+            style="border-radius:50%; cursor:pointer;"
+        >
+    </label>
+    <video id="videoPlayer" controls></video>
+</div>
 
     <button id="processBtn">Generate Output</button>
 
