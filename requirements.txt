@@ -1,11 +1,11 @@
 # Core
 fastapi==0.111.1
-uvicorn==0.26.1
+uvicorn
 python-multipart==0.0.6
 pydantic==2.6.2
 
 # Audio / Video
-ffmpeg-python==1.2
+ffmpeg-python==0.2.0
 librosa==0.10.1.post2
 torchaudio==2.2.1
 torch==2.2.0

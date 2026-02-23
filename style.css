@@ -1,0 +1,217 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(-45deg, 
+        #0f0c29, 
+        #302b63, 
+        #24243e, 
+        #ff00cc, 
+        #00dbde,
+        #fc466b,
+        #3a1c71
+    );
+    background-size: 500% 500%;
+    animation: gradientFlow 14s ease infinite;
+    color: white;
+    overflow-x: hidden;
+}
+
+/* Matte Overlay */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(40px);
+    z-index: -1;
+}
+
+/* Gradient Animation */
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Floating Shapes */
+
+.matte {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(8, 8, 18, 0.65);  /* 🔥 Matte diffusion */
+    
+    backdrop-filter: blur(18px);        /* 🔥 Glass blur */
+    -webkit-backdrop-filter: blur(18px);
+
+    z-index: 1;
+}
+
+.shape {
+    z-index: 0;
+    pointer-events: none;
+}
+
+header, .hero, .login-box, .workspace {
+    position: relative;
+    z-index: 2;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;   /* 🔥 THIS FIXES CLICK ISSUE */
+}
+
+.shape1 { width: 320px; height: 320px; background: #ff00cc; top: 10%; left: 5%; }
+.shape2 { width: 420px; height: 420px; background: #00dbde; bottom: 10%; right: 5%; }
+.shape3 { width: 220px; height: 220px; background: #fc466b; top: 50%; left: 40%; }
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-50px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Header */
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 60px;
+    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.2);
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(45deg, #ff00cc, #00dbde);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+nav a {
+    margin-left: 30px;
+    text-decoration: none;
+    color: rgba(255,255,255,0.85);
+}
+
+/* Hero */
+
+.hero {
+    text-align: center;
+    padding: 130px 20px;
+}
+
+.hero h1 {
+    font-size: 52px;
+    text-shadow: 0 0 25px rgba(0,0,0,0.8);
+}
+
+.hero p {
+    margin-top: 15px;
+    opacity: 0.9;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 34px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(45deg, #ff00cc, #00dbde);
+    color: white;
+    cursor: pointer;
+}
+
+/* Glass */
+
+.glass {
+    background: rgba(255,255,255,0.08);
+    border-radius: 22px;
+    padding: 40px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 0 45px rgba(0,0,0,0.4);
+}
+
+/* Login */
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-box {
+    width: 380px;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+/* Workspace */
+
+.section {
+    padding: 80px 10%;
+}
+
+.workspace {
+    text-align: center;
+}
+
+.upload-area input { display: none; }
+
+.upload-area label {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 30px;
+    background: linear-gradient(45deg, #ff00cc, #00dbde);
+    cursor: pointer;
+}
+
+.controls {
+    margin-top: 25px;
+}
+
+select {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.video-placeholder {
+    margin-top: 25px;
+    padding: 35px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.06);
+    opacity: 0.7;
+}
+
+/* Footer */
+
+footer {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.6;
+}
