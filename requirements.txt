@@ -1,0 +1,28 @@
+# Core
+fastapi==0.111.1
+uvicorn==0.26.1
+python-multipart==0.0.6
+pydantic==2.6.2
+
+# Audio / Video
+ffmpeg-python==1.2
+librosa==0.10.1.post2
+torchaudio==2.2.1
+torch==2.2.0
+torchvision==0.17.1
+
+# TTS / Voice cloning
+TTS==0.13.1
+numpy==1.26.0
+scipy==1.11.1
+
+# Translation / Whisper
+transformers==4.42.2
+sentencepiece==0.1.99
+faster-whisper==2023.11.2
+torchtext==0.18.1
+
+# Misc
+pandas==2.1.1
+requests==2.31.0
+typing-extensions==4.9.0
