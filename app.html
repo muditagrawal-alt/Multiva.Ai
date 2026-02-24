@@ -11,15 +11,11 @@
 
 <body>
 
-    <!-- Matte Layer -->
     <div class="matte"></div>
-
-    <!-- Floating Shapes -->
     <div class="shape shape1"></div>
     <div class="shape shape2"></div>
     <div class="shape shape3"></div>
 
-    <!-- Header -->
     <header>
         <div class="logo">Multiva.AI</div>
         <nav>
@@ -28,16 +24,15 @@
         </nav>
     </header>
 
-    <!-- Workspace Content -->
     <div class="workspace">
 
         <h2>AI Voice & Video Translator</h2>
 
-        <!-- Hidden file input -->
         <input type="file" id="videoUpload" style="display:none;">
 
-        <!-- Upload icon -->
         <div class="upload-box">
+
+            <!-- Upload Icon -->
             <label for="videoUpload" class="upload-icon">
                 <img 
                     src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
@@ -47,33 +42,48 @@
                     style="border-radius:50%; cursor:pointer;"
                 >
             </label>
+
+            <!-- ✅ LANGUAGE SELECTOR ADDED BACK -->
+            <div style="margin-top:15px;">
+                <select id="languageSelect" style="padding:8px 12px; border-radius:8px; border:none;">
+                    <option value="de">German</option>
+                    <option value="hi">Hindi</option>
+                    <option value="fr">French</option>
+                    <option value="zh">Chinese</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="nl">Dutch</option>
+                    <option value="ko">Korean</option>
+                    <option value="ru">Russian</option>
+                    <option value="ar">Arabic</option>
+                    <option value="pl">Polish</option>
+                    <option value="tr">Turkish</option>
+
+                </select>
+            </div>
+
             <p id="fileName">No video selected</p>
         </div>
 
-        <!-- Video preview -->
         <div class="video-preview">
             <video id="videoPlayer" controls></video>
         </div>
 
-        
-        <!-- Generate button -->
         <button id="processBtn">Generate Output</button>
 
-    
-        <!-- Output Section -->
-<div class="output-box">
-    <h3>Output Video:</h3>
-    <video id="outputVideo" controls style="width:100%; border-radius:12px; display:none;"></video>
-    <p id="outputText">Output will appear here</p>
+        <div class="output-box">
+            <h3>Output Video:</h3>
+            <video id="outputVideo" controls style="width:100%; border-radius:12px; display:none;"></video>
+            <p id="outputText">Output will appear here</p>
 
-    <!-- Download Button -->
-    <a id="downloadBtn" href="#" download style="display:none;">
-        <button style="margin-top:15px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; cursor:pointer;">
-            Download Video
-        </button>
-    </a>
-</div>
-
+            <a id="downloadBtn" href="#" download style="display:none;">
+                <button style="margin-top:15px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; cursor:pointer;">
+                    Download Video
+                </button>
+            </a>
+        </div>
 
     </div>
 

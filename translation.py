@@ -16,7 +16,6 @@ LANGUAGE_MAP = {
     "it": "ita_Latn",
     "pt": "por_Latn",
     "hi": "hin_Deva",
-    "ja": "jpn_Jpan",
     "zh": "zho_Hans",
     "ar": "arb_Arab",     # Arabic
     "ru": "rus_Cyrl",     # Russian
@@ -24,7 +23,6 @@ LANGUAGE_MAP = {
     "tr": "tur_Latn",     # Turkish
     "nl": "nld_Latn",     # Dutch
     "pl": "pol_Latn",     # Polish
-    "cs": "ces_Latn"      # Czech
 }
 
 
