@@ -4,6 +4,7 @@ const uploadInput = document.getElementById("videoUpload");
 const fileNameText = document.getElementById("fileName");
 const outputText = document.getElementById("outputText");
 const videoPlayer = document.getElementById("videoPlayer");
+const outputVideo = document.getElementById("outputVideo");
 const languageSelect = document.getElementById("languageSelect");
 const downloadBtn = document.getElementById("downloadBtn");
 
@@ -47,12 +48,11 @@ if (loginBtn) {
     });
 }
 
-/* ================= LANGUAGE SELECTOR (TOGGLE FEEL) ================= */
+/* ================= LANGUAGE SELECTOR ================= */
 if (languageSelect) {
     languageSelect.addEventListener("change", () => {
         const selectedText =
             languageSelect.options[languageSelect.selectedIndex].text;
-
         outputText.innerText = `Selected Language: ${selectedText}`;
     });
 }
@@ -65,9 +65,10 @@ if (uploadInput) {
 
             if (fileNameText) fileNameText.innerText = file.name;
 
+            const previewURL = URL.createObjectURL(file);
+
             if (videoPlayer) {
-                const videoURL = URL.createObjectURL(file);
-                videoPlayer.src = videoURL;
+                videoPlayer.src = previewURL;
                 videoPlayer.style.display = "block";
             }
         } else {
@@ -111,19 +112,20 @@ if (processBtn) {
             const blob = await response.blob();
             const videoURL = URL.createObjectURL(blob);
 
-            videoPlayer.src = videoURL;
-            videoPlayer.style.display = "block";
+            // Show output video
+            if (outputVideo) {
+                outputVideo.src = videoURL;
+                outputVideo.style.display = "block";
+            }
 
             outputText.innerText = "✅ Video Successfully Generated!";
             processBtn.innerText = "Generate Output";
 
-            downloadBtn.style.display = "inline-block";
-            downloadBtn.onclick = () => {
-                const a = document.createElement("a");
-                a.href = videoURL;
-                a.download = "translated_video.mp4";
-                a.click();
-            };
+            // ✅ FIXED DOWNLOAD BUTTON
+            if (downloadBtn) {
+                downloadBtn.href = videoURL;
+                downloadBtn.style.display = "inline-block";
+            }
 
         } catch (error) {
             console.error(error);
