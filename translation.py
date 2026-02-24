@@ -17,13 +17,27 @@ LANGUAGE_MAP = {
     "pt": "por_Latn",
     "hi": "hin_Deva",
     "ja": "jpn_Jpan",
-    "zh": "zho_Hans"
+    "zh": "zho_Hans",
+    "ar": "arb_Arab",     # Arabic
+    "ru": "rus_Cyrl",     # Russian
+    "ko": "kor_Hang",     # Korean
+    "tr": "tur_Latn",     # Turkish
+    "nl": "nld_Latn",     # Dutch
+    "pl": "pol_Latn",     # Polish
+    "cs": "ces_Latn"      # Czech
 }
 
 
 def translate_text(text: str, source_lang: str, target_lang: str) -> str:
+
     if source_lang == target_lang:
         return text
+
+    if source_lang not in LANGUAGE_MAP:
+        raise ValueError(f"Source language {source_lang} not supported")
+
+    if target_lang not in LANGUAGE_MAP:
+        raise ValueError(f"Target language {target_lang} not supported")
 
     tokenizer.src_lang = LANGUAGE_MAP[source_lang]
 

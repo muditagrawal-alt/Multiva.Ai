@@ -7,8 +7,8 @@ from pydub import AudioSegment
 
 # --------------------------------------------------
 # IMPORTANT:
-# XTTS + Apple MPS = unstable (complex tensor issue)
-# So we FORCE CPU for stable voice cloning
+# XTTS + Apple MPS = unstable
+# Force CPU for stability
 # --------------------------------------------------
 
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -16,9 +16,17 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 DEVICE = "cpu"
 print("Using device for XTTS:", DEVICE)
 
-# Load XTTS v2 model
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(DEVICE)
 
+# --------------------------------------------------
+# Supported XTTS Languages
+# --------------------------------------------------
+
+SUPPORTED_XTTS_LANGS = [
+    "en", "es", "fr", "de", "it", "pt",
+    "pl", "tr", "ru", "nl",
+    "cs", "ar", "zh", "ja", "ko", "hi"
+]
 
 # -----------------------
 # Text Cleaning
@@ -27,12 +35,37 @@ tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(DEVICE)
 def clean_text(text: str) -> str:
     text = unicodedata.normalize("NFKC", text)
     text = text.replace("\n", " ").strip()
+
+    # Remove invisible unicode chars (Arabic/Japanese bug fix)
+    text = re.sub(r'[\u200B-\u200D\uFEFF]', '', text)
+
     return text
 
 
+# -----------------------
+# Multilingual Sentence Splitting
+# -----------------------
+
 def split_sentences(text: str):
-    # Works better for multilingual punctuation
-    return re.split(r'(?<=[.!?।])\s+', text)
+    # Handles Latin + Hindi + Japanese + Arabic punctuation
+    pattern = r'(?<=[.!?।。！？؟])\s*'
+    sentences = re.split(pattern, text)
+
+    return [s.strip() for s in sentences if s.strip()]
+
+
+# -----------------------
+# Enforce Character Limit
+# -----------------------
+
+def enforce_chunk_limit(sentences, max_len=180):
+    chunks = []
+    for s in sentences:
+        while len(s) > max_len:
+            chunks.append(s[:max_len])
+            s = s[max_len:]
+        chunks.append(s)
+    return chunks
 
 
 # -----------------------
@@ -41,12 +74,20 @@ def split_sentences(text: str):
 
 def synthesize_voice(text: str, language: str, speaker_wav: str):
 
-    # Safety check
+    if language not in SUPPORTED_XTTS_LANGS:
+        raise ValueError(f"Language '{language}' not supported by XTTS")
+
     if not os.path.exists(speaker_wav):
         raise FileNotFoundError(f"Speaker file not found: {speaker_wav}")
 
     text = clean_text(text)
+
+    # Japanese spacing improvement
+    if language == "ja":
+        text = text.replace("。", "。 ")
+
     sentences = split_sentences(text)
+    sentences = enforce_chunk_limit(sentences)
 
     combined_audio = AudioSegment.empty()
 
@@ -61,20 +102,18 @@ def synthesize_voice(text: str, language: str, speaker_wav: str):
 
         tts.tts_to_file(
             text=sentence,
-            speaker_wav=speaker_wav,   # Your cloned voice reference
-            language=language,        # "es", "hi", "en", etc.
+            speaker_wav=speaker_wav,
+            language=language,
             file_path=temp_output,
-            temperature=0.6,          # Lower = more stable
-            repetition_penalty=1.5,   # Avoid robotic looping
+            temperature=0.6,
+            repetition_penalty=1.5,
             length_penalty=1.0,
-            speed=0.95                # Slightly slower = more natural
+            speed=0.95
         )
 
         segment_audio = AudioSegment.from_wav(temp_output)
 
-        # Natural pause between sentences
         pause = AudioSegment.silent(duration=250)
-
         combined_audio += segment_audio + pause
 
         os.remove(temp_output)
