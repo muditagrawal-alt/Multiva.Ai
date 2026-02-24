@@ -1,28 +1,30 @@
 # Core
 fastapi==0.111.1
-uvicorn
-python-multipart==0.0.6
-pydantic==2.6.2
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+pydantic==2.6.4
+
+# Torch stack (MATCHED)
+torch==2.2.1
+torchaudio==2.2.1
+torchvision==0.17.1
 
 # Audio / Video
 ffmpeg-python==0.2.0
 librosa==0.10.1.post2
-torchaudio==2.2.1
-torch==2.2.0
-torchvision==0.17.1
+soundfile==0.12.1
+numpy==1.26.4
+scipy==1.11.4
 
-# TTS / Voice cloning
-TTS==0.13.1
-numpy==1.26.0
-scipy==1.11.1
+# TTS / Voice Cloning
+TTS==0.22.0
 
 # Translation / Whisper
 transformers==4.42.2
 sentencepiece==0.1.99
-faster-whisper==2023.11.2
-torchtext==0.18.1
+faster-whisper==2024.2.0
+huggingface-hub==0.23.0
 
-# Misc
-pandas==2.1.1
+# Utilities
 requests==2.31.0
-typing-extensions==4.9.0
+typing-extensions==4.12.2
