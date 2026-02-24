@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, UploadFile, Query
 from fastapi.responses import FileResponse
 import os
@@ -13,6 +14,14 @@ from tts_module import synthesize_voice
 from lip_sync_generate import generate_lip_synced_video
 
 app = FastAPI(title="Multilingual Voice Cloning API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # later replace with frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 UPLOAD_DIR = "temp_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
