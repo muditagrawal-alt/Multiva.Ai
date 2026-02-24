@@ -11,54 +11,59 @@
 
 <body>
 
-<div class="shape shape1"></div>
-<div class="shape shape2"></div>
-<div class="shape shape3"></div>
+    <!-- Matte Layer -->
+    <div class="matte"></div>
 
-<header>
-    <div class="logo">Multiva.AI</div>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="index.html">Logout</a>
-    </nav>
-</header>
+    <!-- Floating Shapes -->
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
 
-<div class="workspace">
+    <!-- Header -->
+    <header>
+        <div class="logo">Multiva.AI</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="index.html">Logout</a>
+        </nav>
+    </header>
 
-    <h2>AI Voice & Video Translator</h2>
+    <!-- Workspace Content -->
+    <div class="workspace">
 
-    <!-- <div class="upload-box"> -->
-       
-    <input type="file" id="videoUpload" style="display:none;">
-</div>
-    
-        <!-- <input type="file" id="videoUpload" accept="video/*"> -->
-         
-     <div class="upload-box"></div>
-        <p id="fileName">No video selected</p>
+        <h2>AI Voice & Video Translator</h2>
+
+        <!-- Hidden file input -->
+        <input type="file" id="videoUpload" style="display:none;">
+
+        <!-- Upload icon -->
+        <div class="upload-box">
+            <label for="videoUpload" class="upload-icon">
+                <img 
+                    src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
+                    alt="Upload" 
+                    width="40" 
+                    height="40" 
+                    style="border-radius:50%; cursor:pointer;"
+                >
+            </label>
+            <p id="fileName">No video selected</p>
+        </div>
+
+        <!-- Video preview -->
+        <div class="video-preview">
+            <video id="videoPlayer" controls></video>
+        </div>
+
+        <!-- Generate button -->
+        <button id="processBtn">Generate Output</button>
+
+        <!-- Output box -->
+        <div class="output-box">
+            <p id="outputText">Output will appear here</p>
+        </div>
+
     </div>
-
-    <!-- ✅ VIDEO PREVIEW -->
-    <div class="video-preview">
-    <label for="videoUpload" class="upload-icon">
-        <img 
-            src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
-            alt="Upload" 
-            width="40" 
-            height="40" 
-            style="border-radius:50%; cursor:pointer;"
-        >
-    </label>
-    <video id="videoPlayer" controls></video>
-</div>
-
-    <button id="processBtn">Generate Output</button>
-
-    <div class="output-box">
-        <p id="outputText">Output will appear here</p>
-    </div>
-
-</div>
 
 <script src="script.js"></script>
 </body>
