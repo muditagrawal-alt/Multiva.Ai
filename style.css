@@ -151,6 +151,10 @@ nav a {
 }
 
 button {
+    a{
+        text-decoration: none;
+        color: white;
+    }
     margin-top: 25px;
     padding: 14px 34px;
     border: none;
