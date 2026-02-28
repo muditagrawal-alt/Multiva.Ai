@@ -20,6 +20,9 @@ if (loginBtn) {
         loginError.className = "error-text";
         loginBtn.parentNode.appendChild(loginError);
     }
+    window.goToLogin = function() {
+    window.location.href = "login.html";
+}
 
     emailInput.addEventListener("input", () => loginError.innerText = "");
     passwordInput.addEventListener("input", () => loginError.innerText = "");
