@@ -35,7 +35,6 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(TTS_DEVICE)
 
-
 # --------------------------------------------------
 # Supported XTTS Languages
 # --------------------------------------------------
