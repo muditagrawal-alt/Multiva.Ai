@@ -6,17 +6,35 @@ from TTS.api import TTS
 from pydub import AudioSegment
 
 # --------------------------------------------------
-# IMPORTANT:
-# XTTS + Apple MPS = unstable
-# Force CPU for stability
+# DEVICE SELECTION
+# XTTS unstable on MPS → avoid it
+# Force CPU for now
 # --------------------------------------------------
 
+def get_tts_device():
+    """
+    For now:
+    - XTTS runs safest on CPU
+    - Avoid MPS
+    - Allow override via FORCE_TTS_DEVICE
+    """
+
+    forced = os.getenv("FORCE_TTS_DEVICE")
+    if forced:
+        return forced
+
+    # If in future you want CUDA for other models,
+    # you can change this logic.
+    return "cpu"
+
+
+TTS_DEVICE = get_tts_device()
+
+# Enable fallback (safe on Mac)
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
-DEVICE = "cpu"
-print("Using device for XTTS:", DEVICE)
+tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(TTS_DEVICE)
 
-tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(DEVICE)
 
 # --------------------------------------------------
 # Supported XTTS Languages
@@ -28,6 +46,7 @@ SUPPORTED_XTTS_LANGS = [
     "cs", "ar", "zh", "ja", "ko", "hi"
 ]
 
+
 # -----------------------
 # Text Cleaning
 # -----------------------
@@ -36,7 +55,7 @@ def clean_text(text: str) -> str:
     text = unicodedata.normalize("NFKC", text)
     text = text.replace("\n", " ").strip()
 
-    # Remove invisible unicode chars (Arabic/Japanese bug fix)
+    # Remove invisible unicode chars
     text = re.sub(r'[\u200B-\u200D\uFEFF]', '', text)
 
     return text
@@ -47,10 +66,8 @@ def clean_text(text: str) -> str:
 # -----------------------
 
 def split_sentences(text: str):
-    # Handles Latin + Hindi + Japanese + Arabic punctuation
     pattern = r'(?<=[.!?।。！？؟])\s*'
     sentences = re.split(pattern, text)
-
     return [s.strip() for s in sentences if s.strip()]
 
 
@@ -98,8 +115,6 @@ def synthesize_voice(text: str, language: str, speaker_wav: str):
 
         temp_output = f"temp_sentence_{i}.wav"
 
-        print(f"Generating sentence {i+1}/{len(sentences)}")
-
         tts.tts_to_file(
             text=sentence,
             speaker_wav=speaker_wav,
@@ -121,5 +136,4 @@ def synthesize_voice(text: str, language: str, speaker_wav: str):
     final_output = "final_tts_output.wav"
     combined_audio.export(final_output, format="wav")
 
-    print("TTS generation complete.")
     return final_output
