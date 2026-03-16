@@ -99,7 +99,7 @@ if (processBtn) {
 
         try {
             const response = await fetch(
-                `http://localhost:10000/process_video/?target_language=${language}`,
+                `https://localhost:10000/process_video/?target_language=${language}`,
                 {
                     method: "POST",
                     body: formData
