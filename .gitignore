@@ -89,3 +89,5 @@ Thumbs.db
 # =========================
 .AppleDouble
 .LSOverride
+cert.pem
+key.pem
