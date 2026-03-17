@@ -2,7 +2,7 @@ import whisper
 import torch
 import os
 
-MODEL_SIZE = "base"
+MODEL_SIZE = "medium"
 
 
 def get_asr_device():
@@ -34,9 +34,16 @@ def transcribe_audio(audio_path: str):
 
     with torch.no_grad():
         result = model.transcribe(
-            audio_path,
-            fp16=use_fp16
-        )
+    audio_path,
+    fp16=use_fp16,
+    task="transcribe",
+    beam_size=5,
+    best_of=5,
+    temperature=0.0,
+    compression_ratio_threshold=2.4,
+    logprob_threshold=-1.0,
+    no_speech_threshold=0.6
+)
 
     return {
         "text": result["text"].strip(),

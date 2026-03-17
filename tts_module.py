@@ -7,24 +7,13 @@ from pydub import AudioSegment
 
 # --------------------------------------------------
 # DEVICE SELECTION
-# XTTS unstable on MPS → avoid it
-# Force CPU for now
 # --------------------------------------------------
 
 def get_tts_device():
-    """
-    For now:
-    - XTTS runs safest on CPU
-    - Avoid MPS
-    - Allow override via FORCE_TTS_DEVICE
-    """
-
     forced = os.getenv("FORCE_TTS_DEVICE")
     if forced:
         return forced
 
-    # If in future you want CUDA for other models,
-    # you can change this logic.
     return "cpu"
 
 
@@ -45,42 +34,51 @@ SUPPORTED_XTTS_LANGS = [
     "cs", "ar", "zh", "ja", "ko", "hi"
 ]
 
-
 # -----------------------
 # Text Cleaning
 # -----------------------
 
-def clean_text(text: str) -> str:
+def clean_text(text: str):
     text = unicodedata.normalize("NFKC", text)
     text = text.replace("\n", " ").strip()
-
-    # Remove invisible unicode chars
     text = re.sub(r'[\u200B-\u200D\uFEFF]', '', text)
-
     return text
 
 
 # -----------------------
-# Multilingual Sentence Splitting
+# Sentence Splitting
 # -----------------------
 
 def split_sentences(text: str):
-    pattern = r'(?<=[.!?।。！？؟])\s*'
+    pattern = r'(?<=[.!?।。！？؟…])\s*'
     sentences = re.split(pattern, text)
     return [s.strip() for s in sentences if s.strip()]
 
 
 # -----------------------
-# Enforce Character Limit
+# Smart Chunking
 # -----------------------
 
-def enforce_chunk_limit(sentences, max_len=180):
+def enforce_chunk_limit(sentences, max_len=120):
     chunks = []
+
     for s in sentences:
-        while len(s) > max_len:
-            chunks.append(s[:max_len])
-            s = s[max_len:]
-        chunks.append(s)
+        if len(s) <= max_len:
+            chunks.append(s)
+        else:
+            words = s.split()
+            temp = ""
+
+            for w in words:
+                if len(temp + " " + w) < max_len:
+                    temp += " " + w
+                else:
+                    chunks.append(temp.strip())
+                    temp = w
+
+            if temp:
+                chunks.append(temp.strip())
+
     return chunks
 
 
@@ -114,6 +112,9 @@ def synthesize_voice(text: str, language: str, speaker_wav: str):
 
         temp_output = f"temp_sentence_{i}.wav"
 
+        # Dynamic speed
+        speed = 0.92 if len(sentence) > 100 else 1.0
+
         tts.tts_to_file(
             text=sentence,
             speaker_wav=speaker_wav,
@@ -122,15 +123,38 @@ def synthesize_voice(text: str, language: str, speaker_wav: str):
             temperature=0.6,
             repetition_penalty=1.5,
             length_penalty=1.0,
-            speed=0.95
+            speed=speed
         )
 
         segment_audio = AudioSegment.from_wav(temp_output)
 
-        pause = AudioSegment.silent(duration=250)
+        # Debug logs
+        print(f"[TTS] Sentence {i} | chars={len(sentence)} | duration={len(segment_audio)} ms")
+
+        # Language-aware pause
+        pause_duration = 80 if language in ["zh", "ja"] else 50
+        pause = AudioSegment.silent(duration=pause_duration)
+
         combined_audio += segment_audio + pause
 
         os.remove(temp_output)
+
+    # -----------------------
+    # Duration Alignment (CRITICAL FIX)
+    # -----------------------
+
+    original_audio = AudioSegment.from_wav(speaker_wav)
+
+    if len(combined_audio) > len(original_audio):
+        combined_audio = combined_audio[:len(original_audio)]
+    else:
+        combined_audio += AudioSegment.silent(
+            duration=(len(original_audio) - len(combined_audio))
+        )
+
+    # -----------------------
+    # Export final audio
+    # -----------------------
 
     final_output = "final_tts_output.wav"
     combined_audio.export(final_output, format="wav")
