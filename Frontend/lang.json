@@ -1,0 +1,190 @@
+{
+  "en": {
+    "navMission": "Mission",
+    "navTech": "Technology",
+    "navContact": "Contact",
+    "navLogin": "Login",
+    "navHome": "Home",
+    "navLogout": "Logout",
+
+    "heroTitle": "Create Videos. Preserve Voices. Break Language Barriers.",
+    "heroSubtitle": "AI-powered multilingual Video Translation Platform.",
+
+    "loginBtnText": "Login / Get Started",
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Login to continue",
+    "emailPlaceholder": "Enter Email",
+    "passwordPlaceholder": "Enter Password",
+
+    "appTitle": "AI Voice & Video Translator",
+
+    "outputTitle": "Output Video:",
+    "outputText": "Output will appear here",
+    "generateBtn": "Generate Output",
+    "downloadText": "Download Video",
+
+    "footerText": "© 2026 Multiva.AI — AI Powered Communication"
+  },
+
+  "hi": {
+    "navMission": "मिशन",
+    "navTech": "तकनीक",
+    "navContact": "संपर्क",
+    "navLogin": "लॉगिन",
+    "navHome": "होम",
+    "navLogout": "लॉगआउट",
+
+    "heroTitle": "वीडियो बनाएं। आवाज़ सुरक्षित रखें। भाषा बाधाओं को तोड़ें।",
+    "heroSubtitle": "एआई आधारित बहुभाषी वीडियो अनुवाद प्लेटफॉर्म।",
+
+    "loginBtnText": "लॉगिन / शुरू करें",
+    "loginTitle": "वापसी पर स्वागत है",
+    "loginSubtitle": "जारी रखने के लिए लॉगिन करें",
+    "emailPlaceholder": "ईमेल दर्ज करें",
+    "passwordPlaceholder": "पासवर्ड दर्ज करें",
+
+    "appTitle": "एआई वॉइस और वीडियो ट्रांसलेटर",
+
+    "outputTitle": "आउटपुट वीडियो:",
+    "outputText": "आउटपुट यहाँ दिखाई देगा",
+    "generateBtn": "आउटपुट बनाएं",
+    "downloadText": "वीडियो डाउनलोड करें",
+
+    "footerText": "© 2026 मल्टिवा.एआई — एआई संचालित संचार"
+  },
+
+  "ar": {
+    "navMission": "المهمة",
+    "navTech": "التقنية",
+    "navContact": "اتصال",
+    "navLogin": "تسجيل الدخول",
+    "navHome": "الرئيسية",
+    "navLogout": "تسجيل الخروج",
+
+    "heroTitle": "أنشئ مقاطع فيديو. حافظ على الأصوات. اكسر حواجز اللغة.",
+    "heroSubtitle": "منصة ترجمة فيديو متعددة اللغات مدعومة بالذكاء الاصطناعي.",
+
+    "loginBtnText": "ابدأ / تسجيل الدخول",
+    "loginTitle": "مرحبًا بعودتك",
+    "loginSubtitle": "سجل الدخول للمتابعة",
+    "emailPlaceholder": "أدخل البريد الإلكتروني",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+
+    "appTitle": "مترجم الصوت والفيديو بالذكاء الاصطناعي",
+
+    "outputTitle": "فيديو الإخراج:",
+    "outputText": "سيظهر الإخراج هنا",
+    "generateBtn": "إنشاء الإخراج",
+    "downloadText": "تحميل الفيديو",
+
+    "footerText": "© 2026 Multiva.AI — تواصل مدعوم بالذكاء الاصطناعي"
+  },
+
+  "es": {
+    "navMission": "Misión",
+    "navTech": "Tecnología",
+    "navContact": "Contacto",
+    "navLogin": "Iniciar sesión",
+    "navHome": "Inicio",
+    "navLogout": "Cerrar sesión",
+
+    "heroTitle": "Crea videos. Conserva voces. Rompe las barreras del idioma.",
+    "heroSubtitle": "Plataforma de traducción de video multilingüe impulsada por IA.",
+
+    "loginBtnText": "Iniciar / Comenzar",
+    "loginTitle": "Bienvenido de nuevo",
+    "loginSubtitle": "Inicia sesión para continuar",
+    "emailPlaceholder": "Introduce el correo electrónico",
+    "passwordPlaceholder": "Introduce la contraseña",
+
+    "appTitle": "Traductor de voz y video con IA",
+
+    "outputTitle": "Video de salida:",
+    "outputText": "La salida aparecerá aquí",
+    "generateBtn": "Generar salida",
+    "downloadText": "Descargar video",
+
+    "footerText": "© 2026 Multiva.AI — Comunicación impulsada por IA"
+  },
+
+  "fr": {
+    "navMission": "Mission",
+    "navTech": "Technologie",
+    "navContact": "Contact",
+    "navLogin": "Connexion",
+    "navHome": "Accueil",
+    "navLogout": "Déconnexion",
+
+    "heroTitle": "Créez des vidéos. Préservez les voix. Brisez les barrières linguistiques.",
+    "heroSubtitle": "Plateforme de traduction vidéo multilingue alimentée par l'IA.",
+
+    "loginBtnText": "Connexion / Démarrer",
+    "loginTitle": "Bon retour",
+    "loginSubtitle": "Connectez-vous pour continuer",
+    "emailPlaceholder": "Entrez l'email",
+    "passwordPlaceholder": "Entrez le mot de passe",
+
+    "appTitle": "Traducteur vocal et vidéo IA",
+
+    "outputTitle": "Vidéo de sortie:",
+    "outputText": "La sortie apparaîtra ici",
+    "generateBtn": "Générer la sortie",
+    "downloadText": "Télécharger la vidéo",
+
+    "footerText": "© 2026 Multiva.AI — Communication alimentée par IA"
+  },
+
+  "zh": {
+    "navMission": "使命",
+    "navTech": "技术",
+    "navContact": "联系",
+    "navLogin": "登录",
+    "navHome": "首页",
+    "navLogout": "退出",
+
+    "heroTitle": "创建视频。保留声音。打破语言障碍。",
+    "heroSubtitle": "AI驱动的多语言视频翻译平台。",
+
+    "loginBtnText": "登录 / 开始",
+    "loginTitle": "欢迎回来",
+    "loginSubtitle": "登录以继续",
+    "emailPlaceholder": "输入电子邮件",
+    "passwordPlaceholder": "输入密码",
+
+    "appTitle": "AI语音与视频翻译器",
+
+    "outputTitle": "输出视频：",
+    "outputText": "输出将显示在这里",
+    "generateBtn": "生成输出",
+    "downloadText": "下载视频",
+
+    "footerText": "© 2026 Multiva.AI — AI驱动的通信"
+  },
+
+  "de": {
+    "navMission": "Mission",
+    "navTech": "Technologie",
+    "navContact": "Kontakt",
+    "navLogin": "Anmelden",
+    "navHome": "Startseite",
+    "navLogout": "Abmelden",
+
+    "heroTitle": "Erstellen Sie Videos. Bewahren Sie Stimmen. Überwinden Sie Sprachbarrieren.",
+    "heroSubtitle": "KI-gestützte mehrsprachige Videoübersetzungsplattform.",
+
+    "loginBtnText": "Anmelden / Starten",
+    "loginTitle": "Willkommen zurück",
+    "loginSubtitle": "Melden Sie sich an, um fortzufahren",
+    "emailPlaceholder": "E-Mail eingeben",
+    "passwordPlaceholder": "Passwort eingeben",
+
+    "appTitle": "KI Sprach- und Videoübersetzer",
+
+    "outputTitle": "Ausgabevideo:",
+    "outputText": "Die Ausgabe erscheint hier",
+    "generateBtn": "Ausgabe generieren",
+    "downloadText": "Video herunterladen",
+
+    "footerText": "© 2026 Multiva.AI — KI-gestützte Kommunikation"
+  }
+}

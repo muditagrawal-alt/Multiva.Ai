@@ -11,89 +11,104 @@
 
 <body>
 
-    <div class="matte"></div>
-    <div class="shape shape1"></div>
-    <div class="shape shape2"></div>
-    <div class="shape shape3"></div>
+<div class="matte"></div>
+<div class="shape shape1"></div>
+<div class="shape shape2"></div>
+<div class="shape shape3"></div>
 
-    <header>
-        <div class="logo">Multiva.AI</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="index.html">Logout</a>
-        </nav>
-    </header>
+<header>
+    <div class="logo">Multiva.AI</div>
 
-    <div class="workspace">
+    <nav>
+        <a href="index.html"><span id="navHome">Home</span></a>
+        <a href="index.html"><span id="navLogout">Logout</span></a>
+    </nav>
 
-        <h2>AI Voice & Video Translator</h2>
+    <!-- 🌍 Language Switcher -->
+    <select id="languageSwitcher">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="ar">Arabic</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="zh">Chinese</option>
+        <option value="tr">Turkish</option>
+        <option value="ru">Russian</option>
+        <option value="pt">Portuguese</option>
+        <option value="it">Italian</option>
+        <option value="ko">Korean</option>
+        <option value="de">German</option>
+        <option value="nl">Dutch</option>
+        <option value="cs">Czech</option>
+    </select>
+</header>
 
-        <input type="file" id="videoUpload" style="display:none;">
+<div class="workspace">
 
-        <div class="upload-box">
+    <h2 id="appTitle">AI Voice & Video Translator</h2>
 
-            <!-- Upload Icon -->
-            <label for="videoUpload" class="upload-icon">
-                <img 
-                    src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
-                    alt="Upload" 
-                    width="40" 
-                    height="40" 
-                    style="border-radius:50%; cursor:pointer;"
-                >
-            </label>
+    <input type="file" id="videoUpload" style="display:none;">
 
-            <!-- ✅ LANGUAGE SELECTOR ADDED BACK -->
-            <div style="margin-top:15px;">
-                <select id="languageSelect" style="padding:8px 12px; border-radius:8px; border:none;">
-                    <option value="de">German</option>
-                    <option value="hi">Hindi</option>
-                    <option value="fr">French</option>
-                    <option value="zh">Chinese</option>
-                    <option value="it">Italian</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="nl">Dutch</option>
-                    <option value="ko">Korean</option>
-                    <option value="ru">Russian</option>
-                    <option value="ar">Arabic</option>
-                    <option value="pl">Polish</option>
-                    <option value="tr">Turkish</option>
+    <div class="upload-box">
 
-                </select>
-            </div>
+        <!-- Upload Icon -->
+        <label for="videoUpload" class="upload-icon">
+            <img 
+                src="https://static.vecteezy.com/system/resources/previews/021/344/211/original/file-upload-icon-for-your-website-mobile-presentation-and-logo-design-free-vector.jpg" 
+                alt="Upload" 
+                width="40" 
+                height="40" 
+                style="border-radius:50%; cursor:pointer;"
+            >
+        </label>
 
-            <p id="fileName">No video selected</p>
+        <!-- Language Selector (for backend processing) -->
+        <div style="margin-top:15px;">
+            <select id="languageSelect" style="padding:8px 12px; border-radius:8px; border:none;">
+                <option value="de">German</option>
+                <option value="hi">Hindi</option>
+                <option value="fr">French</option>
+                <option value="zh">Chinese</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="nl">Dutch</option>
+                <option value="ko">Korean</option>
+                <option value="ru">Russian</option>
+                <option value="ar">Arabic</option>
+                <option value="tr">Turkish</option>
+            </select>
         </div>
 
-        <div class="video-preview">
-            <video id="videoPlayer" controls></video>
-        </div>
-
-        <button id="processBtn">Generate Output</button>
-
-        <div class="output-box">
-            <!-- <h3>Output Video:</h3>
-            <video id="outputVideo" controls style="width:100%; border-radius:12px; display:none;"></video>
-            <p id="outputText">Output will appear here</p> -->
-
-            <!-- Output Section -->
-<div class="output-box">
-    <h3>Output Video:</h3>
-    <video id="outputVideo" controls style="width:100%; border-radius:12px; display:none;"></video>
-    <p id="outputText">Output will appear here</p>
-
-    <!-- Download Button -->
-    <a id="downloadBtn" href="#" download style="display:none;">
-        <button style="margin-top:15px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; cursor:pointer;">
-            Download Video
-        </button>
-    </a>
-</div>
-        </div>
-
+        <p id="fileName">No video selected</p>
     </div>
+
+    <div class="video-preview">
+        <video id="videoPlayer" controls></video>
+    </div>
+
+    <button id="processBtn">
+        <span id="generateBtn">Generate Output</span>
+    </button>
+
+    <!-- Output Section -->
+    <div class="output-box">
+        <h3 id="outputTitle">Output Video:</h3>
+
+        <video id="outputVideo" controls style="width:100%; border-radius:12px; display:none;"></video>
+
+        <p id="outputText">Output will appear here</p>
+
+        <!-- Download Button -->
+        <a id="downloadBtn" href="#" download style="display:none;">
+            <button style="margin-top:15px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; cursor:pointer;">
+                <span id="downloadText">Download Video</span>
+            </button>
+        </a>
+    </div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
