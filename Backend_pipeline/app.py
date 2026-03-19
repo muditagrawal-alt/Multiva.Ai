@@ -5,13 +5,13 @@ import os
 import shutil
 from pathlib import Path
 
-from video_processing import extract_audio
-from speech_to_text import transcribe_audio
-from translation import translate_text
-from tts_module import synthesize_voice
+from Backend_pipeline.video_processing import extract_audio
+from Backend_pipeline.speech_to_text import transcribe_audio
+from Backend_pipeline.translation import translate_text
+from Backend_pipeline.tts_module import synthesize_voice
 
 # Import lip-sync generator
-from lip_sync_generate import generate_lip_synced_video
+from Backend_pipeline.lip_sync_generate import generate_lip_synced_video
 
 app = FastAPI(title="Multilingual Voice Cloning API")
 
