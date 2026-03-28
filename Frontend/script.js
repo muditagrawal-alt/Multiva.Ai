@@ -179,7 +179,6 @@ if (processBtn) {
         formData.append("file", file);
 
         try {
-<<<<<<< HEAD
             const response = await fetch(
                 `http://127.0.0.1:10000/process_video/?target_language=${language}`,
                 {
@@ -192,44 +191,6 @@ if (processBtn) {
 
             const blob = await response.blob();
             const videoURL = URL.createObjectURL(blob);
-=======
-            await runAnywhereProcess();
-            outputText.innerText = "Enhancing with AI...";
-            await enhanceWithAI();
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            let videoURL = "";
-
-            try {
-                const response = await fetch(
-                    `http://127.0.0.1:10000/process_video/?target_language=${language}`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error("Backend returned non-200");
-                }
-
-                const blob = await response.blob();
-
-                // 🔥 VALIDATE ACTUAL VIDEO OUTPUT
-                if (blob.size < 10000) {
-                    throw new Error("Invalid video blob");
-                }
-
-                videoURL = URL.createObjectURL(blob);
-
-            } catch (e) {
-                console.error("Backend failed:", e);
-                alert("Backend failed — check server logs");
-                return;
-            }
->>>>>>> 1ab3301 (Updated gitignore, app.py, tts_module.py)
 
             if (outputVideo) {
                 outputVideo.src = videoURL;
