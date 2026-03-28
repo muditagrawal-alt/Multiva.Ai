@@ -20,6 +20,7 @@
 
     "outputTitle": "Output Video:",
     "outputText": "Output will appear here",
+    "noVideoText": "No video selected",
     "generateBtn": "Generate Output",
     "downloadText": "Download Video",
 
@@ -47,6 +48,7 @@
 
     "outputTitle": "आउटपुट वीडियो:",
     "outputText": "आउटपुट यहाँ दिखाई देगा",
+    "noVideoText": "कोई वीडियो चयनित नहीं है",
     "generateBtn": "आउटपुट बनाएं",
     "downloadText": "वीडियो डाउनलोड करें",
 
@@ -74,6 +76,7 @@
 
     "outputTitle": "فيديو الإخراج:",
     "outputText": "سيظهر الإخراج هنا",
+    "noVideoText": "لم يتم تحديد فيديو",
     "generateBtn": "إنشاء الإخراج",
     "downloadText": "تحميل الفيديو",
 
@@ -101,6 +104,7 @@
 
     "outputTitle": "Video de salida:",
     "outputText": "La salida aparecerá aquí",
+    "noVideoText": "Ningún video seleccionado",
     "generateBtn": "Generar salida",
     "downloadText": "Descargar video",
 
@@ -128,6 +132,7 @@
 
     "outputTitle": "Vidéo de sortie:",
     "outputText": "La sortie apparaîtra ici",
+    "noVideoText": "Aucune vidéo sélectionnée",
     "generateBtn": "Générer la sortie",
     "downloadText": "Télécharger la vidéo",
 
@@ -155,10 +160,151 @@
 
     "outputTitle": "输出视频：",
     "outputText": "输出将显示在这里",
+    "noVideoText": "未选择视频",
     "generateBtn": "生成输出",
     "downloadText": "下载视频",
 
     "footerText": "© 2026 Multiva.AI — AI驱动的通信"
+  },
+
+  "tr": {
+    "navMission": "Misyon",
+    "navTech": "Teknoloji",
+    "navContact": "İletişim",
+    "navLogin": "Giriş Yap",
+    "navHome": "Anasayfa",
+    "navLogout": "Çıkış Yap",
+
+    "heroTitle": "Videolar oluşturun. Sesleri koruyun. Dil engellerini aşın.",
+    "heroSubtitle": "Yapay zeka destekli çok dilli video çeviri platformu.",
+
+    "loginBtnText": "Giriş / Başla",
+    "loginTitle": "Tekrar Hoşgeldiniz",
+    "loginSubtitle": "Devam etmek için giriş yapın",
+    "emailPlaceholder": "E-posta girin",
+    "passwordPlaceholder": "Şifre girin",
+
+    "appTitle": "Yapay Zeka Ses & Video Çevirici",
+
+    "outputTitle": "Çıktı Videosu:",
+    "outputText": "Çıktı burada görünecek",
+    "noVideoText": "Video seçilmedi",
+    "generateBtn": "Çıktıyı Oluştur",
+    "downloadText": "Videoyu İndir",
+
+    "footerText": "© 2026 Multiva.AI — AI Destekli İletişim"
+  },
+
+  "ru": {
+    "navMission": "Миссия",
+    "navTech": "Технология",
+    "navContact": "Контакт",
+    "navLogin": "Войти",
+    "navHome": "Главная",
+    "navLogout": "Выйти",
+
+    "heroTitle": "Создавайте видео. Сохраняйте голоса. Ломайте языковые барьеры.",
+    "heroSubtitle": "Многоязычная платформа перевода видео на базе ИИ.",
+
+    "loginBtnText": "Войти / Начать",
+    "loginTitle": "С возвращением",
+    "loginSubtitle": "Войдите, чтобы продолжить",
+    "emailPlaceholder": "Введите Email",
+    "passwordPlaceholder": "Введите пароль",
+
+    "appTitle": "ИИ Переводчик Голоса и Видео",
+
+    "outputTitle": "Выходное видео:",
+    "outputText": "Выход будет здесь",
+    "noVideoText": "Видео не выбрано",
+    "generateBtn": "Создать выход",
+    "downloadText": "Скачать видео",
+
+    "footerText": "© 2026 Multiva.AI — Коммуникация с поддержкой ИИ"
+  },
+
+  "pt": {
+    "navMission": "Missão",
+    "navTech": "Tecnologia",
+    "navContact": "Contato",
+    "navLogin": "Login",
+    "navHome": "Início",
+    "navLogout": "Sair",
+
+    "heroTitle": "Crie vídeos. Preserve vozes. Quebre barreiras linguísticas.",
+    "heroSubtitle": "Plataforma de tradução de vídeo multilíngue com IA.",
+
+    "loginBtnText": "Login / Começar",
+    "loginTitle": "Bem-vindo de volta",
+    "loginSubtitle": "Faça login para continuar",
+    "emailPlaceholder": "Digite o email",
+    "passwordPlaceholder": "Digite a senha",
+
+    "appTitle": "Tradutor de Voz e Vídeo com IA",
+
+    "outputTitle": "Vídeo de saída:",
+    "outputText": "A saída aparecerá aqui",
+    "noVideoText": "Nenhum vídeo selecionado",
+    "generateBtn": "Gerar saída",
+    "downloadText": "Baixar vídeo",
+
+    "footerText": "© 2026 Multiva.AI — Comunicação impulsionada por IA"
+  },
+
+  "it": {
+    "navMission": "Missione",
+    "navTech": "Tecnologia",
+    "navContact": "Contatto",
+    "navLogin": "Accedi",
+    "navHome": "Home",
+    "navLogout": "Disconnetti",
+
+    "heroTitle": "Crea video. Conserva le voci. Rompi le barriere linguistiche.",
+    "heroSubtitle": "Piattaforma di traduzione video multilingue basata su IA.",
+
+    "loginBtnText": "Accedi / Inizia",
+    "loginTitle": "Bentornato",
+    "loginSubtitle": "Accedi per continuare",
+    "emailPlaceholder": "Inserisci email",
+    "passwordPlaceholder": "Inserisci password",
+
+    "appTitle": "Traduttore Vocale e Video IA",
+
+    "outputTitle": "Video di uscita:",
+    "outputText": "L'output apparirà qui",
+    "noVideoText": "Nessun video selezionato",
+    "generateBtn": "Genera Output",
+    "downloadText": "Scarica Video",
+
+    "footerText": "© 2026 Multiva.AI — Comunicazione alimentata da IA"
+  },
+
+  "ko": {
+    "navMission": "미션",
+    "navTech": "기술",
+    "navContact": "연락처",
+    "navLogin": "로그인",
+    "navHome": "홈",
+    "navLogout": "로그아웃",
+
+    "heroTitle": "비디오를 만드세요. 목소리를 보존하세요. 언어 장벽을 허물세요.",
+    "heroSubtitle": "AI 기반 다국어 비디오 번역 플랫폼.",
+
+    "loginBtnText": "로그인 / 시작",
+    "loginTitle": "다시 오신 것을 환영합니다",
+    "loginSubtitle": "계속하려면 로그인하세요",
+    "emailPlaceholder": "이메일 입력",
+    "passwordPlaceholder": "비밀번호 입력",
+
+    "appTitle": "AI 음성 및 비디오 번역기",
+
+    "outputTitle": "출력 비디오:",
+    "outputText": "출력이 여기에 표시됩니다",
+    "noVideoText": "선택된 비디오 없음",
+    "generateBtn": "출력 생성",
+    "downloadText": "비디오 다운로드",
+
+    "footerText": "© 2026 Multiva.AI — AI 기반 커뮤니케이션"
   },
 
   "de": {
@@ -182,9 +328,66 @@
 
     "outputTitle": "Ausgabevideo:",
     "outputText": "Die Ausgabe erscheint hier",
+    "noVideoText": "Kein Video ausgewählt",
     "generateBtn": "Ausgabe generieren",
     "downloadText": "Video herunterladen",
 
     "footerText": "© 2026 Multiva.AI — KI-gestützte Kommunikation"
+  },
+
+  "nl": {
+    "navMission": "Missie",
+    "navTech": "Technologie",
+    "navContact": "Contact",
+    "navLogin": "Inloggen",
+    "navHome": "Home",
+    "navLogout": "Uitloggen",
+
+    "heroTitle": "Maak video's. Behoud stemmen. Doorbreek taalbarrières.",
+    "heroSubtitle": "AI-aangedreven meertalige videovertaler.",
+
+    "loginBtnText": "Inloggen / Starten",
+    "loginTitle": "Welkom terug",
+    "loginSubtitle": "Log in om verder te gaan",
+    "emailPlaceholder": "E-mail invoeren",
+    "passwordPlaceholder": "Wachtwoord invoeren",
+
+    "appTitle": "AI Stem & Video Vertaler",
+
+    "outputTitle": "Uitvoervideo:",
+    "outputText": "Uitvoer verschijnt hier",
+    "noVideoText": "Geen video geselecteerd",
+    "generateBtn": "Genereer Uitvoer",
+    "downloadText": "Video downloaden",
+
+    "footerText": "© 2026 Multiva.AI — AI-gestuurde communicatie"
+  },
+
+  "cs": {
+    "navMission": "Mise",
+    "navTech": "Technologie",
+    "navContact": "Kontakt",
+    "navLogin": "Přihlásit se",
+    "navHome": "Domů",
+    "navLogout": "Odhlásit se",
+
+    "heroTitle": "Vytvářejte videa. Uchovejte hlasy. Překonejte jazykové bariéry.",
+    "heroSubtitle": "Vícejazyčná platforma pro překlad videa poháněná AI.",
+
+    "loginBtnText": "Přihlásit / Začít",
+    "loginTitle": "Vítejte zpět",
+    "loginSubtitle": "Přihlaste se pro pokračování",
+    "emailPlaceholder": "Zadejte e-mail",
+    "passwordPlaceholder": "Zadejte heslo",
+
+    "appTitle": "AI Překladač hlasu a videa",
+
+    "outputTitle": "Výstupní video:",
+    "outputText": "Výstup se zobrazí zde",
+    "noVideoText": "Žádné video nebylo vybráno",
+    "generateBtn": "Generovat výstup",
+    "downloadText": "Stáhnout video",
+
+    "footerText": "© 2026 Multiva.AI — Komunikace poháněná AI"
   }
 }
