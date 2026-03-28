@@ -91,3 +91,6 @@ Thumbs.db
 .LSOverride
 cert.pem
 key.pem
+
+indicf5_env/
+Backend_pipeline/IndicF5/
