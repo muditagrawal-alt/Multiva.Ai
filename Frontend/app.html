@@ -20,8 +20,8 @@
     <div class="logo">Multiva.AI</div>
 
     <nav>
-        <a href="index.html"><span id="navHome">Home</span></a>
-        <a href="index.html"><span id="navLogout">Logout</span></a>
+        <a href="index.html" id="navHome">Home</a>
+        <a href="index.html" id="navLogout">Logout</a>
     </nav>
 
     <!-- 🌍 Language Switcher -->
@@ -62,7 +62,7 @@
             >
         </label>
 
-        <!-- Language Selector (for backend processing) -->
+        <!-- Backend Language -->
         <div style="margin-top:15px;">
             <select id="languageSelect" style="padding:8px 12px; border-radius:8px; border:none;">
                 <option value="de">German</option>
@@ -81,16 +81,16 @@
             </select>
         </div>
 
-        <p id="fileName">No video selected</p>
+        <!-- 🔥 FIXED -->
+        <p id="noVideoText"></p>
     </div>
 
     <div class="video-preview">
-        <video id="videoPlayer" controls></video>
+        <video id="videoPlayer" controls style="display:none;"></video>
     </div>
 
-    <button id="processBtn">
-        <span id="generateBtn">Generate Output</span>
-    </button>
+    <!-- 🔥 FIXED BUTTON -->
+    <button id="processBtn">Generate Output</button>
 
     <!-- Output Section -->
     <div class="output-box">
@@ -100,11 +100,9 @@
 
         <p id="outputText">Output will appear here</p>
 
-        <!-- Download Button -->
-        <a id="downloadBtn" href="#" download style="display:none;">
-            <button style="margin-top:15px; padding:10px 20px; border:none; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; cursor:pointer;">
-                <span id="downloadText">Download Video</span>
-            </button>
+        <!-- 🔥 FIXED DOWNLOAD -->
+        <a id="downloadBtn" href="#" download style="display:none; margin-top:15px; padding:10px 20px; border-radius:12px; background:linear-gradient(45deg,#ff00cc,#00dbde); color:white; text-decoration:none;">
+            Download Video
         </a>
     </div>
 

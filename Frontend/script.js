@@ -1,73 +1,77 @@
+// ===== ELEMENTS =====
 const loginBtn = document.getElementById("loginAction");
 const processBtn = document.getElementById("processBtn");
 const uploadInput = document.getElementById("videoUpload");
-const fileNameText = document.getElementById("fileName");
+const fileNameText = document.getElementById("noVideoText");
 const outputText = document.getElementById("outputText");
 const videoPlayer = document.getElementById("videoPlayer");
 const outputVideo = document.getElementById("outputVideo");
 const languageSelect = document.getElementById("languageSelect");
 const downloadBtn = document.getElementById("downloadBtn");
+const switcher = document.getElementById("languageSwitcher");
 
 let translations = {};
 let currentLang = "en";
 
-/* ================= RUNANYWHERE CONFIG ================= */
-const RUNANYWHERE_API_KEY = "runa_prod_9p5mzB9bogj_5CThYgiEN9BbU77RuULdh2BJ1giRnDg";
-const RUNANYWHERE_BASE_URL = "https://runanywhere-backend-production.up.railway.app";
 
-/* ================= AI AGENT CONFIG ================= */
-const AI_AGENT_KEY = "sk-Wz6cQSIH2TC4-oMxJYltdg";
+// ===== LOAD LANGUAGE =====
+window.addEventListener("DOMContentLoaded", () => {
+    fetch("lang.json")
+        .then(res => res.json())
+        .then(data => {
+            translations = data;
 
-/* ================= LOAD LANG ================= */
-fetch("lang.json")
-    .then(res => res.json())
-    .then(data => {
-        translations = data;
-        currentLang = localStorage.getItem("lang") || "en";
-        applyLanguage(currentLang);
+            currentLang = localStorage.getItem("lang") || "en";
 
-        const switcher = document.getElementById("languageSwitcher");
-        if (switcher) switcher.value = currentLang;
-    })
-    .catch(err => console.error("Lang load error:", err));
+            applyLanguage(currentLang);
+
+            if (switcher) switcher.value = currentLang;
+        })
+        .catch(err => console.error("Lang load error:", err));
+});
 
 
-/* ================= APPLY LANGUAGE ================= */
+// ===== APPLY LANGUAGE =====
 function applyLanguage(lang) {
+
     if (!translations[lang]) return;
 
     currentLang = lang;
     localStorage.setItem("lang", lang);
 
-    Object.keys(translations[lang]).forEach(key => {
-        const element = document.getElementById(key);
-        if (element) element.innerText = translations[lang][key];
+    const t = translations[lang];
+
+    // 🔥 Update all matching IDs
+    Object.keys(t).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) el.innerText = t[key];
     });
 
+    // 🔥 CRITICAL FIX: always set default text when no file
+    if (fileNameText) {
+        if (!uploadInput || !uploadInput.files.length) {
+            fileNameText.innerText = t.noVideoText;
+        }
+    }
+
+    // 🔥 Placeholders
     const emailInput = document.querySelector("input[type='text']");
     const passwordInput = document.querySelector("input[type='password']");
 
-    if (emailInput && translations[lang].emailPlaceholder)
-        emailInput.placeholder = translations[lang].emailPlaceholder;
+    if (emailInput) emailInput.placeholder = t.emailPlaceholder;
+    if (passwordInput) passwordInput.placeholder = t.passwordPlaceholder;
 
-    if (passwordInput && translations[lang].passwordPlaceholder)
-        passwordInput.placeholder = translations[lang].passwordPlaceholder;
+    // 🔥 Buttons
+    if (processBtn) processBtn.innerText = t.generateBtn;
+    if (downloadBtn) downloadBtn.innerText = t.downloadText;
+    if (outputText) outputText.innerText = t.outputText;
 
-    if (processBtn && translations[lang].generateBtn)
-        processBtn.innerText = translations[lang].generateBtn;
-
-    if (downloadBtn && translations[lang].downloadText)
-        downloadBtn.innerText = translations[lang].downloadText;
-
-    if (outputText && translations[lang].outputText)
-        outputText.innerText = translations[lang].outputText;
-
+    // RTL
     document.body.dir = (lang === "ar") ? "rtl" : "ltr";
 }
 
 
-/* ================= LANGUAGE SWITCHER ================= */
-const switcher = document.getElementById("languageSwitcher");
+// ===== LANGUAGE SWITCHER =====
 if (switcher) {
     switcher.addEventListener("change", (e) => {
         applyLanguage(e.target.value);
@@ -75,7 +79,7 @@ if (switcher) {
 }
 
 
-/* ================= LOGIN ================= */
+// ===== LOGIN =====
 if (loginBtn) {
     const emailInput = document.querySelector("input[type='text']");
     const passwordInput = document.querySelector("input[type='password']");
@@ -88,8 +92,8 @@ if (loginBtn) {
         loginBtn.parentNode.appendChild(loginError);
     }
 
-    emailInput.addEventListener("input", () => loginError.innerText = "");
-    passwordInput.addEventListener("input", () => loginError.innerText = "");
+    emailInput?.addEventListener("input", () => loginError.innerText = "");
+    passwordInput?.addEventListener("input", () => loginError.innerText = "");
 
     loginBtn.addEventListener("click", () => {
         const email = emailInput.value.trim();
@@ -115,12 +119,22 @@ if (loginBtn) {
 }
 
 
-/* ================= FILE UPLOAD ================= */
+// ===== BACKEND LANGUAGE SELECT =====
+if (languageSelect) {
+    languageSelect.addEventListener("change", () => {
+        console.log("Selected backend language:", languageSelect.value);
+    });
+}
+
+
+// ===== FILE UPLOAD =====
 if (uploadInput) {
     uploadInput.addEventListener("change", () => {
+
         if (uploadInput.files.length > 0) {
             const file = uploadInput.files[0];
 
+            // 🔥 Show file name (no translation here)
             if (fileNameText) fileNameText.innerText = file.name;
 
             const previewURL = URL.createObjectURL(file);
@@ -129,77 +143,29 @@ if (uploadInput) {
                 videoPlayer.src = previewURL;
                 videoPlayer.style.display = "block";
             }
+
         } else {
-            if (fileNameText) fileNameText.innerText = "No video selected";
-            if (videoPlayer) videoPlayer.style.display = "none";
+
+            // 🔥 Restore translated "No video selected"
+            if (fileNameText) {
+                fileNameText.innerText = translations[currentLang]?.noVideoText || "No video selected";
+            }
+
+            if (videoPlayer) {
+                videoPlayer.style.display = "none";
+                videoPlayer.src = "";
+            }
         }
     });
 }
 
 
-/* ================= RUNANYWHERE CALL ================= */
-async function runAnywhereProcess() {
-    try {
-        console.log("Running via RunAnywhere...");
-
-        const response = await fetch(`${RUNANYWHERE_BASE_URL}/run`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${RUNANYWHERE_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "multiva-processing-model",
-                input: "video processing request"
-            })
-        });
-
-        const data = await response.json();
-        console.log("RunAnywhere Response:", data);
-
-        return data;
-
-    } catch (error) {
-        console.error("RunAnywhere Error:", error);
-        return { status: "fallback-success" };
-    }
-}
-
-
-/* ================= AI AGENT CALL ================= */
-async function enhanceWithAI() {
-    try {
-        console.log("Enhancing with AI Agent...");
-
-        const response = await fetch("https://api.codingagent.dev/run", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${AI_AGENT_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                prompt: "Improve dubbing quality and sync"
-            })
-        });
-
-        const data = await response.json();
-        console.log("AI Response:", data);
-
-        return data;
-
-    } catch (error) {
-        console.error("AI Error:", error);
-        return { status: "enhanced (simulated)" };
-    }
-}
-
-
-/* ================= PROCESS VIDEO ================= */
+// ===== PROCESS VIDEO =====
 if (processBtn) {
     processBtn.addEventListener("click", async () => {
 
         if (!uploadInput || !uploadInput.files.length) {
-            alert(translations[currentLang]?.uploadError || "Upload video first");
+            alert("Upload video first");
             return;
         }
 
@@ -207,51 +173,31 @@ if (processBtn) {
         const language = languageSelect.value;
 
         processBtn.innerText = "Processing...";
-        outputText.innerText = "Running on RunAnywhere...";
+        if (outputText) outputText.innerText = "Processing...";
+
+        const formData = new FormData();
+        formData.append("file", file);
 
         try {
-            // STEP 1: RunAnywhere call
-            await runAnywhereProcess();
-
-            outputText.innerText = "Enhancing with AI...";
-
-            // STEP 2: AI Enhancement
-            await enhanceWithAI();
-
-            // STEP 3: Try original backend (if available)
-            const formData = new FormData();
-            formData.append("file", file);
-
-            let videoURL = "";
-
-            try {
-                const response = await fetch(
-                    `http://127.0.0.1:10000/process_video/?target_language=${language}`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    videoURL = URL.createObjectURL(blob);
+            const response = await fetch(
+                `http://127.0.0.1:10000/process_video/?target_language=${language}`,
+                {
+                    method: "POST",
+                    body: formData
                 }
-            } catch (e) {
-                console.warn("Backend not available, using fallback");
-            }
+            );
 
-            // fallback preview if backend not working
-            if (!videoURL) {
-                videoURL = URL.createObjectURL(file);
-            }
+            if (!response.ok) throw new Error("Backend failed");
+
+            const blob = await response.blob();
+            const videoURL = URL.createObjectURL(blob);
 
             if (outputVideo) {
                 outputVideo.src = videoURL;
                 outputVideo.style.display = "block";
             }
 
-            outputText.innerText = "✅ Processing Complete!";
+            if (outputText) outputText.innerText = "Video Generated!";
             processBtn.innerText = translations[currentLang]?.generateBtn;
 
             if (downloadBtn) {
@@ -261,7 +207,7 @@ if (processBtn) {
 
         } catch (error) {
             console.error(error);
-            outputText.innerText = "Error occurred";
+            if (outputText) outputText.innerText = "Error occurred";
             processBtn.innerText = translations[currentLang]?.generateBtn;
         }
     });
