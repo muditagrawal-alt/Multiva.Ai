@@ -92,4 +92,5 @@ Thumbs.db
 cert.pem
 key.pem
 
-MuseTalk/
+indicf5_env/
+Backend_pipeline/IndicF5/

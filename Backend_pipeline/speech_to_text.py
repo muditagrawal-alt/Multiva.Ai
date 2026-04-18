@@ -1,3 +1,4 @@
+#Checkpoint: 29/3/26
 import whisper
 import torch
 import os
