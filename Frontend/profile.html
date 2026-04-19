@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Multiva.AI — My Profile</title>
+  <meta name="description" content="View your Multiva.AI profile and complete history of AI-dubbed videos." />
+  <!-- Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#006251",
+            "on-tertiary": "#006150",
+            "surface-container-highest": "#25252f",
+            "surface-container-low": "#13131a",
+            "surface": "#0e0e15",
+            "inverse-surface": "#fcf8ff",
+            "secondary-fixed": "#eac4ff",
+            "primary-fixed-dim": "#f16092",
+            "on-secondary-container": "#f2d5ff",
+            "surface-bright": "#2b2b36",
+            "surface-tint": "#ff89ad",
+            "on-primary-fixed": "#000000",
+            "on-secondary-fixed": "#530081",
+            "on-tertiary-fixed": "#004236",
+            "outline-variant": "#48474f",
+            "primary-container": "#ff709f",
+            "on-secondary-fixed-variant": "#7d06bd",
+            "secondary-fixed-dim": "#e2b1ff",
+            "tertiary": "#77ffde",
+            "tertiary-container": "#32f4ce",
+            "surface-variant": "#25252f",
+            "secondary-container": "#7c04bc",
+            "primary-dim": "#ff6b9d",
+            "surface-dim": "#0e0e15",
+            "secondary": "#ca7bff",
+            "surface-container-lowest": "#000000",
+            "primary-fixed": "#ff709f",
+            "inverse-on-surface": "#55545d",
+            "on-primary-container": "#4c0022",
+            "primary": "#ff89ad",
+            "on-error-container": "#ffb2b9",
+            "on-primary-fixed-variant": "#5d002b",
+            "outline": "#76747e",
+            "error": "#ff6e84",
+            "on-surface-variant": "#acaab4",
+            "tertiary-fixed-dim": "#05e6c1",
+            "surface-container-high": "#1f1f28",
+            "on-secondary": "#360056",
+            "surface-container": "#191921",
+            "secondary-dim": "#ca7bff",
+            "inverse-primary": "#ad2b5e",
+            "on-tertiary-container": "#005748",
+            "on-surface": "#e7e4ee",
+            "error-container": "#a70138",
+            "background": "#0e0e15",
+            "on-background": "#e7e4ee",
+            "error-dim": "#d73357",
+            "tertiary-dim": "#05e6c1",
+            "tertiary-fixed": "#32f4ce",
+            "on-primary": "#62002e",
+            "on-error": "#490013"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Space Grotesk", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0e0e15;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .aurora-blur {
+      filter: blur(120px);
+    }
+
+    .clash-display {
+      font-family: 'Clash Display', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+    }
+
+    /* Status badge pill animation */
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .pulse-dot {
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+
+    /* Video card hover glow */
+    .vid-card:hover {
+      box-shadow: 0 0 24px rgba(202, 123, 255, 0.12);
+    }
+
+    /* Profile cover gradient */
+    .profile-cover-grad {
+      background: linear-gradient(135deg, rgba(255, 137, 173, 0.18) 0%, rgba(202, 123, 255, 0.14) 50%, rgba(119, 255, 222, 0.08) 100%);
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background font-body overflow-hidden" data-page="profile">
+
+  <!-- Aurora Orbs -->
+  <div
+    class="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full aurora-blur pointer-events-none">
+  </div>
+  <div
+    class="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-secondary/10 rounded-full aurora-blur pointer-events-none">
+  </div>
+
+  <div class="flex h-screen w-full relative z-10">
+
+    <!-- ══ SIDEBAR ══════════════════════════════════════════════════ -->
+    <aside
+      class="fixed left-0 top-0 h-screen w-[260px] bg-slate-950 border-r border-white/5 flex flex-col p-6 gap-8 shadow-2xl">
+      <div class="flex flex-col gap-1">
+        <a href="index.html"
+          class="text-lg font-bold text-white font-headline hover:text-primary transition-colors">Workspace</a>
+        <span class="text-xs uppercase tracking-widest text-slate-500">AI Voice Engine</span>
+      </div>
+
+      <a href="workspace.html"
+        class="w-full rounded-full py-3 px-6 bg-gradient-to-r from-primary to-secondary text-on-primary font-semibold hover:translate-x-1 transition-transform shadow-[0_0_20px_rgba(191,95,255,0.3)] text-center text-sm">
+        New Project
+      </a>
+
+      <nav class="flex flex-col gap-2">
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-900 hover:translate-x-1 transition-transform"
+          href="workspace.html">
+          <span class="material-symbols-outlined">folder</span>
+          <span class="text-xs uppercase tracking-widest">Projects</span>
+        </a>
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-900 hover:translate-x-1 transition-transform"
+          href="#">
+          <span class="material-symbols-outlined">mic</span>
+          <span class="text-xs uppercase tracking-widest">Clones</span>
+        </a>
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-900 hover:translate-x-1 transition-transform"
+          href="#">
+          <span class="material-symbols-outlined">science</span>
+          <span class="text-xs uppercase tracking-widest">Voice Lab</span>
+        </a>
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-900 hover:translate-x-1 transition-transform"
+          href="#">
+          <span class="material-symbols-outlined">layers</span>
+          <span class="text-xs uppercase tracking-widest">Templates</span>
+        </a>
+        <!-- Profile — active -->
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg bg-gradient-to-r from-purple-900/20 to-transparent text-purple-400 border-l-4 border-purple-500 hover:translate-x-1 transition-transform"
+          href="profile.html">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span class="text-xs uppercase tracking-widest">Profile</span>
+        </a>
+        <a class="flex items-center gap-3 py-3 px-4 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-900 hover:translate-x-1 transition-transform"
+          href="#">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="text-xs uppercase tracking-widest">Settings</span>
+        </a>
+      </nav>
+
+      <!-- Go Pro + User pill -->
+      <div class="mt-auto pt-6 border-t border-white/5 flex flex-col gap-4">
+
+        <!-- ── Go Pro hover pill ── -->
+        <div class="relative group/gopro">
+          <!-- Trigger button -->
+          <button
+            class="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 hover:border-primary/50 hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 group-hover/gopro:shadow-[0_0_20px_rgba(191,95,255,0.15)]">
+            <div
+              class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(191,95,255,0.4)]">
+              <span class="material-symbols-outlined text-white text-sm"
+                style="font-variation-settings:'FILL' 1;">rocket_launch</span>
+            </div>
+            <div class="flex-1 text-left">
+              <div class="text-xs font-bold text-on-surface">Go Pro</div>
+              <div class="text-[10px] text-on-surface-variant">Unlock full access</div>
+            </div>
+            <span
+              class="material-symbols-outlined text-sm text-primary transition-transform duration-300 group-hover/gopro:translate-y-[-2px]">arrow_upward</span>
+          </button>
+
+          <!-- Tooltip popup — opens upward -->
+          <div class="absolute bottom-full left-0 mb-3 w-[230px]
+                      opacity-0 scale-95 pointer-events-none translate-y-2
+                      group-hover/gopro:opacity-100 group-hover/gopro:scale-100 group-hover/gopro:pointer-events-auto group-hover/gopro:translate-y-0
+                      transition-all duration-250 origin-bottom-left z-50">
+
+            <!-- Card -->
+            <div
+              class="rounded-xl border border-white/10 bg-slate-950/98 backdrop-blur-xl shadow-[0_-8px_40px_rgba(191,95,255,0.2)] overflow-hidden">
+
+              <!-- Header -->
+              <div class="px-4 pt-4 pb-2 border-b border-white/5">
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">Choose a Plan</p>
+              </div>
+
+              <!-- Starter -->
+              <div class="px-4 py-3 border-b border-white/5 hover:bg-white/[0.03] transition-colors cursor-pointer">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Starter</span>
+                  <span class="text-sm font-bold clash-display text-on-surface">Free</span>
+                </div>
+                <ul class="flex flex-col gap-1">
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface-variant"><span
+                      class="material-symbols-outlined text-outline text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> 10 min dubbing / mo</li>
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface-variant"><span
+                      class="material-symbols-outlined text-outline text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> 5 languages · 1 clone</li>
+                </ul>
+              </div>
+
+              <!-- Pro — highlighted -->
+              <div
+                class="px-4 py-3 border-b border-white/5 bg-gradient-to-r from-primary/5 to-secondary/5 relative overflow-hidden cursor-pointer hover:from-primary/10 hover:to-secondary/10 transition-colors">
+                <span
+                  class="absolute top-2 right-3 text-[8px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-1.5 py-0.5 rounded-full"></span>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-bold text-primary uppercase tracking-wide">Free</span>
+                  <span class="text-sm font-bold clash-display text-on-surface">$49<span
+                      class="text-[10px] text-on-surface-variant font-normal">/mo</span></span>
+                </div>
+                <ul class="flex flex-col gap-1">
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface"><span
+                      class="material-symbols-outlined text-tertiary text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> 5 hrs dubbing / mo</li>
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface"><span
+                      class="material-symbols-outlined text-tertiary text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> All 50+ languages</li>
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface"><span
+                      class="material-symbols-outlined text-tertiary text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> 10 clones · Real-time</li>
+                </ul>
+              </div>
+
+              <!-- Enterprise -->
+              <div class="px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wide">Enterprise</span>
+                  <span class="text-sm font-bold clash-display text-on-surface">$199<span
+                      class="text-[10px] text-on-surface-variant font-normal">/mo</span></span>
+                </div>
+                <ul class="flex flex-col gap-1">
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface-variant"><span
+                      class="material-symbols-outlined text-outline text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> Unlimited everything</li>
+                  <li class="flex items-center gap-1.5 text-[10px] text-on-surface-variant"><span
+                      class="material-symbols-outlined text-outline text-xs"
+                      style="font-variation-settings:'FILL' 1;">check_circle</span> Full API access</li>
+                </ul>
+              </div>
+
+              <!-- CTA -->
+              <div class="px-4 pb-4 pt-3 border-t border-white/5">
+                <a href="index.html#pricing"
+                  class="block w-full text-center py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold shadow-[0_0_14px_rgba(191,95,255,0.35)] hover:shadow-[0_0_22px_rgba(191,95,255,0.55)] transition-all">
+                  View All Plans →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /Go Pro -->
+
+        <!-- User pill -->
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary text-sm font-bold shrink-0">
+            AR</div>
+          <div class="flex flex-col">
+            <span class="text-sm font-medium text-on-surface">Aman Raj</span>
+            <span class="text-[10px] text-slate-500 uppercase tracking-tighter">free Plan</span>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ══ MAIN CONTENT ═══════════════════════════════════════════ -->
+    <main class="ml-[260px] flex-1 h-screen overflow-y-auto p-8 bg-surface">
+
+      <!-- Page Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-2xl font-bold font-headline text-on-surface">My Profile</h1>
+          <p class="text-sm text-on-surface-variant mt-1">Manage your account, plan, and generation history.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="editProfileBtn"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 text-on-surface-variant text-sm font-medium hover:bg-white/5 hover:text-on-surface transition-all">
+            <span class="material-symbols-outlined text-base">edit</span>
+            Edit Profile
+          </button>
+          <a href="workspace.html"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary text-sm font-bold shadow-[0_0_16px_rgba(191,95,255,0.3)] hover:shadow-[0_0_24px_rgba(191,95,255,0.45)] transition-all">
+            <span class="material-symbols-outlined text-base">add</span>
+            New Project
+          </a>
+        </div>
+      </div>
+
+      <!-- ── Profile Hero Card ─────────────────────────────────── -->
+      <div
+        class="relative rounded-lg overflow-hidden border border-white/5 bg-surface-container-low mb-6 shadow-[0_2px_24px_rgba(0,0,0,0.4)]">
+        <!-- Cover gradient -->
+        <div class="profile-cover-grad h-28 w-full"></div>
+        <!-- Identity row -->
+        <div class="px-8 pb-8 -mt-8 flex flex-col md:flex-row md:items-end gap-6">
+          <!-- Avatar -->
+          <div class="relative shrink-0">
+            <div
+              class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary text-2xl font-bold border-4 border-surface-container-low shadow-[0_0_20px_rgba(255,137,173,0.3)]">
+              AR</div>
+            <span
+              class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+              <span class="material-symbols-outlined text-white text-xs"
+                style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+            </span>
+          </div>
+          <!-- Name + email -->
+          <div class="flex-1 pb-1">
+            <div class="flex items-center gap-3 flex-wrap">
+              <h2 class="text-xl font-bold font-headline text-on-surface" id="profile-name">Aman Raj</h2>
+              <!-- Subscription hover badge -->
+              <div class="relative group/sub" id="subBadgeWrap">
+                <button
+                  class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-primary to-secondary text-on-primary px-3 py-1 rounded-full shadow-[0_0_10px_rgba(191,95,255,0.25)] hover:shadow-[0_0_18px_rgba(191,95,255,0.45)] transition-all cursor-default select-none">
+                  <span class="material-symbols-outlined text-xs"
+                    style="font-variation-settings:'FILL' 1;">workspace_premium</span>
+                  Free Plan
+                </button>
+                <!-- Tooltip card -->
+                <div class="absolute left-0 top-full mt-2 w-64 rounded-xl border border-primary/20 bg-slate-950/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(191,95,255,0.2)] z-50
+                            opacity-0 scale-95 pointer-events-none
+                            group-hover/sub:opacity-100 group-hover/sub:scale-100 group-hover/sub:pointer-events-auto
+                            transition-all duration-200 origin-top-left">
+                  <!-- Header -->
+                  <div class="px-4 pt-4 pb-3 border-b border-white/5">
+                    <div class="flex items-center justify-between mb-0.5">
+                      <span class="text-xs font-bold uppercase tracking-widest text-primary">Free Plan</span>
+                      <span
+                        class="text-xs text-tertiary font-medium bg-tertiary/10 px-2 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div class="flex items-end gap-1">
+                      <span class="text-2xl font-bold clash-display text-on-surface">$0</span>
+                      <span class="text-sm text-on-surface-variant mb-0.5">/month</span>
+                    </div>
+                  </div>
+                  <!-- Features -->
+                  <div class="px-4 py-3 flex flex-col gap-2">
+                    <div class="flex items-center gap-2 text-xs text-on-surface"><span
+                        class="material-symbols-outlined text-tertiary text-sm"
+                        style="font-variation-settings:'FILL' 1;">check_circle</span> 5 hrs dubbing / month</div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface"><span
+                        class="material-symbols-outlined text-tertiary text-sm"
+                        style="font-variation-settings:'FILL' 1;">check_circle</span> All 50+ languages</div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface"><span
+                        class="material-symbols-outlined text-tertiary text-sm"
+                        style="font-variation-settings:'FILL' 1;">check_circle</span> 10 voice clones</div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface"><span
+                        class="material-symbols-outlined text-tertiary text-sm"
+                        style="font-variation-settings:'FILL' 1;">check_circle</span> Real-time processing</div>
+                    <div class="flex items-center gap-2 text-xs text-on-surface-variant opacity-50"><span
+                        class="material-symbols-outlined text-sm">close</span> API access</div>
+                  </div>
+                  <!-- Usage bar -->
+                  <div class="px-4 pb-3 border-t border-white/5 pt-3">
+                    <div class="flex justify-between text-[10px] text-on-surface-variant mb-1.5">
+                      <span>Usage this month</span>
+                      <span class="text-primary font-medium">3.2 / 5 hrs</span>
+                    </div>
+                    <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        class="h-full w-[64%] bg-gradient-to-r from-primary to-secondary rounded-full shadow-[0_0_6px_rgba(255,137,173,0.5)]">
+                      </div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1">Resets May 1, 2026</p>
+                  </div>
+                  <!-- Actions -->
+                  <div class="px-4 pb-4 flex gap-2">
+                    <button
+                      class="flex-1 py-2 rounded-full border border-white/10 text-on-surface-variant text-xs font-medium hover:bg-white/5 transition-all">Manage</button>
+                    <button
+                      class="flex-1 py-2 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold shadow-[0_0_10px_rgba(191,95,255,0.3)] hover:shadow-[0_0_16px_rgba(191,95,255,0.5)] transition-all">Upgrade</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface-variant mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">mail</span>
+              <span id="profile-email">aman.raj@gmail.com</span>
+            </p>
+            <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">calendar_today</span>
+              Member since January 2025
+            </p>
+          </div>
+          <!-- Quick stats -->
+          <div
+            class="flex items-center gap-1 md:gap-0 divide-x divide-white/10 bg-surface-container-high rounded-lg border border-white/5 px-2 py-2 shrink-0">
+            <div class="flex flex-col items-center px-5 py-1">
+              <span
+                class="text-xl font-bold clash-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">24</span>
+              <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Videos</span>
+            </div>
+            <div class="flex flex-col items-center px-5 py-1">
+              <span
+                class="text-xl font-bold clash-display bg-gradient-to-r from-secondary to-tertiary bg-clip-text text-transparent">9</span>
+              <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Languages</span>
+            </div>
+            <div class="flex flex-col items-center px-5 py-1">
+              <span
+                class="text-xl font-bold clash-display bg-gradient-to-r from-tertiary to-amber-400 bg-clip-text text-transparent">3.2h</span>
+              <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Content</span>
+            </div>
+            <div class="flex flex-col items-center px-5 py-1">
+              <span
+                class="text-xl font-bold clash-display bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">5</span>
+              <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Clones</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Account Details (full width) ──────────────────────── -->
+      <div class="mb-6">
+        <div class="bg-surface-container-low rounded-lg border border-white/5 p-6">
+          <h3
+            class="flex items-center gap-2 text-sm font-bold font-headline text-on-surface mb-5 uppercase tracking-widest">
+            <span class="material-symbols-outlined text-base text-primary">person</span>
+            Account Details
+          </h3>
+          <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5">
+            <div class="flex flex-col divide-y divide-white/5 md:pr-8">
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Full Name</span>
+                <span class="text-on-surface font-medium" id="pd-name">Aman Raj</span>
+              </div>
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Email</span>
+                <span class="text-on-surface font-medium" id="pd-email">aman.raj@gmail.com</span>
+              </div>
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Username</span>
+                <span class="text-on-surface font-medium">@amanraj</span>
+              </div>
+            </div>
+            <div class="flex flex-col divide-y divide-white/5 md:pl-8">
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Timezone</span>
+                <span class="text-on-surface font-medium">UTC−05:00 (Eastern)</span>
+              </div>
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Interface Language</span>
+                <span class="text-on-surface font-medium">English (US)</span>
+              </div>
+              <div class="flex justify-between py-3 text-sm">
+                <span class="text-on-surface-variant">Member Since</span>
+                <span class="text-on-surface font-medium">January 2025</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ── Generation History ────────────────────────────────── -->
+      <div class="bg-surface-container-low rounded-lg border border-white/5 p-6">
+        <!-- Toolbar -->
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <div>
+            <h3 class="text-sm font-bold font-headline text-on-surface uppercase tracking-widest">Generation History
+            </h3>
+            <p class="text-xs text-on-surface-variant mt-0.5">All your AI-dubbed videos in one place.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Search -->
+            <div
+              class="flex items-center gap-2 px-4 py-2 bg-surface-container-high rounded-full border border-white/5 focus-within:border-secondary/40 transition-all">
+              <span class="material-symbols-outlined text-base text-on-surface-variant">search</span>
+              <input id="histSearch" type="search" placeholder="Search videos…" aria-label="Search history"
+                class="bg-transparent text-sm text-on-surface placeholder:text-outline outline-none w-44" />
+            </div>
+            <!-- Filter dropdown -->
+            <div class="relative" id="filterWrap">
+              <button id="filterBtn" aria-haspopup="listbox" aria-expanded="false"
+                class="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-surface-container-high text-on-surface-variant text-sm hover:text-on-surface hover:border-secondary/40 transition-all">
+                <span class="material-symbols-outlined text-sm">filter_list</span>
+                <span id="filterLabel">All</span>
+                <span class="material-symbols-outlined text-xs" id="filterChevron">expand_more</span>
+              </button>
+              <ul id="filterPanel" role="listbox"
+                class="absolute right-0 mt-2 w-40 rounded-xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.5)] overflow-hidden z-50 opacity-0 scale-95 pointer-events-none transition-all duration-200 origin-top-right">
+                <li role="option" data-filter="all"
+                  class="filter-opt px-4 py-2.5 text-sm text-on-surface cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                  All Videos</li>
+                <li role="option" data-filter="done"
+                  class="filter-opt px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                  Completed</li>
+                <li role="option" data-filter="processing"
+                  class="filter-opt px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                  Processing</li>
+                <li role="option" data-filter="failed"
+                  class="filter-opt px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                  Failed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="histTable" aria-label="Video history">
+            <thead>
+              <tr class="border-b border-white/5">
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Video</th>
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Original</th>
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Dubbed Into</th>
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Duration</th>
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Created</th>
+                <th
+                  class="text-left py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Status</th>
+                <th
+                  class="text-right py-3 px-4 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
+                  Actions</th>
+              </tr>
+            </thead>
+            <tbody id="histTableBody" class="divide-y divide-white/[0.04]">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+
+          <!-- Empty state -->
+          <div class="hidden flex-col items-center justify-center py-20 text-center" id="histEmpty">
+            <span class="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-4">video_library</span>
+            <p class="text-on-surface font-medium mb-1">No videos found</p>
+            <p class="text-xs text-on-surface-variant">Try a different search or filter, or create your first project.
+            </p>
+            <a href="workspace.html"
+              class="mt-4 px-6 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary text-sm font-bold shadow-[0_0_12px_rgba(191,95,255,0.3)] hover:shadow-[0_0_20px_rgba(191,95,255,0.45)] transition-all">Start
+              Dubbing</a>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-white/5" id="histPagination">
+          <button id="histPrev" aria-label="Previous page" disabled
+            class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+            <span class="material-symbols-outlined text-sm">chevron_left</span>
+          </button>
+          <span class="text-xs text-on-surface-variant" id="histPageInfo">Page 1 of 3</span>
+          <button id="histNext" aria-label="Next page"
+            class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /flex -->
+
+  <!-- ── Edit Profile Modal ─────────────────────────────────────── -->
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden" id="editModal"
+    role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="w-full max-w-md bg-surface-container-low rounded-lg border border-white/10 shadow-2xl p-8 relative">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold font-headline text-on-surface" id="modalTitle">Edit Profile</h2>
+        <button id="modalClose" aria-label="Close modal"
+          class="text-on-surface-variant hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="editProfileForm" novalidate class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant"
+            for="edit-name">Full Name</label>
+          <input
+            class="w-full h-12 px-4 bg-white/[0.05] border border-white/10 rounded-lg text-on-surface placeholder:text-outline outline-none focus:border-secondary/50 focus:shadow-[0_0_16px_rgba(202,123,255,0.18)] transition-all"
+            id="edit-name" type="text" value="Alex Rivera" autocomplete="name" />
+          <span class="text-xs text-error hidden" id="edit-name-err"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant"
+            for="edit-email">Email Address</label>
+          <input
+            class="w-full h-12 px-4 bg-white/[0.05] border border-white/10 rounded-lg text-on-surface placeholder:text-outline outline-none focus:border-secondary/50 focus:shadow-[0_0_16px_rgba(202,123,255,0.18)] transition-all"
+            id="edit-email" type="email" value="alex.rivera@example.com" autocomplete="email" />
+          <span class="text-xs text-error hidden" id="edit-email-err"></span>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant"
+            for="edit-username">Username</label>
+          <input
+            class="w-full h-12 px-4 bg-white/[0.05] border border-white/10 rounded-lg text-on-surface placeholder:text-outline outline-none focus:border-secondary/50 focus:shadow-[0_0_16px_rgba(202,123,255,0.18)] transition-all"
+            id="edit-username" type="text" value="@alexrivera" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant"
+            for="edit-timezone">Timezone</label>
+          <select
+            class="w-full h-12 px-4 bg-surface-container-high border border-white/10 rounded-lg text-on-surface outline-none focus:border-secondary/50 transition-all appearance-none"
+            id="edit-timezone">
+            <option value="UTC-5" selected>UTC−05:00 (Eastern)</option>
+            <option value="UTC-6">UTC−06:00 (Central)</option>
+            <option value="UTC-7">UTC−07:00 (Mountain)</option>
+            <option value="UTC-8">UTC−08:00 (Pacific)</option>
+            <option value="UTC+0">UTC+00:00 (London)</option>
+            <option value="UTC+5:30">UTC+05:30 (India)</option>
+          </select>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="modalCancel"
+            class="flex-1 py-3 rounded-full border border-white/10 text-on-surface-variant text-sm font-medium hover:bg-white/5 transition-all">Cancel</button>
+          <button type="submit" id="saveProfileBtn"
+            class="flex-1 py-3 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary text-sm font-bold shadow-[0_0_14px_rgba(191,95,255,0.3)] hover:shadow-[0_0_22px_rgba(191,95,255,0.5)] transition-all flex items-center justify-center gap-2">
+            <span id="saveBtnText">Save Changes</span>
+            <span class="material-symbols-outlined text-base hidden animate-spin" id="saveSpinner">autorenew</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── Video history data ───────────────────────────────────────
+    const videos = [
+      { title: 'Product Launch 2025', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYedsyhciXXWDIQ8FJ3jvXi1fpIqoASGHNIdkFP6GA77qLQfPVxg5AUPYXQI6EdTT3pN4B46B_lbqDgKUsEnr22mqJ69MIDOM5c8nuxDgRTnOxDGYrXmH1-VWED2kh9VPba0IscI4YDxCbCP0EByqE6VFKnZzE8Rvp3UB0KAwoPDFMy_xOl5Zrz2yZ2PYaD2xnGOzUBTKOaVAocuC7roFe1bPBCgmuYGO4FXkuUCEmu1lixkj2sEkKfu4ww5GVW_BfTUh3_zLm5ms', from: 'English', into: 'Spanish', dur: '4:32', date: 'Apr 14, 2026', status: 'done' },
+      { title: 'TED Talk — AI Future', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBPRiRuD6C_W_-s_JYOvMCALY5-SESSxtfBNIX8WUZhhyNJHCKv5iLch1QDKfM3qojmqLT1_5JNqIqqfnkPVAA8jkSwDN5lsYfVTUhQQdg67Lvnsdt_j8kntqhDZt2Ob8qmTqe0sDGBHhLxDLyashNs1kpddRxdJTiG_r1flwsit7soFOdnb-17RMsHY38_2Ybzk8e09BY7IKsX_YO0UEVIJK-5z8-X2l25UaKPKeISU8gQYSzp9Id1E1hZJ8YDlxILroirRLqftLg', from: 'English', into: 'French', dur: '18:04', date: 'Apr 12, 2026', status: 'done' },
+      { title: 'Cooking Masterclass', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQxxxA_30ggN7XhEMswUKYVF9fR5sUiQI8766rmTD8BLk3mJnGpEQuv_PfIFeSby0Ax8aO2AthlloYfvOAqarwZExq5mVxKCUKZRXwFN1i_9ITmB7GTqGcTH2LuAaa9gxvmcu1MKtTg49h9p5nqqKrpXJTNuLlMJxwa1wtlsQz9lHJHmwo1VhybzEBlC1KZI8hPf48CV3ThFcx_H6Nsvn-DrznPjoGfvlLoyN0SZ8jN8cMNTr_YKN3JUVlp3X9Fx_QV52Uc9UIVl8', from: 'English', into: 'Hindi', dur: '22:10', date: 'Apr 10, 2026', status: 'processing' },
+      { title: 'Documentary: Ocean', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYSoBcrr2RszJR_cUDWkkhO8su1pmAIOjsg7829IT0l_8ufKB6Fsc5z-85D1Sq3_RbR5kwFbTg16I2Wbl9mfEajsKzDW10UF_R1MQwv9ov23gQyGNdlGX1nKayUeWkb1cAHUFDQk8M-W5YMZWKhY3f-AOKHFxd_ELyM0ivwEQcNpsnZkS3-OtLwpnkca5MhVevDaGay8mNvWDnEzLUKEjJtWF5gg8GGGtJDIs8a-kNbXTJsThXtBG80LaH4t08oBqPX-kQSIDvih4', from: 'English', into: 'Japanese', dur: '48:17', date: 'Apr 8,  2026', status: 'done' },
+      { title: 'Startup Pitch Deck', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBClYV44kBt7aR48zlgsCUp51fPbuWAG7KxExscXt_f3mIS-ByHR7yYVlhcxVQTMwbMFoCeLI7wuOuFLdZZo8Zpvm8oUz05zTycUcTjjft-EITkHHwihc6nCj9uMrBu__WGsMFitom4Y-6GXmBu67RAI6O2fn-DMG5OdHnSsNm9QHDtT-mKenEeUMeJipNSHx91FGWpNarV30yct9Wr_fwnKrwt3j8tv0pDOglyqOImYMgiIDWskVdNyruZjumkIaTjkFSx_0xOrfE', from: 'English', into: 'German', dur: '7:55', date: 'Apr 5,  2026', status: 'failed' },
+      { title: 'Yoga Flow Tutorial', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvKC4vIsWGQ1GRPYdAWIwJ57WfgNmdA_2BYGyg8LUeUHF2XpNJF20ee6v4Q192o2XOIwbnJaPcSq0djVNiAUhwTohEE6HuC2K7WqLCNqtZ9y7EkSGpF5pOJh83n1oQC8EIreSRNcUEOScLCl2N-2Erf-O021k_GmRe51xs9HqWhXI5vV1iyQUguqtwCmhdDYxFz5M6nrFxVxtTk9HMpO1EhoH9EeJ8xz8CgstTPXmKbSb-cEVGumXKShv7gOpreHFcXCiWLJJ9nKc', from: 'English', into: 'Korean', dur: '11:28', date: 'Apr 3,  2026', status: 'done' },
+      { title: 'Comedy Sketch Vol.2', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDX0ZG_BBJk9wRL7mhr14PvmPTAyKcIG0dKOMlZf9Ry_kHrV4Sy1qLhUcEIzWbHxsx9td5XUnSM-R2cKb0rIgdg5reh0zYlL7-HtQtPpz0UlV40WC5DuRegiOFLp7rWYCysr4VzPuEgFnz9lOEaGpdokUCAyO79TAgc_2z0Xaz9pTUUgSXhzNLKHVftA0opkdt7VTu_rThWxU0sxdH8ppSpYI1NJtLFlTnDVOIFD8KJ2ZdOYXe9yIucC3mPufkfJQqKnWavR2t06ww', from: 'English', into: 'Italian', dur: '9:03', date: 'Mar 30, 2026', status: 'done' },
+      { title: 'Finance Explainer', thumb: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYedsyhciXXWDIQ8FJ3jvXi1fpIqoASGHNIdkFP6GA77qLQfPVxg5AUPYXQI6EdTT3pN4B46B_lbqDgKUsEnr22mqJ69MIDOM5c8nuxDgRTnOxDGYrXmH1-VWED2kh9VPba0IscI4YDxCbCP0EByqE6VFKnZzE8Rvp3UB0KAwoPDFMy_xOl5Zrz2yZ2PYaD2xnGOzUBTKOaVAocuC7roFe1bPBCgmuYGO4FXkuUCEmu1lixkj2sEkKfu4ww5GVW_BfTUh3_zLm5ms', from: 'English', into: 'Portuguese', dur: '16:44', date: 'Mar 28, 2026', status: 'done' },
+    ];
+
+    const PAGE_SIZE = 5;
+    let currentPage = 1, currentFilter = 'all', searchQuery = '';
+
+    function statusHTML(s) {
+      if (s === 'done') return `<span class="inline-flex items-center gap-1 text-xs font-medium text-tertiary bg-tertiary/10 px-3 py-1 rounded-full"><span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">check_circle</span>Done</span>`;
+      if (s === 'processing') return `<span class="inline-flex items-center gap-1 text-xs font-medium text-secondary bg-secondary/10 px-3 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-secondary pulse-dot"></span>Processing</span>`;
+      return `<span class="inline-flex items-center gap-1 text-xs font-medium text-error bg-error/10 px-3 py-1 rounded-full"><span class="material-symbols-outlined text-xs" style="font-variation-settings:'FILL' 1;">cancel</span>Failed</span>`;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('histTableBody');
+      const empty = document.getElementById('histEmpty');
+      const filtered = videos.filter(v => {
+        const matchFilter = currentFilter === 'all' || v.status === currentFilter;
+        const matchSearch = v.title.toLowerCase().includes(searchQuery) || v.into.toLowerCase().includes(searchQuery);
+        return matchFilter && matchSearch;
+      });
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const slice = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+      tbody.innerHTML = '';
+      if (!slice.length) {
+        empty.classList.remove('hidden'); empty.classList.add('flex');
+      } else {
+        empty.classList.add('hidden'); empty.classList.remove('flex');
+        slice.forEach(v => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-white/[0.02] transition-colors vid-card';
+          tr.innerHTML = `
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-9 rounded-md overflow-hidden bg-surface-container-highest shrink-0 relative">
+                  <img src="${v.thumb}" alt="" class="w-full h-full object-cover opacity-70" />
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-sm" style="font-variation-settings:'FILL' 1;">play_circle</span>
+                  </div>
+                </div>
+                <span class="font-medium text-on-surface text-sm">${v.title}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-on-surface-variant text-sm">${v.from}</td>
+            <td class="py-3 px-4 text-primary text-sm font-medium">${v.into}</td>
+            <td class="py-3 px-4 text-on-surface-variant text-sm">${v.dur}</td>
+            <td class="py-3 px-4 text-on-surface-variant text-sm">${v.date}</td>
+            <td class="py-3 px-4">${statusHTML(v.status)}</td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1">
+                <button title="Download" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary/40 transition-all">
+                  <span class="material-symbols-outlined text-sm">download</span>
+                </button>
+                <button title="Share" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-secondary hover:border-secondary/40 transition-all">
+                  <span class="material-symbols-outlined text-sm">share</span>
+                </button>
+                <button title="Delete" class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-on-surface-variant hover:text-error hover:border-error/40 transition-all">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+              </div>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+      }
+      document.getElementById('histPageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('histPrev').disabled = currentPage === 1;
+      document.getElementById('histNext').disabled = currentPage === totalPages || !filtered.length;
+    }
+
+    // Pagination
+    document.getElementById('histPrev').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
+    document.getElementById('histNext').addEventListener('click', () => { currentPage++; renderTable(); });
+
+    // Search
+    document.getElementById('histSearch').addEventListener('input', e => { searchQuery = e.target.value.toLowerCase(); currentPage = 1; renderTable(); });
+
+    // Filter dropdown
+    const filterBtn = document.getElementById('filterBtn');
+    const filterPanel = document.getElementById('filterPanel');
+    const filterChevron = document.getElementById('filterChevron');
+    filterBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = filterBtn.getAttribute('aria-expanded') === 'true';
+      filterBtn.setAttribute('aria-expanded', String(!open));
+      filterPanel.classList.toggle('opacity-0', open);
+      filterPanel.classList.toggle('scale-95', open);
+      filterPanel.classList.toggle('pointer-events-none', open);
+      filterPanel.classList.toggle('opacity-100', !open);
+      filterPanel.classList.toggle('scale-100', !open);
+      filterChevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+    document.addEventListener('click', () => {
+      filterBtn.setAttribute('aria-expanded', 'false');
+      filterPanel.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+      filterPanel.classList.remove('opacity-100', 'scale-100');
+      filterChevron.style.transform = 'rotate(0deg)';
+    });
+    document.querySelectorAll('.filter-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        currentFilter = opt.dataset.filter;
+        document.getElementById('filterLabel').textContent = opt.textContent;
+        currentPage = 1; renderTable();
+      });
+    });
+
+    // Edit profile modal
+    const modal = document.getElementById('editModal');
+    document.getElementById('editProfileBtn').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('modalClose').addEventListener('click', () => modal.classList.add('hidden'));
+    document.getElementById('modalCancel').addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+    document.getElementById('editProfileForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nameEl = document.getElementById('edit-name');
+      const emailEl = document.getElementById('edit-email');
+      const nameErr = document.getElementById('edit-name-err');
+      const emailErr = document.getElementById('edit-email-err');
+      let ok = true;
+      if (!nameEl.value.trim()) { nameErr.textContent = 'Name is required.'; nameErr.classList.remove('hidden'); ok = false; } else nameErr.classList.add('hidden');
+      if (!emailEl.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) { emailErr.textContent = 'Enter a valid email.'; emailErr.classList.remove('hidden'); ok = false; } else emailErr.classList.add('hidden');
+      if (!ok) return;
+      const spinner = document.getElementById('saveSpinner');
+      const btnText = document.getElementById('saveBtnText');
+      spinner.classList.remove('hidden'); btnText.textContent = 'Saving…';
+      setTimeout(() => {
+        document.getElementById('profile-name').textContent = nameEl.value;
+        document.getElementById('profile-email').textContent = emailEl.value;
+        document.getElementById('pd-name').textContent = nameEl.value;
+        document.getElementById('pd-email').textContent = emailEl.value;
+        spinner.classList.add('hidden'); btnText.textContent = 'Save Changes';
+        modal.classList.add('hidden');
+      }, 1000);
+    });
+
+    // Init
+    renderTable();
+  </script>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

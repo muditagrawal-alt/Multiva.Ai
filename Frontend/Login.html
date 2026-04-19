@@ -1,68 +1,306 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Login • Multiva.AI</title>
 
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Multiva.AI - Login</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#006251",
+            "on-tertiary": "#006150",
+            "surface-container-highest": "#25252f",
+            "surface-container-low": "#13131a",
+            "surface": "#0e0e15",
+            "inverse-surface": "#fcf8ff",
+            "secondary-fixed": "#eac4ff",
+            "primary-fixed-dim": "#f16092",
+            "on-secondary-container": "#f2d5ff",
+            "surface-bright": "#2b2b36",
+            "surface-tint": "#ff89ad",
+            "on-primary-fixed": "#000000",
+            "on-secondary-fixed": "#530081",
+            "on-tertiary-fixed": "#004236",
+            "outline-variant": "#48474f",
+            "primary-container": "#ff709f",
+            "on-secondary-fixed-variant": "#7d06bd",
+            "secondary-fixed-dim": "#e2b1ff",
+            "tertiary": "#77ffde",
+            "tertiary-container": "#32f4ce",
+            "surface-variant": "#25252f",
+            "secondary-container": "#7c04bc",
+            "primary-dim": "#ff6b9d",
+            "surface-dim": "#0e0e15",
+            "secondary": "#ca7bff",
+            "surface-container-lowest": "#000000",
+            "primary-fixed": "#ff709f",
+            "inverse-on-surface": "#55545d",
+            "on-primary-container": "#4c0022",
+            "primary": "#ff89ad",
+            "on-error-container": "#ffb2b9",
+            "on-primary-fixed-variant": "#5d002b",
+            "outline": "#76747e",
+            "error": "#ff6e84",
+            "on-surface-variant": "#acaab4",
+            "tertiary-fixed-dim": "#05e6c1",
+            "surface-container-high": "#1f1f28",
+            "on-secondary": "#360056",
+            "surface-container": "#191921",
+            "secondary-dim": "#ca7bff",
+            "inverse-primary": "#ad2b5e",
+            "on-tertiary-container": "#005748",
+            "on-surface": "#e7e4ee",
+            "error-container": "#a70138",
+            "background": "#0e0e15",
+            "on-background": "#e7e4ee",
+            "error-dim": "#d73357",
+            "tertiary-dim": "#05e6c1",
+            "tertiary-fixed": "#32f4ce",
+            "on-primary": "#62002e",
+            "on-error": "#490013"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Space Grotesk"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0e0e15;
+      background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+      background-size: 32px 32px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .clash-display {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .aurora-glow {
+      filter: blur(120px);
+      opacity: 0.15;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .form-input-focus:focus {
+      box-shadow: 0 0 20px rgba(202, 123, 255, 0.2);
+      border-color: rgba(202, 123, 255, 0.5);
+      outline: none;
+    }
+  </style>
 </head>
 
-<body>
-
-<header>
-    <div class="logo">Multiva.AI</div>
-
-    <nav>
-        <a href="index.html"><span id="navHome">Home</span></a>
-    </nav>
-
-    <!-- 🌍 Language Dropdown -->
-    <select id="languageSwitcher">
-        <option value="en">English</option>
-        <option value="hi">Hindi</option>
-        <option value="ar">Arabic</option>
-        <option value="es">Spanish</option>
-        <option value="fr">French</option>
-        <option value="zh">Chinese</option>
-        <option value="tr">Turkish</option>
-        <option value="ru">Russian</option>
-        <option value="pt">Portuguese</option>
-        <option value="it">Italian</option>
-        <option value="ko">Korean</option>
-        <option value="de">German</option>
-        <option value="nl">Dutch</option>
-        <option value="cs">Czech</option>
-    </select>
-</header>
-
-<div class="matte"></div>
-
-<div class="shape shape1"></div>
-<div class="shape shape2"></div>
-<div class="shape shape3"></div>
-
-<div class="center-container">
-
-    <div class="glass login-box">
-
-        <h2 id="loginTitle">Welcome Back</h2>
-
-        <p id="loginSubtitle" style="margin-top:10px; opacity:0.8;">
-            Login to continue
-        </p>
-
-        <input type="text" placeholder="Email">
-        <input type="password" placeholder="Password">
-
-        <button id="loginAction">
+<body class="text-on-surface overflow-hidden" data-page="login">
+  <!-- Background Orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-primary rounded-full aurora-glow"></div>
+    <div class="absolute top-[40%] -right-[10%] w-[500px] h-[500px] bg-secondary rounded-full aurora-glow"></div>
+    <div class="absolute -bottom-[10%] left-[20%] w-[700px] h-[700px] bg-tertiary rounded-full aurora-glow"
+      style="opacity: 0.08;"></div>
+  </div>
+  <main class="relative z-10 flex h-screen w-full">
+    <!-- Left Column: Decorative Panel -->
+    <section class="hidden md:flex md:w-1/2 relative flex-col justify-center items-center p-12 overflow-hidden">
+      <!-- Decorative Gradient Background -->
+      <div class="absolute inset-0 bg-gradient-to-br from-secondary/20 via-primary/10 to-transparent"></div>
+      <div class="relative z-20 w-full max-w-lg">
+        <!-- Branding Logo -->
+        <div class="mb-16">
+          <a href="index.html"
+            class="text-3xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400 bg-clip-text text-transparent clash-display">Multiva.AI</a>
+        </div>
+        <!-- Floating Card Mockup -->
+        <div
+          class="glass-panel rounded-lg p-6 shadow-2xl mb-12 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
+          <div class="relative rounded-md overflow-hidden mb-4 aspect-video bg-surface-container">
+            <img class="w-full h-full object-cover opacity-80"
+              alt="Cinematic frame of a futuristic video editing interface showing audio waveforms and neon overlays in a dark studio setting"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPRiRuD6C_W_-s_JYOvMCALY5-SESSxtfBNIX8WUZhhyNJHCKv5iLch1QDKfM3qojmqLT1_5JNqIqqfnkPVAA8jkSwDN5lsYfVTUhQQdg67Lvnsdt_j8kntqhDZt2Ob8qmTqe0sDGBHhLxDLyashNs1kpddRxdJTiG_r1flwsit7soFOdnb-17RMsHY38_2Ybzk8e09BY7IKsX_YO0UEVIJK-5z8-X2l25UaKPKeISU8gQYSzp9Id1E1hZJ8YDlxILroirRLqftLg" />
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div
+                class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <span class="material-symbols-outlined text-white text-3xl"
+                  style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-2 w-1/3 bg-white/10 rounded-full"></div>
+            <div class="h-2 w-1/4 bg-secondary/40 rounded-full"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <div class="h-1.5 w-full bg-white/5 rounded-full"></div>
+            </div>
+            <div class="flex gap-2">
+              <div class="h-1.5 w-3/4 bg-white/5 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Feature Rows -->
+        <div class="space-y-8">
+          <div class="flex items-center gap-6">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+              <span class="material-symbols-outlined text-white">translate</span>
+            </div>
+            <div>
+              <h3 class="clash-display font-bold text-white text-lg">Instant Localization</h3>
+              <p class="text-on-surface-variant text-sm">Translate content into 40+ languages while maintaining tone.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-tertiary flex items-center justify-center shrink-0 shadow-lg shadow-secondary/20">
+              <span class="material-symbols-outlined text-white">settings_voice</span>
+            </div>
+            <div>
+              <h3 class="clash-display font-bold text-white text-lg">Neural Voice Cloning</h3>
+              <p class="text-on-surface-variant text-sm">Perfectly replicate your original voice in any target language.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-tertiary to-primary flex items-center justify-center shrink-0 shadow-lg shadow-tertiary/20">
+              <span class="material-symbols-outlined text-white">auto_fix_high</span>
+            </div>
+            <div>
+              <h3 class="clash-display font-bold text-white text-lg">AI Lip-Syncing</h3>
+              <p class="text-on-surface-variant text-sm">Automatic mouth movement alignment for natural results.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Right Column: Login Panel -->
+    <section class="w-full md:w-1/2 bg-[#13131F] flex items-center justify-center p-8 border-l border-white/5">
+      <div class="w-full max-w-[420px]">
+        <header class="mb-10 text-center md:text-left">
+          <h1 class="clash-display text-4xl font-bold text-white mb-2">Welcome back</h1>
+          <p class="text-on-surface-variant">Continue your creative journey with Multiva.AI.</p>
+        </header>
+        <!-- Login Form -->
+        <form class="space-y-6" id="loginForm" novalidate>
+          <div class="space-y-2">
+            <label class="text-xs font-medium uppercase tracking-widest text-on-surface-variant ml-1" for="email">Email
+              Address</label>
+            <input
+              class="w-full h-14 px-5 bg-white/[0.05] border border-white/10 rounded-lg text-white placeholder:text-outline outline-none transition-all duration-300 form-input-focus"
+              id="email" placeholder="name@company.com" type="email" />
+            <p class="text-xs text-error ml-1 hidden" id="emailErr">Please enter a valid email address.</p>
+          </div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-end ml-1">
+              <label class="text-xs font-medium uppercase tracking-widest text-on-surface-variant"
+                for="password">Password</label>
+              <a class="text-xs text-secondary hover:text-primary transition-colors" href="#">Forgot password?</a>
+            </div>
+            <div class="relative">
+              <input
+                class="w-full h-14 px-5 bg-white/[0.05] border border-white/10 rounded-lg text-white placeholder:text-outline outline-none transition-all duration-300 form-input-focus pr-14"
+                id="password" placeholder="••••••••" type="password" />
+              <button type="button" id="pwToggle"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors">
+                <span class="material-symbols-outlined text-xl" id="pwToggleIcon">visibility_off</span>
+              </button>
+            </div>
+            <p class="text-xs text-error ml-1 hidden" id="pwErr">Password must be at least 6 characters.</p>
+          </div>
+          <div class="flex items-center gap-3 py-2">
+            <input class="w-5 h-5 rounded border-outline bg-surface text-tertiary focus:ring-tertiary/20 transition-all"
+              id="remember" type="checkbox" />
+            <label class="text-sm text-on-surface-variant cursor-pointer" for="remember">Keep me signed in for 30
+              days</label>
+          </div>
+          <button
+            class="w-full h-14 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold text-lg clash-display shadow-[0_0_20px_rgba(191,95,255,0.3)] hover:shadow-[0_0_30px_rgba(191,95,255,0.5)] transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2"
+            id="loginBtn" type="submit">
             <span id="loginBtnText">Login</span>
-        </button>
-
-    </div>
-
-</div>
-
-<script src="script.js"></script>
+            <span id="loginSpinner" class="material-symbols-outlined text-xl hidden animate-spin">autorenew</span>
+          </button>
+        </form>
+        <!-- Divider -->
+        <div class="relative my-10 flex items-center">
+          <div class="flex-grow border-t border-white/5"></div>
+          <span class="px-4 text-xs font-medium text-outline uppercase tracking-widest">Or continue with</span>
+          <div class="flex-grow border-t border-white/5"></div>
+        </div>
+        <!-- Social Login -->
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            class="flex items-center justify-center gap-3 h-14 rounded-lg bg-white/[0.03] border border-white/10 text-on-surface hover:bg-white/[0.08] transition-all"
+            id="googleBtn">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"></path>
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"></path>
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"></path>
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"></path>
+            </svg>
+            <span class="text-sm font-medium">Google</span>
+          </button>
+          <button
+            class="flex items-center justify-center gap-3 h-14 rounded-lg bg-white/[0.03] border border-white/10 text-on-surface hover:bg-white/[0.08] transition-all"
+            id="githubBtn">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                d="M12 1.27a11 11 0 00-3.48 21.46c.55.1.75-.24.75-.53v-1.87c-3.06.66-3.7-1.47-3.7-1.47-.5-1.27-1.22-1.61-1.22-1.61-.99-.68.08-.66.08-.66 1.1.08 1.67 1.13 1.67 1.13.97 1.66 2.54 1.18 3.17.9.1-.7.38-1.18.69-1.45-2.44-.27-5-1.22-5-5.42 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.11-2.91 0 0 .92-.3 3.03 1.13a10.4 10.4 0 015.5 0c2.1-1.43 3.03-1.13 3.03-1.13.6 1.51.22 2.63.11 2.91.71.77 1.13 1.75 1.13 2.95 0 4.21-2.57 5.14-5.02 5.41.39.34.74 1.01.74 2.03v3.01c0 .29.2.64.76.53A11 11 0 0012 1.27z"
+                fill="currentColor"></path>
+            </svg>
+            <span class="text-sm font-medium">GitHub</span>
+          </button>
+        </div>
+        <footer class="mt-12 text-center">
+          <p class="text-sm text-on-surface-variant">
+            Don't have an account?
+            <a class="text-primary font-bold hover:underline underline-offset-4 ml-1" href="#">Create free account</a>
+          </p>
+        </footer>
+      </div>
+    </section>
+  </main>
+  <!-- Header Floating Tag for Mobile -->
+  <div class="fixed top-8 left-1/2 -translate-x-1/2 md:hidden z-50">
+    <a href="index.html"
+      class="text-2xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400 bg-clip-text text-transparent clash-display">Multiva.AI</a>
+  </div>
+  <script src="script.js"></script>
 </body>
+
 </html>

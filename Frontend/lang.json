@@ -1,393 +1,2721 @@
 {
-  "en": {
-    "navMission": "Mission",
-    "navTech": "Technology",
-    "navContact": "Contact",
-    "navLogin": "Login",
-    "navHome": "Home",
-    "navLogout": "Logout",
-
-    "heroTitle": "Create Videos. Preserve Voices. Break Language Barriers.",
-    "heroSubtitle": "AI-powered multilingual Video Translation Platform.",
-
-    "loginBtnText": "Login / Get Started",
-    "loginTitle": "Welcome Back",
-    "loginSubtitle": "Login to continue",
-    "emailPlaceholder": "Enter Email",
-    "passwordPlaceholder": "Enter Password",
-
-    "appTitle": "AI Voice & Video Translator",
-
-    "outputTitle": "Output Video:",
-    "outputText": "Output will appear here",
-    "noVideoText": "No video selected",
-    "generateBtn": "Generate Output",
-    "downloadText": "Download Video",
-
-    "footerText": "© 2026 Multiva.AI — AI Powered Communication"
-  },
-
-  "hi": {
-    "navMission": "मिशन",
-    "navTech": "तकनीक",
-    "navContact": "संपर्क",
-    "navLogin": "लॉगिन",
-    "navHome": "होम",
-    "navLogout": "लॉगआउट",
-
-    "heroTitle": "वीडियो बनाएं। आवाज़ सुरक्षित रखें। भाषा बाधाओं को तोड़ें।",
-    "heroSubtitle": "एआई आधारित बहुभाषी वीडियो अनुवाद प्लेटफॉर्म।",
-
-    "loginBtnText": "लॉगिन / शुरू करें",
-    "loginTitle": "वापसी पर स्वागत है",
-    "loginSubtitle": "जारी रखने के लिए लॉगिन करें",
-    "emailPlaceholder": "ईमेल दर्ज करें",
-    "passwordPlaceholder": "पासवर्ड दर्ज करें",
-
-    "appTitle": "एआई वॉइस और वीडियो ट्रांसलेटर",
-
-    "outputTitle": "आउटपुट वीडियो:",
-    "outputText": "आउटपुट यहाँ दिखाई देगा",
-    "noVideoText": "कोई वीडियो चयनित नहीं है",
-    "generateBtn": "आउटपुट बनाएं",
-    "downloadText": "वीडियो डाउनलोड करें",
-
-    "footerText": "© 2026 मल्टिवा.एआई — एआई संचालित संचार"
-  },
-
-  "ar": {
-    "navMission": "المهمة",
-    "navTech": "التقنية",
-    "navContact": "اتصال",
-    "navLogin": "تسجيل الدخول",
-    "navHome": "الرئيسية",
-    "navLogout": "تسجيل الخروج",
-
-    "heroTitle": "أنشئ مقاطع فيديو. حافظ على الأصوات. اكسر حواجز اللغة.",
-    "heroSubtitle": "منصة ترجمة فيديو متعددة اللغات مدعومة بالذكاء الاصطناعي.",
-
-    "loginBtnText": "ابدأ / تسجيل الدخول",
-    "loginTitle": "مرحبًا بعودتك",
-    "loginSubtitle": "سجل الدخول للمتابعة",
-    "emailPlaceholder": "أدخل البريد الإلكتروني",
-    "passwordPlaceholder": "أدخل كلمة المرور",
-
-    "appTitle": "مترجم الصوت والفيديو بالذكاء الاصطناعي",
-
-    "outputTitle": "فيديو الإخراج:",
-    "outputText": "سيظهر الإخراج هنا",
-    "noVideoText": "لم يتم تحديد فيديو",
-    "generateBtn": "إنشاء الإخراج",
-    "downloadText": "تحميل الفيديو",
-
-    "footerText": "© 2026 Multiva.AI — تواصل مدعوم بالذكاء الاصطناعي"
-  },
-
-  "es": {
-    "navMission": "Misión",
-    "navTech": "Tecnología",
-    "navContact": "Contacto",
-    "navLogin": "Iniciar sesión",
-    "navHome": "Inicio",
-    "navLogout": "Cerrar sesión",
-
-    "heroTitle": "Crea videos. Conserva voces. Rompe las barreras del idioma.",
-    "heroSubtitle": "Plataforma de traducción de video multilingüe impulsada por IA.",
-
-    "loginBtnText": "Iniciar / Comenzar",
-    "loginTitle": "Bienvenido de nuevo",
-    "loginSubtitle": "Inicia sesión para continuar",
-    "emailPlaceholder": "Introduce el correo electrónico",
-    "passwordPlaceholder": "Introduce la contraseña",
-
-    "appTitle": "Traductor de voz y video con IA",
-
-    "outputTitle": "Video de salida:",
-    "outputText": "La salida aparecerá aquí",
-    "noVideoText": "Ningún video seleccionado",
-    "generateBtn": "Generar salida",
-    "downloadText": "Descargar video",
-
-    "footerText": "© 2026 Multiva.AI — Comunicación impulsada por IA"
-  },
-
-  "fr": {
-    "navMission": "Mission",
-    "navTech": "Technologie",
-    "navContact": "Contact",
-    "navLogin": "Connexion",
-    "navHome": "Accueil",
-    "navLogout": "Déconnexion",
-
-    "heroTitle": "Créez des vidéos. Préservez les voix. Brisez les barrières linguistiques.",
-    "heroSubtitle": "Plateforme de traduction vidéo multilingue alimentée par l'IA.",
-
-    "loginBtnText": "Connexion / Démarrer",
-    "loginTitle": "Bon retour",
-    "loginSubtitle": "Connectez-vous pour continuer",
-    "emailPlaceholder": "Entrez l'email",
-    "passwordPlaceholder": "Entrez le mot de passe",
-
-    "appTitle": "Traducteur vocal et vidéo IA",
-
-    "outputTitle": "Vidéo de sortie:",
-    "outputText": "La sortie apparaîtra ici",
-    "noVideoText": "Aucune vidéo sélectionnée",
-    "generateBtn": "Générer la sortie",
-    "downloadText": "Télécharger la vidéo",
-
-    "footerText": "© 2026 Multiva.AI — Communication alimentée par IA"
-  },
-
-  "zh": {
-    "navMission": "使命",
-    "navTech": "技术",
-    "navContact": "联系",
-    "navLogin": "登录",
-    "navHome": "首页",
-    "navLogout": "退出",
-
-    "heroTitle": "创建视频。保留声音。打破语言障碍。",
-    "heroSubtitle": "AI驱动的多语言视频翻译平台。",
-
-    "loginBtnText": "登录 / 开始",
-    "loginTitle": "欢迎回来",
-    "loginSubtitle": "登录以继续",
-    "emailPlaceholder": "输入电子邮件",
-    "passwordPlaceholder": "输入密码",
-
-    "appTitle": "AI语音与视频翻译器",
-
-    "outputTitle": "输出视频：",
-    "outputText": "输出将显示在这里",
-    "noVideoText": "未选择视频",
-    "generateBtn": "生成输出",
-    "downloadText": "下载视频",
-
-    "footerText": "© 2026 Multiva.AI — AI驱动的通信"
-  },
-
-  "tr": {
-    "navMission": "Misyon",
-    "navTech": "Teknoloji",
-    "navContact": "İletişim",
-    "navLogin": "Giriş Yap",
-    "navHome": "Anasayfa",
-    "navLogout": "Çıkış Yap",
-
-    "heroTitle": "Videolar oluşturun. Sesleri koruyun. Dil engellerini aşın.",
-    "heroSubtitle": "Yapay zeka destekli çok dilli video çeviri platformu.",
-
-    "loginBtnText": "Giriş / Başla",
-    "loginTitle": "Tekrar Hoşgeldiniz",
-    "loginSubtitle": "Devam etmek için giriş yapın",
-    "emailPlaceholder": "E-posta girin",
-    "passwordPlaceholder": "Şifre girin",
-
-    "appTitle": "Yapay Zeka Ses & Video Çevirici",
-
-    "outputTitle": "Çıktı Videosu:",
-    "outputText": "Çıktı burada görünecek",
-    "noVideoText": "Video seçilmedi",
-    "generateBtn": "Çıktıyı Oluştur",
-    "downloadText": "Videoyu İndir",
-
-    "footerText": "© 2026 Multiva.AI — AI Destekli İletişim"
-  },
-
-  "ru": {
-    "navMission": "Миссия",
-    "navTech": "Технология",
-    "navContact": "Контакт",
-    "navLogin": "Войти",
-    "navHome": "Главная",
-    "navLogout": "Выйти",
-
-    "heroTitle": "Создавайте видео. Сохраняйте голоса. Ломайте языковые барьеры.",
-    "heroSubtitle": "Многоязычная платформа перевода видео на базе ИИ.",
-
-    "loginBtnText": "Войти / Начать",
-    "loginTitle": "С возвращением",
-    "loginSubtitle": "Войдите, чтобы продолжить",
-    "emailPlaceholder": "Введите Email",
-    "passwordPlaceholder": "Введите пароль",
-
-    "appTitle": "ИИ Переводчик Голоса и Видео",
-
-    "outputTitle": "Выходное видео:",
-    "outputText": "Выход будет здесь",
-    "noVideoText": "Видео не выбрано",
-    "generateBtn": "Создать выход",
-    "downloadText": "Скачать видео",
-
-    "footerText": "© 2026 Multiva.AI — Коммуникация с поддержкой ИИ"
-  },
-
-  "pt": {
-    "navMission": "Missão",
-    "navTech": "Tecnologia",
-    "navContact": "Contato",
-    "navLogin": "Login",
-    "navHome": "Início",
-    "navLogout": "Sair",
-
-    "heroTitle": "Crie vídeos. Preserve vozes. Quebre barreiras linguísticas.",
-    "heroSubtitle": "Plataforma de tradução de vídeo multilíngue com IA.",
-
-    "loginBtnText": "Login / Começar",
-    "loginTitle": "Bem-vindo de volta",
-    "loginSubtitle": "Faça login para continuar",
-    "emailPlaceholder": "Digite o email",
-    "passwordPlaceholder": "Digite a senha",
-
-    "appTitle": "Tradutor de Voz e Vídeo com IA",
-
-    "outputTitle": "Vídeo de saída:",
-    "outputText": "A saída aparecerá aqui",
-    "noVideoText": "Nenhum vídeo selecionado",
-    "generateBtn": "Gerar saída",
-    "downloadText": "Baixar vídeo",
-
-    "footerText": "© 2026 Multiva.AI — Comunicação impulsionada por IA"
-  },
-
-  "it": {
-    "navMission": "Missione",
-    "navTech": "Tecnologia",
-    "navContact": "Contatto",
-    "navLogin": "Accedi",
-    "navHome": "Home",
-    "navLogout": "Disconnetti",
-
-    "heroTitle": "Crea video. Conserva le voci. Rompi le barriere linguistiche.",
-    "heroSubtitle": "Piattaforma di traduzione video multilingue basata su IA.",
-
-    "loginBtnText": "Accedi / Inizia",
-    "loginTitle": "Bentornato",
-    "loginSubtitle": "Accedi per continuare",
-    "emailPlaceholder": "Inserisci email",
-    "passwordPlaceholder": "Inserisci password",
-
-    "appTitle": "Traduttore Vocale e Video IA",
-
-    "outputTitle": "Video di uscita:",
-    "outputText": "L'output apparirà qui",
-    "noVideoText": "Nessun video selezionato",
-    "generateBtn": "Genera Output",
-    "downloadText": "Scarica Video",
-
-    "footerText": "© 2026 Multiva.AI — Comunicazione alimentata da IA"
-  },
-
-  "ko": {
-    "navMission": "미션",
-    "navTech": "기술",
-    "navContact": "연락처",
-    "navLogin": "로그인",
-    "navHome": "홈",
-    "navLogout": "로그아웃",
-
-    "heroTitle": "비디오를 만드세요. 목소리를 보존하세요. 언어 장벽을 허물세요.",
-    "heroSubtitle": "AI 기반 다국어 비디오 번역 플랫폼.",
-
-    "loginBtnText": "로그인 / 시작",
-    "loginTitle": "다시 오신 것을 환영합니다",
-    "loginSubtitle": "계속하려면 로그인하세요",
-    "emailPlaceholder": "이메일 입력",
-    "passwordPlaceholder": "비밀번호 입력",
-
-    "appTitle": "AI 음성 및 비디오 번역기",
-
-    "outputTitle": "출력 비디오:",
-    "outputText": "출력이 여기에 표시됩니다",
-    "noVideoText": "선택된 비디오 없음",
-    "generateBtn": "출력 생성",
-    "downloadText": "비디오 다운로드",
-
-    "footerText": "© 2026 Multiva.AI — AI 기반 커뮤니케이션"
-  },
-
-  "de": {
-    "navMission": "Mission",
-    "navTech": "Technologie",
-    "navContact": "Kontakt",
-    "navLogin": "Anmelden",
-    "navHome": "Startseite",
-    "navLogout": "Abmelden",
-
-    "heroTitle": "Erstellen Sie Videos. Bewahren Sie Stimmen. Überwinden Sie Sprachbarrieren.",
-    "heroSubtitle": "KI-gestützte mehrsprachige Videoübersetzungsplattform.",
-
-    "loginBtnText": "Anmelden / Starten",
-    "loginTitle": "Willkommen zurück",
-    "loginSubtitle": "Melden Sie sich an, um fortzufahren",
-    "emailPlaceholder": "E-Mail eingeben",
-    "passwordPlaceholder": "Passwort eingeben",
-
-    "appTitle": "KI Sprach- und Videoübersetzer",
-
-    "outputTitle": "Ausgabevideo:",
-    "outputText": "Die Ausgabe erscheint hier",
-    "noVideoText": "Kein Video ausgewählt",
-    "generateBtn": "Ausgabe generieren",
-    "downloadText": "Video herunterladen",
-
-    "footerText": "© 2026 Multiva.AI — KI-gestützte Kommunikation"
-  },
-
-  "nl": {
-    "navMission": "Missie",
-    "navTech": "Technologie",
-    "navContact": "Contact",
-    "navLogin": "Inloggen",
-    "navHome": "Home",
-    "navLogout": "Uitloggen",
-
-    "heroTitle": "Maak video's. Behoud stemmen. Doorbreek taalbarrières.",
-    "heroSubtitle": "AI-aangedreven meertalige videovertaler.",
-
-    "loginBtnText": "Inloggen / Starten",
-    "loginTitle": "Welkom terug",
-    "loginSubtitle": "Log in om verder te gaan",
-    "emailPlaceholder": "E-mail invoeren",
-    "passwordPlaceholder": "Wachtwoord invoeren",
-
-    "appTitle": "AI Stem & Video Vertaler",
-
-    "outputTitle": "Uitvoervideo:",
-    "outputText": "Uitvoer verschijnt hier",
-    "noVideoText": "Geen video geselecteerd",
-    "generateBtn": "Genereer Uitvoer",
-    "downloadText": "Video downloaden",
-
-    "footerText": "© 2026 Multiva.AI — AI-gestuurde communicatie"
-  },
-
-  "cs": {
-    "navMission": "Mise",
-    "navTech": "Technologie",
-    "navContact": "Kontakt",
-    "navLogin": "Přihlásit se",
-    "navHome": "Domů",
-    "navLogout": "Odhlásit se",
-
-    "heroTitle": "Vytvářejte videa. Uchovejte hlasy. Překonejte jazykové bariéry.",
-    "heroSubtitle": "Vícejazyčná platforma pro překlad videa poháněná AI.",
-
-    "loginBtnText": "Přihlásit / Začít",
-    "loginTitle": "Vítejte zpět",
-    "loginSubtitle": "Přihlaste se pro pokračování",
-    "emailPlaceholder": "Zadejte e-mail",
-    "passwordPlaceholder": "Zadejte heslo",
-
-    "appTitle": "AI Překladač hlasu a videa",
-
-    "outputTitle": "Výstupní video:",
-    "outputText": "Výstup se zobrazí zde",
-    "noVideoText": "Žádné video nebylo vybráno",
-    "generateBtn": "Generovat výstup",
-    "downloadText": "Stáhnout video",
-
-    "footerText": "© 2026 Multiva.AI — Komunikace poháněná AI"
+  "defaultLanguage": "en",
+  "languages": {
+    "en": {
+      "languageLabel": "English",
+      "index": {
+        "metaTitle": "Multiva.AI — AI Voice Engine",
+        "nav": {
+          "home": "Home",
+          "mission": "Mission",
+          "features": "Features",
+          "pricing": "Pricing",
+          "demo": "Demo",
+          "login": "Login"
+        },
+        "interfaceLanguage": "Interface Language",
+        "hero": {
+          "badge": "AI-Powered Voice Cloning",
+          "title": "Your Voice.<br>Every Language.",
+          "subtitle": "Clone your unique voice in seconds. Dub your content into 50+ languages with full emotion and accuracy.",
+          "primaryCta": "Get Started Free",
+          "secondaryCta": "Watch Demo"
+        },
+        "mission": {
+          "title": "Breaking language barriers — <span class=\"text-tertiary\">one voice</span> at a time.",
+          "description": "We believe great storytelling should never be limited to one language. Multiva.AI helps creators sound natural everywhere.",
+          "languages": "Languages",
+          "accuracy": "Accuracy",
+          "videos": "Videos Dubbed"
+        },
+        "features": {
+          "title": "Unmatched Audio Quality",
+          "subtitle": "The tools you need to scale your content globally.",
+          "voiceCloningTitle": "Voice Cloning",
+          "voiceCloningDesc": "Clone any voice in just 30 seconds while preserving tone, rhythm, and emotion.",
+          "multilingualTitle": "Multilingual Dubbing",
+          "multilingualDesc": "Translate and synchronize your content automatically across many target languages.",
+          "exportTitle": "Instant Export",
+          "exportDesc": "Download high-quality output optimized for YouTube, TikTok, courses, and more."
+        },
+        "howItWorks": {
+          "title": "How It Works",
+          "step1Title": "Upload",
+          "step1Desc": "Upload your video or audio file.",
+          "step2Title": "Select",
+          "step2Desc": "Choose language and voice settings.",
+          "step3Title": "Download",
+          "step3Desc": "Get your final dubbed content in minutes.",
+          "button": "Open Workspace"
+        },
+        "testimonials": {
+          "title": "Trusted by Creators",
+          "quote1": "\"The voice cloning sounds just like the real speaker.\"",
+          "quote2": "\"We launched our course in 12 languages and the workflow stayed smooth.\"",
+          "quote3": "\"The first AI tool we used that actually understands emotion.\""
+        },
+        "pricing": {
+          "title": "Simple, transparent pricing.",
+          "subtitle": "Start free. Scale as you grow.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/mo</span></div><p class=\"text-on-surface-variant text-sm\">For exploring Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min dubbing/month</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 languages</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 voice clone</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Real-time processing</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API access</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Get Started Free</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Most Popular</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/mo</span></div><p class=\"text-on-surface-variant text-sm\">For serious content creators</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 hours dubbing/month</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>All 50+ languages</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 voice clones</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Real-time processing</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API access</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Start Pro Trial</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/mo</span></div><p class=\"text-on-surface-variant text-sm\">For studios and large teams</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Unlimited dubbing</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>All 50+ languages</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Unlimited clones</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Real-time processing</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Full API access</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Contact Sales</a>"
+        },
+        "cta": {
+          "title": "Ready to go global?",
+          "description": "Join 10,000+ creators who use Multiva.AI to reach audiences around the world.",
+          "button": "Start Free"
+        },
+        "footer": {
+          "description": "The world's most advanced AI voice engine for global creators and enterprises.",
+          "copyright": "© 2026 Multiva.AI. All rights reserved.",
+          "productTitle": "Product",
+          "companyTitle": "Company",
+          "connectTitle": "Connect",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Templates</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API Access</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Security</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Mission</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Careers</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Legal</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Privacy</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Support</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Login",
+        "leftFeature1Title": "Instant Localization",
+        "leftFeature1Desc": "Translate content into 40+ languages while maintaining tone.",
+        "leftFeature2Title": "Neural Voice Cloning",
+        "leftFeature2Desc": "Perfectly replicate your original voice in any target language.",
+        "leftFeature3Title": "AI Lip-Syncing",
+        "leftFeature3Desc": "Automatic mouth movement alignment for natural results.",
+        "heading": "Welcome back",
+        "subheading": "Continue your creative journey with Multiva.AI.",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Please enter a valid email address.",
+        "passwordLabel": "Password",
+        "forgotPassword": "Forgot password?",
+        "passwordError": "Password must be at least 6 characters.",
+        "rememberMe": "Keep me signed in for 30 days",
+        "loginButton": "Login",
+        "continueWith": "Or continue with",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Don't have an account?",
+        "createAccount": "Create free account"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — My Profile",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI Voice Engine",
+          "newProject": "New Project",
+          "projects": "Projects",
+          "clones": "Clones",
+          "voiceLab": "Voice Lab",
+          "templates": "Templates",
+          "profile": "Profile",
+          "settings": "Settings",
+          "goPro": "Go Pro",
+          "unlockFullAccess": "Unlock full access"
+        },
+        "heading": "My Profile",
+        "editProfile": "Edit Profile",
+        "quickAction": "New Project",
+        "details": {
+          "fullName": "Full Name",
+          "email": "Email",
+          "username": "Username",
+          "timezone": "Timezone",
+          "interfaceLanguage": "Interface Language",
+          "memberSince": "Member Since"
+        },
+        "history": {
+          "title": "Generation History",
+          "subtitle": "All your AI-dubbed videos in one place.",
+          "searchPlaceholder": "Search videos…",
+          "filterAll": "All",
+          "filterDone": "Done",
+          "filterProcessing": "Processing",
+          "filterFailed": "Failed",
+          "statusDone": "Done",
+          "statusProcessing": "Processing",
+          "statusFailed": "Failed"
+        },
+        "modal": {
+          "title": "Edit Profile",
+          "fullName": "Full Name",
+          "email": "Email Address",
+          "username": "Username",
+          "timezone": "Timezone",
+          "cancel": "Cancel",
+          "saveChanges": "Save Changes"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | AI Voice Engine Dashboard",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI Voice Engine",
+          "newProject": "New Project",
+          "projects": "Projects",
+          "clones": "Clones",
+          "voiceLab": "Voice Lab",
+          "templates": "Templates",
+          "settings": "Settings",
+          "profile": "Profile"
+        },
+        "status": {
+          "idle": "Idle",
+          "uploading": "Uploading",
+          "cloning": "Cloning",
+          "translating": "Translating",
+          "rendering": "Rendering",
+          "done": "Done"
+        },
+        "source": {
+          "title": "Source Video",
+          "dropTitle": "Drag video here to start",
+          "dropSubtitle": "MP4, MOV, or WEBM (Max 1MB)",
+          "browseFiles": "Browse Files",
+          "originalLanguage": "Original Language",
+          "targetLanguage": "Target Language",
+          "startDubbing": "Start Dubbing"
+        },
+        "output": {
+          "title": "Dubbed Output",
+          "processingTitle": "Synthesizing Voice Texture",
+          "processingEta": "Estimated time: 14s",
+          "translatedScript": "Translated Script",
+          "editScript": "Edit Script",
+          "scriptPlaceholder": "Script generation in progress...",
+          "downloadVideo": "Download Video",
+          "share": "Share"
+        },
+        "toast": {
+          "title": "Voice Clone Ready",
+          "description": "The \"Alex Narrator\" voice profile has been optimized."
+        }
+      }
+    },
+    "hi": {
+      "languageLabel": "हिंदी",
+      "index": {
+        "metaTitle": "Multiva.AI — एआई वॉइस इंजन",
+        "nav": {
+          "home": "होम",
+          "mission": "मिशन",
+          "features": "फ़ीचर्स",
+          "pricing": "प्राइसिंग",
+          "demo": "डेमो",
+          "login": "लॉगिन"
+        },
+        "interfaceLanguage": "इंटरफ़ेस भाषा",
+        "hero": {
+          "badge": "एआई-पावर्ड वॉइस क्लोनिंग",
+          "title": "आपकी आवाज़।<br>हर भाषा में।",
+          "subtitle": "कुछ ही सेकंड में अपनी अनोखी आवाज़ क्लोन करें। अपने कंटेंट को 50+ भाषाओं में भाव और सटीकता के साथ डब करें।",
+          "primaryCta": "मुफ़्त शुरू करें",
+          "secondaryCta": "डेमो देखें"
+        },
+        "mission": {
+          "title": "भाषाई बाधाएँ तोड़ते हुए — <span class=\"text-tertiary\">एक आवाज़</span> के साथ।",
+          "description": "हम मानते हैं कि बेहतरीन कहानी केवल एक भाषा तक सीमित नहीं होनी चाहिए। Multiva.AI आपकी आवाज़ को दुनिया तक स्वाभाविक रूप से पहुँचाता है।",
+          "languages": "भाषाएँ",
+          "accuracy": "सटीकता",
+          "videos": "डब किए गए वीडियो"
+        },
+        "features": {
+          "title": "बेहतर ऑडियो क्वालिटी",
+          "subtitle": "आपके कंटेंट को ग्लोबल स्तर पर बढ़ाने के लिए ज़रूरी टूल्स।",
+          "voiceCloningTitle": "वॉइस क्लोनिंग",
+          "voiceCloningDesc": "सिर्फ 30 सेकंड में किसी भी आवाज़ को क्लोन करें और उसका भाव बनाए रखें।",
+          "multilingualTitle": "मल्टीलिंगुअल डबिंग",
+          "multilingualDesc": "कई भाषाओं में अपने कंटेंट का अनुवाद और सिंक्रोनाइज़ेशन अपने आप करें।",
+          "exportTitle": "इंस्टेंट एक्सपोर्ट",
+          "exportDesc": "YouTube, TikTok, कोर्स और अन्य प्लेटफ़ॉर्म के लिए हाई-क्वालिटी आउटपुट डाउनलोड करें।"
+        },
+        "howItWorks": {
+          "title": "यह कैसे काम करता है",
+          "step1Title": "अपलोड करें",
+          "step1Desc": "अपनी वीडियो या ऑडियो फ़ाइल अपलोड करें।",
+          "step2Title": "चुनें",
+          "step2Desc": "भाषा और वॉइस सेटिंग चुनें।",
+          "step3Title": "डाउनलोड करें",
+          "step3Desc": "कुछ ही मिनटों में अपना अंतिम डब किया हुआ कंटेंट पाएँ।",
+          "button": "वर्कस्पेस खोलें"
+        },
+        "testimonials": {
+          "title": "क्रिएटर्स का भरोसा",
+          "quote1": "\"वॉइस क्लोनिंग बिल्कुल असली वक्ता जैसी लगती है।\"",
+          "quote2": "\"हमने अपना कोर्स 12 भाषाओं में लॉन्च किया और वर्कफ़्लो आसान रहा।\"",
+          "quote3": "\"यह पहला एआई टूल है जो सच में भाव समझता है।\""
+        },
+        "pricing": {
+          "title": "सरल और पारदर्शी प्राइसिंग।",
+          "subtitle": "मुफ़्त शुरू करें। ज़रूरत के साथ बढ़ें।",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">स्टार्टर</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/माह</span></div><p class=\"text-on-surface-variant text-sm\">Multiva.AI को आज़माने के लिए</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 मिनट डबिंग/माह</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 भाषाएँ</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 वॉइस क्लोन</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>रियल-टाइम प्रोसेसिंग</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API एक्सेस</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">मुफ़्त शुरू करें</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">सबसे लोकप्रिय</div><div class=\"text-xs uppercase tracking-widest text-primary\">प्रो</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/माह</span></div><p class=\"text-on-surface-variant text-sm\">गंभीर कंटेंट क्रिएटर्स के लिए</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 घंटे डबिंग/माह</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>सभी 50+ भाषाएँ</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 वॉइस क्लोन्स</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>रियल-टाइम प्रोसेसिंग</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API एक्सेस</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">प्रो ट्रायल शुरू करें</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">एंटरप्राइज़</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/माह</span></div><p class=\"text-on-surface-variant text-sm\">स्टूडियो और बड़ी टीमों के लिए</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>अनलिमिटेड डबिंग</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>सभी 50+ भाषाएँ</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>अनलिमिटेड क्लोन्स</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>रियल-टाइम प्रोसेसिंग</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>पूरा API एक्सेस</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">सेल्स से संपर्क करें</a>"
+        },
+        "cta": {
+          "title": "क्या आप ग्लोबल जाना चाहते हैं?",
+          "description": "10,000+ क्रिएटर्स के साथ जुड़ें जो Multiva.AI का उपयोग करके दुनिया भर में पहुँच बना रहे हैं।",
+          "button": "मुफ़्त शुरू करें"
+        },
+        "footer": {
+          "description": "ग्लोबल क्रिएटर्स और एंटरप्राइज़ के लिए दुनिया का सबसे उन्नत एआई वॉइस इंजन।",
+          "copyright": "© 2026 Multiva.AI. सर्वाधिकार सुरक्षित।",
+          "productTitle": "प्रोडक्ट",
+          "companyTitle": "कंपनी",
+          "connectTitle": "कनेक्ट",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">वॉइस लैब</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">टेम्पलेट्स</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API एक्सेस</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">सिक्योरिटी</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">मिशन</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">करियर</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">लीगल</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">प्राइवेसी</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">ट्विटर</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">डिस्कॉर्ड</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">लिंक्डइन</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">सपोर्ट</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - लॉगिन",
+        "leftFeature1Title": "तुरंत लोकलाइज़ेशन",
+        "leftFeature1Desc": "टोन बनाए रखते हुए 40+ भाषाओं में कंटेंट अनुवाद करें।",
+        "leftFeature2Title": "न्यूरल वॉइस क्लोनिंग",
+        "leftFeature2Desc": "किसी भी लक्ष्य भाषा में अपनी मूल आवाज़ को सटीकता से दोहराएँ।",
+        "leftFeature3Title": "एआई लिप-सिंकिंग",
+        "leftFeature3Desc": "प्राकृतिक परिणामों के लिए मुँह की हरकतें अपने आप मेल करें।",
+        "heading": "वापसी पर स्वागत है",
+        "subheading": "Multiva.AI के साथ अपनी क्रिएटिव यात्रा जारी रखें।",
+        "emailLabel": "ईमेल पता",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "कृपया एक मान्य ईमेल पता दर्ज करें।",
+        "passwordLabel": "पासवर्ड",
+        "forgotPassword": "पासवर्ड भूल गए?",
+        "passwordError": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।",
+        "rememberMe": "मुझे 30 दिनों तक साइन इन रखें",
+        "loginButton": "लॉगिन",
+        "continueWith": "या इनके साथ जारी रखें",
+        "google": "गूगल",
+        "github": "गिटहब",
+        "noAccount": "क्या आपका अकाउंट नहीं है?",
+        "createAccount": "मुफ़्त अकाउंट बनाएँ"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — मेरी प्रोफ़ाइल",
+        "sidebar": {
+          "brand": "वर्कस्पेस",
+          "tagline": "एआई वॉइस इंजन",
+          "newProject": "नया प्रोजेक्ट",
+          "projects": "प्रोजेक्ट्स",
+          "clones": "क्लोन्स",
+          "voiceLab": "वॉइस लैब",
+          "templates": "टेम्पलेट्स",
+          "profile": "प्रोफ़ाइल",
+          "settings": "सेटिंग्स",
+          "goPro": "गो प्रो",
+          "unlockFullAccess": "पूरा एक्सेस अनलॉक करें"
+        },
+        "heading": "मेरी प्रोफ़ाइल",
+        "editProfile": "प्रोफ़ाइल संपादित करें",
+        "quickAction": "नया प्रोजेक्ट",
+        "details": {
+          "fullName": "पूरा नाम",
+          "email": "ईमेल",
+          "username": "यूज़रनेम",
+          "timezone": "टाइमज़ोन",
+          "interfaceLanguage": "इंटरफ़ेस भाषा",
+          "memberSince": "सदस्य कब से"
+        },
+        "history": {
+          "title": "जेनरेशन हिस्ट्री",
+          "subtitle": "आपके सभी एआई-डब्ड वीडियो एक ही जगह।",
+          "searchPlaceholder": "वीडियो खोजें…",
+          "filterAll": "सभी",
+          "filterDone": "पूरा",
+          "filterProcessing": "प्रोसेसिंग",
+          "filterFailed": "असफल",
+          "statusDone": "पूरा",
+          "statusProcessing": "प्रोसेसिंग",
+          "statusFailed": "असफल"
+        },
+        "modal": {
+          "title": "प्रोफ़ाइल संपादित करें",
+          "fullName": "पूरा नाम",
+          "email": "ईमेल पता",
+          "username": "यूज़रनेम",
+          "timezone": "टाइमज़ोन",
+          "cancel": "रद्द करें",
+          "saveChanges": "परिवर्तन सहेजें"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | एआई वॉइस इंजन डैशबोर्ड",
+        "sidebar": {
+          "brand": "वर्कस्पेस",
+          "tagline": "एआई वॉइस इंजन",
+          "newProject": "नया प्रोजेक्ट",
+          "projects": "प्रोजेक्ट्स",
+          "clones": "क्लोन्स",
+          "voiceLab": "वॉइस लैब",
+          "templates": "टेम्पलेट्स",
+          "settings": "सेटिंग्स",
+          "profile": "प्रोफ़ाइल"
+        },
+        "status": {
+          "idle": "खाली",
+          "uploading": "अपलोड हो रहा है",
+          "cloning": "क्लोनिंग",
+          "translating": "अनुवाद",
+          "rendering": "रेंडरिंग",
+          "done": "पूरा"
+        },
+        "source": {
+          "title": "सोर्स वीडियो",
+          "dropTitle": "शुरू करने के लिए वीडियो यहाँ ड्रैग करें",
+          "dropSubtitle": "MP4, MOV, या WEBM (अधिकतम 1MB)",
+          "browseFiles": "फ़ाइलें चुनें",
+          "originalLanguage": "मूल भाषा",
+          "targetLanguage": "लक्ष्य भाषा",
+          "startDubbing": "डबिंग शुरू करें"
+        },
+        "output": {
+          "title": "डब्ड आउटपुट",
+          "processingTitle": "वॉइस टेक्सचर सिंथेसाइज़ हो रही है",
+          "processingEta": "अनुमानित समय: 14s",
+          "translatedScript": "अनुवादित स्क्रिप्ट",
+          "editScript": "स्क्रिप्ट संपादित करें",
+          "scriptPlaceholder": "स्क्रिप्ट जेनरेशन जारी है...",
+          "downloadVideo": "वीडियो डाउनलोड करें",
+          "share": "शेयर"
+        },
+        "toast": {
+          "title": "वॉइस क्लोन तैयार है",
+          "description": "\"Alex Narrator\" वॉइस प्रोफ़ाइल ऑप्टिमाइज़ कर दी गई है।"
+        }
+      }
+    },
+    "es": {
+      "languageLabel": "Español",
+      "index": {
+        "metaTitle": "Multiva.AI — Motor de Voz con IA",
+        "nav": {
+          "home": "Inicio",
+          "mission": "Misión",
+          "features": "Funciones",
+          "pricing": "Precios",
+          "demo": "Demo",
+          "login": "Iniciar sesión"
+        },
+        "interfaceLanguage": "Idioma de la interfaz",
+        "hero": {
+          "badge": "Clonación de voz con IA",
+          "title": "Tu voz.<br>Cada idioma.",
+          "subtitle": "Clona tu voz en segundos. Dobla tu contenido a más de 50 idiomas con emoción y precisión.",
+          "primaryCta": "Comenzar gratis",
+          "secondaryCta": "Ver demo"
+        },
+        "mission": {
+          "title": "Rompiendo barreras de idioma — <span class=\"text-tertiary\">una voz</span> a la vez.",
+          "description": "Creemos que una gran historia no debe limitarse a un solo idioma. Multiva.AI te ayuda a sonar natural en todo el mundo.",
+          "languages": "Idiomas",
+          "accuracy": "Precisión",
+          "videos": "Videos doblados"
+        },
+        "features": {
+          "title": "Calidad de audio incomparable",
+          "subtitle": "Las herramientas que necesitas para escalar tu contenido globalmente.",
+          "voiceCloningTitle": "Clonación de voz",
+          "voiceCloningDesc": "Clona cualquier voz en solo 30 segundos manteniendo tono y emoción.",
+          "multilingualTitle": "Doblaje multilingüe",
+          "multilingualDesc": "Traduce y sincroniza tu contenido automáticamente a muchos idiomas.",
+          "exportTitle": "Exportación instantánea",
+          "exportDesc": "Descarga resultados de alta calidad optimizados para YouTube, TikTok, cursos y más."
+        },
+        "howItWorks": {
+          "title": "Cómo funciona",
+          "step1Title": "Sube",
+          "step1Desc": "Sube tu archivo de video o audio.",
+          "step2Title": "Selecciona",
+          "step2Desc": "Elige idioma y configuración de voz.",
+          "step3Title": "Descarga",
+          "step3Desc": "Obtén tu contenido doblado final en minutos.",
+          "button": "Abrir espacio de trabajo"
+        },
+        "testimonials": {
+          "title": "Creadores confían en nosotros",
+          "quote1": "\"La clonación de voz suena igual que el hablante real.\"",
+          "quote2": "\"Lanzamos nuestro curso en 12 idiomas y el flujo siguió siendo simple.\"",
+          "quote3": "\"La primera herramienta de IA que realmente entiende la emoción.\""
+        },
+        "pricing": {
+          "title": "Precios simples y transparentes.",
+          "subtitle": "Empieza gratis. Escala cuando crezcas.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/mes</span></div><p class=\"text-on-surface-variant text-sm\">Para explorar Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min de doblaje/mes</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 clon de voz</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Procesamiento en tiempo real</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Acceso API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Comenzar gratis</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Más popular</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/mes</span></div><p class=\"text-on-surface-variant text-sm\">Para creadores profesionales</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 horas de doblaje/mes</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Todos los 50+ idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 clones de voz</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Procesamiento en tiempo real</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Acceso API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Iniciar prueba Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/mes</span></div><p class=\"text-on-surface-variant text-sm\">Para estudios y equipos grandes</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Doblaje ilimitado</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Todos los 50+ idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Clones ilimitados</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Procesamiento en tiempo real</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Acceso API completo</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Contactar ventas</a>"
+        },
+        "cta": {
+          "title": "¿Listo para llegar al mundo?",
+          "description": "Únete a más de 10,000 creadores que usan Multiva.AI para llegar a audiencias globales.",
+          "button": "Comenzar gratis"
+        },
+        "footer": {
+          "description": "El motor de voz con IA más avanzado del mundo para creadores y empresas globales.",
+          "copyright": "© 2026 Multiva.AI. Todos los derechos reservados.",
+          "productTitle": "Producto",
+          "companyTitle": "Empresa",
+          "connectTitle": "Conectar",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Laboratorio de voz</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Plantillas</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Acceso API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Seguridad</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Misión</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Carreras</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Legal</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Privacidad</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Soporte</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Iniciar sesión",
+        "leftFeature1Title": "Localización instantánea",
+        "leftFeature1Desc": "Traduce contenido a más de 40 idiomas manteniendo el tono.",
+        "leftFeature2Title": "Clonación de voz neural",
+        "leftFeature2Desc": "Replica perfectamente tu voz original en cualquier idioma de destino.",
+        "leftFeature3Title": "Sincronización labial con IA",
+        "leftFeature3Desc": "Alineación automática del movimiento de labios para resultados naturales.",
+        "heading": "Bienvenido de nuevo",
+        "subheading": "Continúa tu viaje creativo con Multiva.AI.",
+        "emailLabel": "Correo electrónico",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Introduce un correo válido.",
+        "passwordLabel": "Contraseña",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "passwordError": "La contraseña debe tener al menos 6 caracteres.",
+        "rememberMe": "Mantener mi sesión por 30 días",
+        "loginButton": "Entrar",
+        "continueWith": "O continúa con",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "¿No tienes una cuenta?",
+        "createAccount": "Crear cuenta gratis"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Mi perfil",
+        "sidebar": {
+          "brand": "Espacio de trabajo",
+          "tagline": "Motor de Voz con IA",
+          "newProject": "Nuevo proyecto",
+          "projects": "Proyectos",
+          "clones": "Clones",
+          "voiceLab": "Laboratorio de voz",
+          "templates": "Plantillas",
+          "profile": "Perfil",
+          "settings": "Configuración",
+          "goPro": "Hazte Pro",
+          "unlockFullAccess": "Desbloquea acceso completo"
+        },
+        "heading": "Mi perfil",
+        "editProfile": "Editar perfil",
+        "quickAction": "Nuevo proyecto",
+        "details": {
+          "fullName": "Nombre completo",
+          "email": "Correo",
+          "username": "Usuario",
+          "timezone": "Zona horaria",
+          "interfaceLanguage": "Idioma de la interfaz",
+          "memberSince": "Miembro desde"
+        },
+        "history": {
+          "title": "Historial de generación",
+          "subtitle": "Todos tus videos doblados con IA en un solo lugar.",
+          "searchPlaceholder": "Buscar videos…",
+          "filterAll": "Todos",
+          "filterDone": "Listos",
+          "filterProcessing": "Procesando",
+          "filterFailed": "Fallidos",
+          "statusDone": "Listo",
+          "statusProcessing": "Procesando",
+          "statusFailed": "Fallido"
+        },
+        "modal": {
+          "title": "Editar perfil",
+          "fullName": "Nombre completo",
+          "email": "Correo electrónico",
+          "username": "Usuario",
+          "timezone": "Zona horaria",
+          "cancel": "Cancelar",
+          "saveChanges": "Guardar cambios"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Panel del Motor de Voz con IA",
+        "sidebar": {
+          "brand": "Espacio de trabajo",
+          "tagline": "Motor de Voz con IA",
+          "newProject": "Nuevo proyecto",
+          "projects": "Proyectos",
+          "clones": "Clones",
+          "voiceLab": "Laboratorio de voz",
+          "templates": "Plantillas",
+          "settings": "Configuración",
+          "profile": "Perfil"
+        },
+        "status": {
+          "idle": "En espera",
+          "uploading": "Subiendo",
+          "cloning": "Clonando",
+          "translating": "Traduciendo",
+          "rendering": "Renderizando",
+          "done": "Hecho"
+        },
+        "source": {
+          "title": "Video de origen",
+          "dropTitle": "Arrastra tu video aquí para empezar",
+          "dropSubtitle": "MP4, MOV o WEBM (máx. 1MB)",
+          "browseFiles": "Explorar archivos",
+          "originalLanguage": "Idioma original",
+          "targetLanguage": "Idioma destino",
+          "startDubbing": "Iniciar doblaje"
+        },
+        "output": {
+          "title": "Salida doblada",
+          "processingTitle": "Sintetizando textura de voz",
+          "processingEta": "Tiempo estimado: 14s",
+          "translatedScript": "Guion traducido",
+          "editScript": "Editar guion",
+          "scriptPlaceholder": "La generación del guion está en progreso...",
+          "downloadVideo": "Descargar video",
+          "share": "Compartir"
+        },
+        "toast": {
+          "title": "Clon de voz listo",
+          "description": "El perfil de voz \"Alex Narrator\" ha sido optimizado."
+        }
+      }
+    },
+    "fr": {
+      "languageLabel": "Français",
+      "index": {
+        "metaTitle": "Multiva.AI — Moteur vocal IA",
+        "nav": {
+          "home": "Accueil",
+          "mission": "Mission",
+          "features": "Fonctionnalités",
+          "pricing": "Tarifs",
+          "demo": "Démo",
+          "login": "Connexion"
+        },
+        "interfaceLanguage": "Langue de l’interface",
+        "hero": {
+          "badge": "Clonage vocal par IA",
+          "title": "Votre voix.<br>Chaque langue.",
+          "subtitle": "Clonez votre voix en quelques secondes. Doublez votre contenu dans plus de 50 langues avec émotion et précision.",
+          "primaryCta": "Commencer gratuitement",
+          "secondaryCta": "Voir la démo"
+        },
+        "mission": {
+          "title": "Briser les barrières linguistiques — <span class=\"text-tertiary\">une voix</span> à la fois.",
+          "description": "Nous pensons qu’un grand récit ne devrait jamais être limité à une seule langue. Multiva.AI vous aide à sonner naturellement partout.",
+          "languages": "Langues",
+          "accuracy": "Précision",
+          "videos": "Vidéos doublées"
+        },
+        "features": {
+          "title": "Une qualité audio inégalée",
+          "subtitle": "Les outils nécessaires pour développer votre contenu à l’échelle mondiale.",
+          "voiceCloningTitle": "Clonage vocal",
+          "voiceCloningDesc": "Clonez n’importe quelle voix en 30 secondes tout en préservant le ton et l’émotion.",
+          "multilingualTitle": "Doublage multilingue",
+          "multilingualDesc": "Traduisez et synchronisez automatiquement votre contenu dans de nombreuses langues.",
+          "exportTitle": "Export instantané",
+          "exportDesc": "Téléchargez un résultat haute qualité optimisé pour YouTube, TikTok, les cours et plus encore."
+        },
+        "howItWorks": {
+          "title": "Comment ça marche",
+          "step1Title": "Importer",
+          "step1Desc": "Importez votre fichier vidéo ou audio.",
+          "step2Title": "Choisir",
+          "step2Desc": "Choisissez la langue et les réglages de voix.",
+          "step3Title": "Télécharger",
+          "step3Desc": "Récupérez votre contenu final doublé en quelques minutes.",
+          "button": "Ouvrir l’espace de travail"
+        },
+        "testimonials": {
+          "title": "Adopté par les créateurs",
+          "quote1": "\"Le clonage vocal sonne vraiment comme l’orateur d’origine.\"",
+          "quote2": "\"Nous avons lancé notre cours en 12 langues sans alourdir notre workflow.\"",
+          "quote3": "\"Le premier outil IA que nous avons utilisé qui comprend vraiment l’émotion.\""
+        },
+        "pricing": {
+          "title": "Des tarifs simples et transparents.",
+          "subtitle": "Commencez gratuitement. Évoluez à votre rythme.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/mois</span></div><p class=\"text-on-surface-variant text-sm\">Pour découvrir Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min de doublage/mois</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 langues</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 clone vocal</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Traitement en temps réel</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Accès API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Commencer gratuitement</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Le plus populaire</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/mois</span></div><p class=\"text-on-surface-variant text-sm\">Pour les créateurs exigeants</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 heures de doublage/mois</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Toutes les 50+ langues</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 clones vocaux</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Traitement en temps réel</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Accès API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Lancer l’essai Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/mois</span></div><p class=\"text-on-surface-variant text-sm\">Pour les studios et grandes équipes</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Doublage illimité</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Toutes les 50+ langues</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Clones illimités</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Traitement en temps réel</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Accès API complet</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Contacter l’équipe commerciale</a>"
+        },
+        "cta": {
+          "title": "Prêt à vous lancer à l’international ?",
+          "description": "Rejoignez plus de 10 000 créateurs qui utilisent Multiva.AI pour toucher des audiences partout dans le monde.",
+          "button": "Commencer"
+        },
+        "footer": {
+          "description": "Le moteur vocal IA le plus avancé au monde pour les créateurs et entreprises internationaux.",
+          "copyright": "© 2026 Multiva.AI. Tous droits réservés.",
+          "productTitle": "Produit",
+          "companyTitle": "Entreprise",
+          "connectTitle": "Contact",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Modèles</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Accès API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Sécurité</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Mission</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Carrières</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Mentions légales</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Confidentialité</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Support</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Connexion",
+        "leftFeature1Title": "Localisation instantanée",
+        "leftFeature1Desc": "Traduisez votre contenu en plus de 40 langues tout en conservant le ton.",
+        "leftFeature2Title": "Clonage vocal neuronal",
+        "leftFeature2Desc": "Reproduisez parfaitement votre voix originale dans n’importe quelle langue cible.",
+        "leftFeature3Title": "Synchronisation labiale IA",
+        "leftFeature3Desc": "Alignement automatique des mouvements de bouche pour un résultat naturel.",
+        "heading": "Bon retour",
+        "subheading": "Poursuivez votre aventure créative avec Multiva.AI.",
+        "emailLabel": "Adresse e-mail",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Veuillez saisir une adresse e-mail valide.",
+        "passwordLabel": "Mot de passe",
+        "forgotPassword": "Mot de passe oublié ?",
+        "passwordError": "Le mot de passe doit comporter au moins 6 caractères.",
+        "rememberMe": "Rester connecté pendant 30 jours",
+        "loginButton": "Connexion",
+        "continueWith": "Ou continuer avec",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Vous n’avez pas de compte ?",
+        "createAccount": "Créer un compte gratuit"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Mon profil",
+        "sidebar": {
+          "brand": "Espace de travail",
+          "tagline": "Moteur vocal IA",
+          "newProject": "Nouveau projet",
+          "projects": "Projets",
+          "clones": "Clones",
+          "voiceLab": "Voice Lab",
+          "templates": "Modèles",
+          "profile": "Profil",
+          "settings": "Paramètres",
+          "goPro": "Passer Pro",
+          "unlockFullAccess": "Déverrouiller l’accès complet"
+        },
+        "heading": "Mon profil",
+        "editProfile": "Modifier le profil",
+        "quickAction": "Nouveau projet",
+        "details": {
+          "fullName": "Nom complet",
+          "email": "E-mail",
+          "username": "Nom d’utilisateur",
+          "timezone": "Fuseau horaire",
+          "interfaceLanguage": "Langue de l’interface",
+          "memberSince": "Membre depuis"
+        },
+        "history": {
+          "title": "Historique de génération",
+          "subtitle": "Toutes vos vidéos doublées par IA au même endroit.",
+          "searchPlaceholder": "Rechercher des vidéos…",
+          "filterAll": "Tous",
+          "filterDone": "Terminés",
+          "filterProcessing": "En cours",
+          "filterFailed": "Échoués",
+          "statusDone": "Terminé",
+          "statusProcessing": "En cours",
+          "statusFailed": "Échoué"
+        },
+        "modal": {
+          "title": "Modifier le profil",
+          "fullName": "Nom complet",
+          "email": "Adresse e-mail",
+          "username": "Nom d’utilisateur",
+          "timezone": "Fuseau horaire",
+          "cancel": "Annuler",
+          "saveChanges": "Enregistrer les modifications"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Tableau de bord du moteur vocal IA",
+        "sidebar": {
+          "brand": "Espace de travail",
+          "tagline": "Moteur vocal IA",
+          "newProject": "Nouveau projet",
+          "projects": "Projets",
+          "clones": "Clones",
+          "voiceLab": "Voice Lab",
+          "templates": "Modèles",
+          "settings": "Paramètres",
+          "profile": "Profil"
+        },
+        "status": {
+          "idle": "Inactif",
+          "uploading": "Téléversement",
+          "cloning": "Clonage",
+          "translating": "Traduction",
+          "rendering": "Rendu",
+          "done": "Terminé"
+        },
+        "source": {
+          "title": "Vidéo source",
+          "dropTitle": "Glissez votre vidéo ici pour commencer",
+          "dropSubtitle": "MP4, MOV ou WEBM (1 Mo max)",
+          "browseFiles": "Parcourir les fichiers",
+          "originalLanguage": "Langue d’origine",
+          "targetLanguage": "Langue cible",
+          "startDubbing": "Lancer le doublage"
+        },
+        "output": {
+          "title": "Sortie doublée",
+          "processingTitle": "Synthèse de la texture vocale",
+          "processingEta": "Temps estimé : 14 s",
+          "translatedScript": "Script traduit",
+          "editScript": "Modifier le script",
+          "scriptPlaceholder": "Génération du script en cours...",
+          "downloadVideo": "Télécharger la vidéo",
+          "share": "Partager"
+        },
+        "toast": {
+          "title": "Clone vocal prêt",
+          "description": "Le profil vocal « Alex Narrator » a été optimisé."
+        }
+      }
+    },
+    "ja": {
+      "languageLabel": "日本語",
+      "index": {
+        "metaTitle": "Multiva.AI — AI音声エンジン",
+        "nav": {
+          "home": "ホーム",
+          "mission": "ミッション",
+          "features": "機能",
+          "pricing": "料金",
+          "demo": "デモ",
+          "login": "ログイン"
+        },
+        "interfaceLanguage": "表示言語",
+        "hero": {
+          "badge": "AI音声クローン",
+          "title": "あなたの声。<br>あらゆる言語へ。",
+          "subtitle": "数秒であなた独自の声をクローン。50以上の言語へ感情と精度を保ったまま吹き替えできます。",
+          "primaryCta": "無料で始める",
+          "secondaryCta": "デモを見る"
+        },
+        "mission": {
+          "title": "言語の壁を越える — <span class=\"text-tertiary\">一つの声</span>で。",
+          "description": "優れたストーリーは一つの言語に縛られるべきではありません。Multiva.AI は世界中で自然に伝わる音声を実現します。",
+          "languages": "言語数",
+          "accuracy": "精度",
+          "videos": "吹き替え動画"
+        },
+        "features": {
+          "title": "圧倒的な音声品質",
+          "subtitle": "コンテンツを世界へ広げるための必要なツールをすべて搭載。",
+          "voiceCloningTitle": "音声クローン",
+          "voiceCloningDesc": "30秒で任意の声をクローンし、トーンと感情を維持します。",
+          "multilingualTitle": "多言語吹き替え",
+          "multilingualDesc": "多くの言語への翻訳と同期を自動で行います。",
+          "exportTitle": "即時エクスポート",
+          "exportDesc": "YouTube、TikTok、講座など向けに最適化された高品質出力をダウンロードできます。"
+        },
+        "howItWorks": {
+          "title": "使い方",
+          "step1Title": "アップロード",
+          "step1Desc": "動画または音声ファイルをアップロードします。",
+          "step2Title": "選択",
+          "step2Desc": "言語と音声設定を選びます。",
+          "step3Title": "ダウンロード",
+          "step3Desc": "数分で最終的な吹き替えコンテンツを取得できます。",
+          "button": "ワークスペースを開く"
+        },
+        "testimonials": {
+          "title": "クリエイターに信頼されています",
+          "quote1": "「音声クローンは本物の話者そのものに聞こえます。」",
+          "quote2": "「12言語で講座を公開でき、ワークフローもそのままでした。」",
+          "quote3": "「感情を本当に理解していると感じた最初のAIツールです。」"
+        },
+        "pricing": {
+          "title": "シンプルで明快な料金。",
+          "subtitle": "無料で開始し、成長に合わせて拡張できます。",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/月</span></div><p class=\"text-on-surface-variant text-sm\">Multiva.AI を試す方向け</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>月10分の吹き替え</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5言語</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>音声クローン1件</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>リアルタイム処理</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>APIアクセス</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">無料で始める</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">人気プラン</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/月</span></div><p class=\"text-on-surface-variant text-sm\">本格的なクリエイター向け</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>月5時間の吹き替え</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>50以上の全言語</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>音声クローン10件</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>リアルタイム処理</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>APIアクセス</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Proトライアルを開始</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/月</span></div><p class=\"text-on-surface-variant text-sm\">スタジオや大規模チーム向け</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>無制限の吹き替え</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>50以上の全言語</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>無制限のクローン</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>リアルタイム処理</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>完全なAPIアクセス</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">営業に連絡</a>"
+        },
+        "cta": {
+          "title": "世界へ広げる準備はできましたか？",
+          "description": "Multiva.AI を使って世界中の視聴者に届ける 10,000 人以上のクリエイターに参加しましょう。",
+          "button": "無料で始める"
+        },
+        "footer": {
+          "description": "世界中のクリエイターと企業のための、最先端のAI音声エンジン。",
+          "copyright": "© 2026 Multiva.AI. All rights reserved.",
+          "productTitle": "製品",
+          "companyTitle": "会社",
+          "connectTitle": "つながる",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">テンプレート</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">APIアクセス</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">セキュリティ</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">ミッション</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">採用情報</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">法務</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">プライバシー</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">サポート</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - ログイン",
+        "leftFeature1Title": "即時ローカライズ",
+        "leftFeature1Desc": "トーンを保ったまま40以上の言語に翻訳します。",
+        "leftFeature2Title": "ニューラル音声クローン",
+        "leftFeature2Desc": "元の声をあらゆる対象言語で自然に再現します。",
+        "leftFeature3Title": "AIリップシンク",
+        "leftFeature3Desc": "自然な結果のために口の動きを自動で調整します。",
+        "heading": "おかえりなさい",
+        "subheading": "Multiva.AI であなたのクリエイティブな制作を続けましょう。",
+        "emailLabel": "メールアドレス",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "有効なメールアドレスを入力してください。",
+        "passwordLabel": "パスワード",
+        "forgotPassword": "パスワードをお忘れですか？",
+        "passwordError": "パスワードは6文字以上である必要があります。",
+        "rememberMe": "30日間サインインしたままにする",
+        "loginButton": "ログイン",
+        "continueWith": "または次で続行",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "アカウントをお持ちでないですか？",
+        "createAccount": "無料アカウントを作成"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — マイプロフィール",
+        "sidebar": {
+          "brand": "ワークスペース",
+          "tagline": "AI音声エンジン",
+          "newProject": "新規プロジェクト",
+          "projects": "プロジェクト",
+          "clones": "クローン",
+          "voiceLab": "Voice Lab",
+          "templates": "テンプレート",
+          "profile": "プロフィール",
+          "settings": "設定",
+          "goPro": "Go Pro",
+          "unlockFullAccess": "フルアクセスを解除"
+        },
+        "heading": "マイプロフィール",
+        "editProfile": "プロフィールを編集",
+        "quickAction": "新規プロジェクト",
+        "details": {
+          "fullName": "氏名",
+          "email": "メール",
+          "username": "ユーザー名",
+          "timezone": "タイムゾーン",
+          "interfaceLanguage": "表示言語",
+          "memberSince": "登録時期"
+        },
+        "history": {
+          "title": "生成履歴",
+          "subtitle": "AI吹き替え動画をすべて一か所で確認できます。",
+          "searchPlaceholder": "動画を検索…",
+          "filterAll": "すべて",
+          "filterDone": "完了",
+          "filterProcessing": "処理中",
+          "filterFailed": "失敗",
+          "statusDone": "完了",
+          "statusProcessing": "処理中",
+          "statusFailed": "失敗"
+        },
+        "modal": {
+          "title": "プロフィールを編集",
+          "fullName": "氏名",
+          "email": "メールアドレス",
+          "username": "ユーザー名",
+          "timezone": "タイムゾーン",
+          "cancel": "キャンセル",
+          "saveChanges": "変更を保存"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | AI音声エンジンダッシュボード",
+        "sidebar": {
+          "brand": "ワークスペース",
+          "tagline": "AI音声エンジン",
+          "newProject": "新規プロジェクト",
+          "projects": "プロジェクト",
+          "clones": "クローン",
+          "voiceLab": "Voice Lab",
+          "templates": "テンプレート",
+          "settings": "設定",
+          "profile": "プロフィール"
+        },
+        "status": {
+          "idle": "待機中",
+          "uploading": "アップロード中",
+          "cloning": "クローン中",
+          "translating": "翻訳中",
+          "rendering": "レンダリング中",
+          "done": "完了"
+        },
+        "source": {
+          "title": "元の動画",
+          "dropTitle": "ここに動画をドラッグして開始",
+          "dropSubtitle": "MP4、MOV、WEBM（最大1MB）",
+          "browseFiles": "ファイルを選択",
+          "originalLanguage": "元の言語",
+          "targetLanguage": "対象言語",
+          "startDubbing": "吹き替え開始"
+        },
+        "output": {
+          "title": "吹き替え出力",
+          "processingTitle": "音声テクスチャを合成中",
+          "processingEta": "推定時間: 14秒",
+          "translatedScript": "翻訳済みスクリプト",
+          "editScript": "スクリプトを編集",
+          "scriptPlaceholder": "スクリプト生成を実行中...",
+          "downloadVideo": "動画をダウンロード",
+          "share": "共有"
+        },
+        "toast": {
+          "title": "音声クローンの準備完了",
+          "description": "「Alex Narrator」音声プロファイルが最適化されました。"
+        }
+      }
+    },
+    "de": {
+      "languageLabel": "Deutsch",
+      "index": {
+        "metaTitle": "Multiva.AI — KI-Sprachengine",
+        "nav": {
+          "home": "Start",
+          "mission": "Mission",
+          "features": "Funktionen",
+          "pricing": "Preise",
+          "demo": "Demo",
+          "login": "Anmelden"
+        },
+        "interfaceLanguage": "Oberflächensprache",
+        "hero": {
+          "badge": "KI-gestütztes Voice Cloning",
+          "title": "Deine Stimme.<br>Jede Sprache.",
+          "subtitle": "Kopiere deine einzigartige Stimme in Sekunden. Synchronisiere Inhalte in über 50 Sprachen mit Emotion und Präzision.",
+          "primaryCta": "Kostenlos starten",
+          "secondaryCta": "Demo ansehen"
+        },
+        "mission": {
+          "title": "Sprachbarrieren überwinden — <span class=\"text-tertiary\">eine Stimme</span> nach der anderen.",
+          "description": "Großartiges Storytelling sollte nicht auf eine Sprache beschränkt sein. Multiva.AI lässt dich weltweit natürlich klingen.",
+          "languages": "Sprachen",
+          "accuracy": "Genauigkeit",
+          "videos": "Synchronisierte Videos"
+        },
+        "features": {
+          "title": "Unübertroffene Audioqualität",
+          "subtitle": "Die Werkzeuge, die du brauchst, um Inhalte global zu skalieren.",
+          "voiceCloningTitle": "Voice Cloning",
+          "voiceCloningDesc": "Kopiere jede Stimme in nur 30 Sekunden und behalte Ton und Emotion bei.",
+          "multilingualTitle": "Mehrsprachige Synchronisation",
+          "multilingualDesc": "Übersetze und synchronisiere Inhalte automatisch in viele Zielsprachen.",
+          "exportTitle": "Sofortiger Export",
+          "exportDesc": "Lade hochwertige Ergebnisse herunter, optimiert für YouTube, TikTok, Kurse und mehr."
+        },
+        "howItWorks": {
+          "title": "So funktioniert es",
+          "step1Title": "Hochladen",
+          "step1Desc": "Lade deine Video- oder Audiodatei hoch.",
+          "step2Title": "Auswählen",
+          "step2Desc": "Wähle Sprache und Stimmeinstellungen.",
+          "step3Title": "Herunterladen",
+          "step3Desc": "Erhalte deinen fertigen synchronisierten Inhalt in wenigen Minuten.",
+          "button": "Workspace öffnen"
+        },
+        "testimonials": {
+          "title": "Von Creators geschätzt",
+          "quote1": "\"Das Voice Cloning klingt genauso wie der echte Sprecher.\"",
+          "quote2": "\"Wir haben unseren Kurs in 12 Sprachen veröffentlicht und den Workflow beibehalten.\"",
+          "quote3": "\"Das erste KI-Tool, das Emotionen wirklich versteht.\""
+        },
+        "pricing": {
+          "title": "Einfache, transparente Preise.",
+          "subtitle": "Starte kostenlos. Skaliere mit deinem Wachstum.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/Monat</span></div><p class=\"text-on-surface-variant text-sm\">Zum Kennenlernen von Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 Min. Synchronisation/Monat</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 Sprachen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 Stimmenklon</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Echtzeitverarbeitung</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API-Zugriff</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Kostenlos starten</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Am beliebtesten</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/Monat</span></div><p class=\"text-on-surface-variant text-sm\">Für ambitionierte Content Creator</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 Stunden Synchronisation/Monat</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Alle 50+ Sprachen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 Stimmenklone</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Echtzeitverarbeitung</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API-Zugriff</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Pro-Test starten</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/Monat</span></div><p class=\"text-on-surface-variant text-sm\">Für Studios und große Teams</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Unbegrenzte Synchronisation</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Alle 50+ Sprachen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Unbegrenzte Klone</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Echtzeitverarbeitung</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Voller API-Zugriff</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Vertrieb kontaktieren</a>"
+        },
+        "cta": {
+          "title": "Bereit, global zu wachsen?",
+          "description": "Werde Teil von über 10.000 Creators, die mit Multiva.AI weltweit Reichweite aufbauen.",
+          "button": "Kostenlos starten"
+        },
+        "footer": {
+          "description": "Die fortschrittlichste KI-Sprachengine der Welt für globale Creator und Unternehmen.",
+          "copyright": "© 2026 Multiva.AI. Alle Rechte vorbehalten.",
+          "productTitle": "Produkt",
+          "companyTitle": "Unternehmen",
+          "connectTitle": "Kontakt",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Vorlagen</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API-Zugriff</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Sicherheit</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Mission</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Karriere</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Rechtliches</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Datenschutz</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Support</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Anmelden",
+        "leftFeature1Title": "Sofortige Lokalisierung",
+        "leftFeature1Desc": "Übersetze Inhalte in über 40 Sprachen und behalte den Ton bei.",
+        "leftFeature2Title": "Neuronales Voice Cloning",
+        "leftFeature2Desc": "Repliziere deine ursprüngliche Stimme in jeder Zielsprache.",
+        "leftFeature3Title": "KI-Lippensynchronisation",
+        "leftFeature3Desc": "Automatische Mundbewegungsanpassung für natürliche Ergebnisse.",
+        "heading": "Willkommen zurück",
+        "subheading": "Setze deine kreative Reise mit Multiva.AI fort.",
+        "emailLabel": "E-Mail-Adresse",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "passwordLabel": "Passwort",
+        "forgotPassword": "Passwort vergessen?",
+        "passwordError": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+        "rememberMe": "Für 30 Tage angemeldet bleiben",
+        "loginButton": "Anmelden",
+        "continueWith": "Oder fortfahren mit",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Noch kein Konto?",
+        "createAccount": "Kostenloses Konto erstellen"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Mein Profil",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "KI-Sprachengine",
+          "newProject": "Neues Projekt",
+          "projects": "Projekte",
+          "clones": "Klone",
+          "voiceLab": "Voice Lab",
+          "templates": "Vorlagen",
+          "profile": "Profil",
+          "settings": "Einstellungen",
+          "goPro": "Go Pro",
+          "unlockFullAccess": "Vollen Zugriff freischalten"
+        },
+        "heading": "Mein Profil",
+        "editProfile": "Profil bearbeiten",
+        "quickAction": "Neues Projekt",
+        "details": {
+          "fullName": "Vollständiger Name",
+          "email": "E-Mail",
+          "username": "Benutzername",
+          "timezone": "Zeitzone",
+          "interfaceLanguage": "Oberflächensprache",
+          "memberSince": "Mitglied seit"
+        },
+        "history": {
+          "title": "Verlauf der Generierungen",
+          "subtitle": "Alle deine KI-synchronisierten Videos an einem Ort.",
+          "searchPlaceholder": "Videos suchen…",
+          "filterAll": "Alle",
+          "filterDone": "Fertig",
+          "filterProcessing": "In Bearbeitung",
+          "filterFailed": "Fehlgeschlagen",
+          "statusDone": "Fertig",
+          "statusProcessing": "In Bearbeitung",
+          "statusFailed": "Fehlgeschlagen"
+        },
+        "modal": {
+          "title": "Profil bearbeiten",
+          "fullName": "Vollständiger Name",
+          "email": "E-Mail-Adresse",
+          "username": "Benutzername",
+          "timezone": "Zeitzone",
+          "cancel": "Abbrechen",
+          "saveChanges": "Änderungen speichern"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Dashboard der KI-Sprachengine",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "KI-Sprachengine",
+          "newProject": "Neues Projekt",
+          "projects": "Projekte",
+          "clones": "Klone",
+          "voiceLab": "Voice Lab",
+          "templates": "Vorlagen",
+          "settings": "Einstellungen",
+          "profile": "Profil"
+        },
+        "status": {
+          "idle": "Leerlauf",
+          "uploading": "Wird hochgeladen",
+          "cloning": "Klonen",
+          "translating": "Übersetzen",
+          "rendering": "Rendern",
+          "done": "Fertig"
+        },
+        "source": {
+          "title": "Quellvideo",
+          "dropTitle": "Video hierher ziehen, um zu starten",
+          "dropSubtitle": "MP4, MOV oder WEBM (max. 1MB)",
+          "browseFiles": "Dateien auswählen",
+          "originalLanguage": "Originalsprache",
+          "targetLanguage": "Zielsprache",
+          "startDubbing": "Synchronisation starten"
+        },
+        "output": {
+          "title": "Synchronisierte Ausgabe",
+          "processingTitle": "Stimmentextur wird synthetisiert",
+          "processingEta": "Geschätzte Zeit: 14s",
+          "translatedScript": "Übersetztes Skript",
+          "editScript": "Skript bearbeiten",
+          "scriptPlaceholder": "Skriptgenerierung läuft...",
+          "downloadVideo": "Video herunterladen",
+          "share": "Teilen"
+        },
+        "toast": {
+          "title": "Stimmenklon bereit",
+          "description": "Das Sprachprofil „Alex Narrator“ wurde optimiert."
+        }
+      }
+    },
+    "ar": {
+      "languageLabel": "العربية",
+      "index": {
+        "metaTitle": "Multiva.AI — محرك صوت بالذكاء الاصطناعي",
+        "nav": {
+          "home": "الرئيسية",
+          "mission": "المهمة",
+          "features": "المميزات",
+          "pricing": "الأسعار",
+          "demo": "عرض توضيحي",
+          "login": "تسجيل الدخول"
+        },
+        "interfaceLanguage": "لغة الواجهة",
+        "hero": {
+          "badge": "استنساخ الصوت بالذكاء الاصطناعي",
+          "title": "صوتك.<br>كل لغة.",
+          "subtitle": "استنسخ صوتك خلال ثوانٍ. دبلج محتواك إلى أكثر من 50 لغة مع الحفاظ على المشاعر والدقة.",
+          "primaryCta": "ابدأ مجانًا",
+          "secondaryCta": "شاهد العرض"
+        },
+        "mission": {
+          "title": "كسر حواجز اللغة — <span class=\"text-tertiary\">صوت واحد</span> في كل مرة.",
+          "description": "نؤمن أن السرد الرائع لا يجب أن يُحصر في لغة واحدة. يساعدك Multiva.AI على الوصول للعالم بصوت طبيعي.",
+          "languages": "اللغات",
+          "accuracy": "الدقة",
+          "videos": "الفيديوهات المدبلجة"
+        },
+        "features": {
+          "title": "جودة صوت لا مثيل لها",
+          "subtitle": "الأدوات التي تحتاجها لتوسيع محتواك عالميًا.",
+          "voiceCloningTitle": "استنساخ الصوت",
+          "voiceCloningDesc": "استنسخ أي صوت خلال 30 ثانية مع الحفاظ على النبرة والإحساس.",
+          "multilingualTitle": "دبلجة متعددة اللغات",
+          "multilingualDesc": "ترجمة ومزامنة محتواك تلقائيًا عبر لغات متعددة.",
+          "exportTitle": "تصدير فوري",
+          "exportDesc": "حمّل نتائج عالية الجودة ومناسبة ليوتيوب وتيك توك والدورات وغير ذلك."
+        },
+        "howItWorks": {
+          "title": "كيف يعمل",
+          "step1Title": "ارفع",
+          "step1Desc": "ارفع ملف الفيديو أو الصوت الخاص بك.",
+          "step2Title": "اختر",
+          "step2Desc": "اختر اللغة وإعدادات الصوت.",
+          "step3Title": "نزّل",
+          "step3Desc": "احصل على المحتوى النهائي المدبلج خلال دقائق.",
+          "button": "افتح مساحة العمل"
+        },
+        "testimonials": {
+          "title": "موثوق من صناع المحتوى",
+          "quote1": "“استنساخ الصوت يبدو مطابقًا تقريبًا للمتحدث الحقيقي.”",
+          "quote2": "“أطلقنا دورتنا بـ12 لغة مع بقاء سير العمل بسيطًا.”",
+          "quote3": "“أول أداة ذكاء اصطناعي شعرنا أنها تفهم المشاعر فعلًا.”"
+        },
+        "pricing": {
+          "title": "أسعار بسيطة وشفافة.",
+          "subtitle": "ابدأ مجانًا ثم توسع مع نموك.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/شهريًا</span></div><p class=\"text-on-surface-variant text-sm\">للبدء مع Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 دقائق دبلجة/شهر</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 لغات</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>استنساخ صوت واحد</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>معالجة فورية</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>وصول API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">ابدأ مجانًا</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">الأكثر شيوعًا</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/شهريًا</span></div><p class=\"text-on-surface-variant text-sm\">لصناع المحتوى الجادين</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 ساعات دبلجة/شهر</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>كل 50+ لغة</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 استنساخات صوت</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>معالجة فورية</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>وصول API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">ابدأ تجربة Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/شهريًا</span></div><p class=\"text-on-surface-variant text-sm\">للاستوديوهات والفرق الكبيرة</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>دبلجة غير محدودة</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>كل 50+ لغة</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>استنساخات غير محدودة</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>معالجة فورية</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>وصول API كامل</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">تواصل مع المبيعات</a>"
+        },
+        "cta": {
+          "title": "هل أنت مستعد للوصول عالميًا؟",
+          "description": "انضم إلى أكثر من 10,000 صانع محتوى يستخدمون Multiva.AI للوصول إلى جماهير حول العالم.",
+          "button": "ابدأ مجانًا"
+        },
+        "footer": {
+          "description": "أكثر محرك صوت بالذكاء الاصطناعي تطورًا في العالم لصناع المحتوى والشركات العالمية.",
+          "copyright": "© 2026 Multiva.AI. جميع الحقوق محفوظة.",
+          "productTitle": "المنتج",
+          "companyTitle": "الشركة",
+          "connectTitle": "تواصل",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">مختبر الصوت</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">القوالب</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">وصول API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">الأمان</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">المهمة</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">الوظائف</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">القانونية</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">الخصوصية</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">الدعم</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - تسجيل الدخول",
+        "leftFeature1Title": "توطين فوري",
+        "leftFeature1Desc": "ترجم المحتوى إلى أكثر من 40 لغة مع الحفاظ على النبرة.",
+        "leftFeature2Title": "استنساخ صوت عصبي",
+        "leftFeature2Desc": "استنسخ صوتك الأصلي بدقة في أي لغة مستهدفة.",
+        "leftFeature3Title": "مزامنة الشفاه بالذكاء الاصطناعي",
+        "leftFeature3Desc": "مطابقة تلقائية لحركة الفم لنتائج طبيعية.",
+        "heading": "مرحبًا بعودتك",
+        "subheading": "واصل رحلتك الإبداعية مع Multiva.AI.",
+        "emailLabel": "البريد الإلكتروني",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "يرجى إدخال بريد إلكتروني صحيح.",
+        "passwordLabel": "كلمة المرور",
+        "forgotPassword": "هل نسيت كلمة المرور؟",
+        "passwordError": "يجب أن تكون كلمة المرور 6 أحرف على الأقل.",
+        "rememberMe": "ابقني مسجلًا لمدة 30 يومًا",
+        "loginButton": "تسجيل الدخول",
+        "continueWith": "أو المتابعة باستخدام",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "ليس لديك حساب؟",
+        "createAccount": "إنشاء حساب مجاني"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — ملفي الشخصي",
+        "sidebar": {
+          "brand": "مساحة العمل",
+          "tagline": "محرك صوت بالذكاء الاصطناعي",
+          "newProject": "مشروع جديد",
+          "projects": "المشاريع",
+          "clones": "النسخ",
+          "voiceLab": "مختبر الصوت",
+          "templates": "القوالب",
+          "profile": "الملف الشخصي",
+          "settings": "الإعدادات",
+          "goPro": "الترقية إلى Pro",
+          "unlockFullAccess": "افتح الوصول الكامل"
+        },
+        "heading": "ملفي الشخصي",
+        "editProfile": "تعديل الملف الشخصي",
+        "quickAction": "مشروع جديد",
+        "details": {
+          "fullName": "الاسم الكامل",
+          "email": "البريد الإلكتروني",
+          "username": "اسم المستخدم",
+          "timezone": "المنطقة الزمنية",
+          "interfaceLanguage": "لغة الواجهة",
+          "memberSince": "عضو منذ"
+        },
+        "history": {
+          "title": "سجل الإنشاءات",
+          "subtitle": "كل فيديوهاتك المدبلجة بالذكاء الاصطناعي في مكان واحد.",
+          "searchPlaceholder": "ابحث في الفيديوهات…",
+          "filterAll": "الكل",
+          "filterDone": "مكتمل",
+          "filterProcessing": "قيد المعالجة",
+          "filterFailed": "فشل",
+          "statusDone": "مكتمل",
+          "statusProcessing": "قيد المعالجة",
+          "statusFailed": "فشل"
+        },
+        "modal": {
+          "title": "تعديل الملف الشخصي",
+          "fullName": "الاسم الكامل",
+          "email": "البريد الإلكتروني",
+          "username": "اسم المستخدم",
+          "timezone": "المنطقة الزمنية",
+          "cancel": "إلغاء",
+          "saveChanges": "حفظ التغييرات"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | لوحة تحكم محرك الصوت بالذكاء الاصطناعي",
+        "sidebar": {
+          "brand": "مساحة العمل",
+          "tagline": "محرك صوت بالذكاء الاصطناعي",
+          "newProject": "مشروع جديد",
+          "projects": "المشاريع",
+          "clones": "النسخ",
+          "voiceLab": "مختبر الصوت",
+          "templates": "القوالب",
+          "settings": "الإعدادات",
+          "profile": "الملف الشخصي"
+        },
+        "status": {
+          "idle": "خامل",
+          "uploading": "جارٍ الرفع",
+          "cloning": "جارٍ الاستنساخ",
+          "translating": "جارٍ الترجمة",
+          "rendering": "جارٍ الإخراج",
+          "done": "مكتمل"
+        },
+        "source": {
+          "title": "الفيديو الأصلي",
+          "dropTitle": "اسحب الفيديو هنا للبدء",
+          "dropSubtitle": "MP4 أو MOV أو WEBM (الحد الأقصى 1MB)",
+          "browseFiles": "تصفح الملفات",
+          "originalLanguage": "اللغة الأصلية",
+          "targetLanguage": "اللغة المستهدفة",
+          "startDubbing": "ابدأ الدبلجة"
+        },
+        "output": {
+          "title": "المخرجات المدبلجة",
+          "processingTitle": "جارٍ تركيب نسيج الصوت",
+          "processingEta": "الوقت المتوقع: 14 ثانية",
+          "translatedScript": "النص المترجم",
+          "editScript": "تعديل النص",
+          "scriptPlaceholder": "جارٍ إنشاء النص...",
+          "downloadVideo": "تنزيل الفيديو",
+          "share": "مشاركة"
+        },
+        "toast": {
+          "title": "استنساخ الصوت جاهز",
+          "description": "تم تحسين ملف الصوت \"Alex Narrator\"."
+        }
+      }
+    },
+    "tr": {
+      "languageLabel": "Türkçe",
+      "index": {
+        "metaTitle": "Multiva.AI — Yapay Zeka Ses Motoru",
+        "nav": {
+          "home": "Ana Sayfa",
+          "mission": "Misyon",
+          "features": "Özellikler",
+          "pricing": "Fiyatlandırma",
+          "demo": "Demo",
+          "login": "Giriş"
+        },
+        "interfaceLanguage": "Arayüz Dili",
+        "hero": {
+          "badge": "Yapay Zeka Destekli Ses Klonlama",
+          "title": "Sesiniz.<br>Her Dil.",
+          "subtitle": "Benzersiz sesinizi saniyeler içinde klonlayın. İçeriğinizi 50+ dile duygu ve doğrulukla dublajlayın.",
+          "primaryCta": "Ücretsiz Başla",
+          "secondaryCta": "Demoyu İzle"
+        },
+        "mission": {
+          "title": "Dil engellerini aşmak — <span class=\"text-tertiary\">tek bir sesle</span>.",
+          "description": "Harika hikaye anlatımı tek bir dille sınırlı kalmamalı. Multiva.AI dünyanın her yerinde doğal duyulmanıza yardımcı olur.",
+          "languages": "Diller",
+          "accuracy": "Doğruluk",
+          "videos": "Dublajlanan Videolar"
+        },
+        "features": {
+          "title": "Eşsiz Ses Kalitesi",
+          "subtitle": "İçeriğinizi global ölçekte büyütmek için ihtiyacınız olan araçlar.",
+          "voiceCloningTitle": "Ses Klonlama",
+          "voiceCloningDesc": "Herhangi bir sesi 30 saniyede klonlayın; ton ve duyguyu koruyun.",
+          "multilingualTitle": "Çok Dilli Dublaj",
+          "multilingualDesc": "İçeriğinizi birçok hedef dile otomatik olarak çevirin ve senkronize edin.",
+          "exportTitle": "Anında Dışa Aktarım",
+          "exportDesc": "YouTube, TikTok, kurslar ve daha fazlası için optimize edilmiş yüksek kaliteli çıktıyı indirin."
+        },
+        "howItWorks": {
+          "title": "Nasıl Çalışır",
+          "step1Title": "Yükle",
+          "step1Desc": "Video veya ses dosyanızı yükleyin.",
+          "step2Title": "Seç",
+          "step2Desc": "Dil ve ses ayarlarını seçin.",
+          "step3Title": "İndir",
+          "step3Desc": "Son dublajlı içeriğinizi dakikalar içinde alın.",
+          "button": "Çalışma Alanını Aç"
+        },
+        "testimonials": {
+          "title": "İçerik Üreticilerinin Güvendiği Platform",
+          "quote1": "\"Ses klonlama gerçek konuşmacı gibi geliyor.\"",
+          "quote2": "\"Kursumuzu 12 dilde yayınladık ve iş akışı bozulmadı.\"",
+          "quote3": "\"Duyguyu gerçekten anlayan ilk yapay zeka aracı.\""
+        },
+        "pricing": {
+          "title": "Basit ve şeffaf fiyatlandırma.",
+          "subtitle": "Ücretsiz başlayın. Büyüdükçe ölçekleyin.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Başlangıç</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/ay</span></div><p class=\"text-on-surface-variant text-sm\">Multiva.AI'yi keşfetmek için</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Ayda 10 dk dublaj</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 dil</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 ses klonu</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Gerçek zamanlı işleme</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API erişimi</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Ücretsiz Başla</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">En Popüler</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/ay</span></div><p class=\"text-on-surface-variant text-sm\">Ciddi içerik üreticileri için</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Ayda 5 saat dublaj</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Tüm 50+ dil</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 ses klonu</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Gerçek zamanlı işleme</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API erişimi</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Pro Denemesini Başlat</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Kurumsal</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/ay</span></div><p class=\"text-on-surface-variant text-sm\">Stüdyolar ve büyük ekipler için</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Sınırsız dublaj</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Tüm 50+ dil</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Sınırsız klon</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Gerçek zamanlı işleme</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Tam API erişimi</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Satış Ekibiyle İletişime Geç</a>"
+        },
+        "cta": {
+          "title": "Global olmaya hazır mısınız?",
+          "description": "Multiva.AI kullanarak dünyanın dört bir yanındaki kitlelere ulaşan 10.000+ içerik üreticisine katılın.",
+          "button": "Ücretsiz Başla"
+        },
+        "footer": {
+          "description": "Global içerik üreticileri ve şirketler için dünyanın en gelişmiş yapay zeka ses motoru.",
+          "copyright": "© 2026 Multiva.AI. Tüm hakları saklıdır.",
+          "productTitle": "Ürün",
+          "companyTitle": "Şirket",
+          "connectTitle": "Bağlan",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Ses Laboratuvarı</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Şablonlar</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API Erişimi</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Güvenlik</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Misyon</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Kariyer</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Yasal</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Gizlilik</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Destek</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Giriş",
+        "leftFeature1Title": "Anında Yerelleştirme",
+        "leftFeature1Desc": "Ton korunurken içeriği 40+ dile çevirin.",
+        "leftFeature2Title": "Nöral Ses Klonlama",
+        "leftFeature2Desc": "Orijinal sesinizi herhangi bir hedef dilde mükemmel şekilde çoğaltın.",
+        "leftFeature3Title": "Yapay Zeka Dudak Senkronu",
+        "leftFeature3Desc": "Doğal sonuçlar için ağız hareketlerini otomatik hizalar.",
+        "heading": "Tekrar hoş geldiniz",
+        "subheading": "Yaratıcı yolculuğunuza Multiva.AI ile devam edin.",
+        "emailLabel": "E-posta Adresi",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Lütfen geçerli bir e-posta adresi girin.",
+        "passwordLabel": "Şifre",
+        "forgotPassword": "Şifrenizi mi unuttunuz?",
+        "passwordError": "Şifre en az 6 karakter olmalıdır.",
+        "rememberMe": "30 gün boyunca oturumum açık kalsın",
+        "loginButton": "Giriş Yap",
+        "continueWith": "Veya şununla devam et",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Hesabınız yok mu?",
+        "createAccount": "Ücretsiz hesap oluştur"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Profilim",
+        "sidebar": {
+          "brand": "Çalışma Alanı",
+          "tagline": "Yapay Zeka Ses Motoru",
+          "newProject": "Yeni Proje",
+          "projects": "Projeler",
+          "clones": "Klonlar",
+          "voiceLab": "Ses Laboratuvarı",
+          "templates": "Şablonlar",
+          "profile": "Profil",
+          "settings": "Ayarlar",
+          "goPro": "Pro Ol",
+          "unlockFullAccess": "Tam erişimi aç"
+        },
+        "heading": "Profilim",
+        "editProfile": "Profili Düzenle",
+        "quickAction": "Yeni Proje",
+        "details": {
+          "fullName": "Ad Soyad",
+          "email": "E-posta",
+          "username": "Kullanıcı Adı",
+          "timezone": "Saat Dilimi",
+          "interfaceLanguage": "Arayüz Dili",
+          "memberSince": "Üyelik Tarihi"
+        },
+        "history": {
+          "title": "Üretim Geçmişi",
+          "subtitle": "Tüm yapay zeka dublajlı videolarınız tek yerde.",
+          "searchPlaceholder": "Videolarda ara…",
+          "filterAll": "Tümü",
+          "filterDone": "Tamamlandı",
+          "filterProcessing": "İşleniyor",
+          "filterFailed": "Başarısız",
+          "statusDone": "Tamamlandı",
+          "statusProcessing": "İşleniyor",
+          "statusFailed": "Başarısız"
+        },
+        "modal": {
+          "title": "Profili Düzenle",
+          "fullName": "Ad Soyad",
+          "email": "E-posta Adresi",
+          "username": "Kullanıcı Adı",
+          "timezone": "Saat Dilimi",
+          "cancel": "İptal",
+          "saveChanges": "Değişiklikleri Kaydet"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Yapay Zeka Ses Motoru Paneli",
+        "sidebar": {
+          "brand": "Çalışma Alanı",
+          "tagline": "Yapay Zeka Ses Motoru",
+          "newProject": "Yeni Proje",
+          "projects": "Projeler",
+          "clones": "Klonlar",
+          "voiceLab": "Ses Laboratuvarı",
+          "templates": "Şablonlar",
+          "settings": "Ayarlar",
+          "profile": "Profil"
+        },
+        "status": {
+          "idle": "Boşta",
+          "uploading": "Yükleniyor",
+          "cloning": "Klonlanıyor",
+          "translating": "Çevriliyor",
+          "rendering": "İşleniyor",
+          "done": "Tamamlandı"
+        },
+        "source": {
+          "title": "Kaynak Video",
+          "dropTitle": "Başlamak için videoyu buraya sürükleyin",
+          "dropSubtitle": "MP4, MOV veya WEBM (Maks 1MB)",
+          "browseFiles": "Dosya Seç",
+          "originalLanguage": "Orijinal Dil",
+          "targetLanguage": "Hedef Dil",
+          "startDubbing": "Dublajı Başlat"
+        },
+        "output": {
+          "title": "Dublajlı Çıktı",
+          "processingTitle": "Ses Dokusu Sentezleniyor",
+          "processingEta": "Tahmini süre: 14 sn",
+          "translatedScript": "Çevrilmiş Metin",
+          "editScript": "Metni Düzenle",
+          "scriptPlaceholder": "Metin oluşturuluyor...",
+          "downloadVideo": "Videoyu İndir",
+          "share": "Paylaş"
+        },
+        "toast": {
+          "title": "Ses Klonu Hazır",
+          "description": "\"Alex Narrator\" ses profili optimize edildi."
+        }
+      }
+    },
+    "ru": {
+      "languageLabel": "Русский",
+      "index": {
+        "metaTitle": "Multiva.AI — ИИ-движок голоса",
+        "nav": {
+          "home": "Главная",
+          "mission": "Миссия",
+          "features": "Функции",
+          "pricing": "Тарифы",
+          "demo": "Демо",
+          "login": "Войти"
+        },
+        "interfaceLanguage": "Язык интерфейса",
+        "hero": {
+          "badge": "Клонирование голоса на базе ИИ",
+          "title": "Ваш голос.<br>Любой язык.",
+          "subtitle": "Клонируйте свой уникальный голос за секунды. Озвучивайте контент на более чем 50 языках с эмоцией и точностью.",
+          "primaryCta": "Начать бесплатно",
+          "secondaryCta": "Смотреть демо"
+        },
+        "mission": {
+          "title": "Разрушаем языковые барьеры — <span class=\"text-tertiary\">одним голосом</span> за раз.",
+          "description": "Отличный сторителлинг не должен ограничиваться одним языком. Multiva.AI помогает звучать естественно по всему миру.",
+          "languages": "Языки",
+          "accuracy": "Точность",
+          "videos": "Озвученные видео"
+        },
+        "features": {
+          "title": "Непревзойденное качество звука",
+          "subtitle": "Инструменты, которые помогут масштабировать контент по всему миру.",
+          "voiceCloningTitle": "Клонирование голоса",
+          "voiceCloningDesc": "Клонируйте любой голос за 30 секунд, сохраняя интонацию и эмоции.",
+          "multilingualTitle": "Многоязычная озвучка",
+          "multilingualDesc": "Автоматически переводите и синхронизируйте контент на многие языки.",
+          "exportTitle": "Мгновенный экспорт",
+          "exportDesc": "Скачивайте качественный результат для YouTube, TikTok, курсов и не только."
+        },
+        "howItWorks": {
+          "title": "Как это работает",
+          "step1Title": "Загрузите",
+          "step1Desc": "Загрузите ваш видео- или аудиофайл.",
+          "step2Title": "Выберите",
+          "step2Desc": "Выберите язык и настройки голоса.",
+          "step3Title": "Скачайте",
+          "step3Desc": "Получите готовый озвученный контент за считанные минуты.",
+          "button": "Открыть рабочее пространство"
+        },
+        "testimonials": {
+          "title": "Нам доверяют создатели контента",
+          "quote1": "«Клонирование голоса звучит как настоящий спикер.»",
+          "quote2": "«Мы запустили курс на 12 языках без усложнения процесса.»",
+          "quote3": "«Первый ИИ-инструмент, который действительно понимает эмоции.»"
+        },
+        "pricing": {
+          "title": "Простые и прозрачные тарифы.",
+          "subtitle": "Начните бесплатно. Масштабируйтесь по мере роста.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/мес</span></div><p class=\"text-on-surface-variant text-sm\">Для знакомства с Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 минут озвучки в месяц</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 языков</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 клон голоса</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Обработка в реальном времени</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Доступ к API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Начать бесплатно</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Самый популярный</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/мес</span></div><p class=\"text-on-surface-variant text-sm\">Для серьезных создателей контента</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 часов озвучки в месяц</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Все 50+ языков</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 клонов голоса</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Обработка в реальном времени</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Доступ к API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Запустить пробный Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/мес</span></div><p class=\"text-on-surface-variant text-sm\">Для студий и больших команд</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Неограниченная озвучка</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Все 50+ языков</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Неограниченные клоны</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Обработка в реальном времени</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Полный доступ к API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Связаться с продажами</a>"
+        },
+        "cta": {
+          "title": "Готовы выйти на мировой уровень?",
+          "description": "Присоединяйтесь к 10 000+ создателям контента, которые используют Multiva.AI для охвата аудитории по всему миру.",
+          "button": "Начать бесплатно"
+        },
+        "footer": {
+          "description": "Самый продвинутый ИИ-движок голоса в мире для глобальных создателей и компаний.",
+          "copyright": "© 2026 Multiva.AI. Все права защищены.",
+          "productTitle": "Продукт",
+          "companyTitle": "Компания",
+          "connectTitle": "Контакты",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Шаблоны</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Доступ к API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Безопасность</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Миссия</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Карьера</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Юридическая информация</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Конфиденциальность</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Поддержка</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Вход",
+        "leftFeature1Title": "Мгновенная локализация",
+        "leftFeature1Desc": "Переводите контент на 40+ языков, сохраняя тональность.",
+        "leftFeature2Title": "Нейросетевое клонирование голоса",
+        "leftFeature2Desc": "Точно воспроизводите исходный голос на любом целевом языке.",
+        "leftFeature3Title": "ИИ-липсинк",
+        "leftFeature3Desc": "Автоматически выравнивает движения губ для естественного результата.",
+        "heading": "С возвращением",
+        "subheading": "Продолжайте свое творческое путешествие с Multiva.AI.",
+        "emailLabel": "Электронная почта",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Пожалуйста, введите корректный адрес электронной почты.",
+        "passwordLabel": "Пароль",
+        "forgotPassword": "Забыли пароль?",
+        "passwordError": "Пароль должен содержать не менее 6 символов.",
+        "rememberMe": "Оставаться в системе 30 дней",
+        "loginButton": "Войти",
+        "continueWith": "Или продолжить через",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Нет аккаунта?",
+        "createAccount": "Создать бесплатный аккаунт"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Мой профиль",
+        "sidebar": {
+          "brand": "Рабочее пространство",
+          "tagline": "ИИ-движок голоса",
+          "newProject": "Новый проект",
+          "projects": "Проекты",
+          "clones": "Клоны",
+          "voiceLab": "Voice Lab",
+          "templates": "Шаблоны",
+          "profile": "Профиль",
+          "settings": "Настройки",
+          "goPro": "Перейти на Pro",
+          "unlockFullAccess": "Открыть полный доступ"
+        },
+        "heading": "Мой профиль",
+        "editProfile": "Редактировать профиль",
+        "quickAction": "Новый проект",
+        "details": {
+          "fullName": "Полное имя",
+          "email": "Эл. почта",
+          "username": "Имя пользователя",
+          "timezone": "Часовой пояс",
+          "interfaceLanguage": "Язык интерфейса",
+          "memberSince": "С нами с"
+        },
+        "history": {
+          "title": "История генерации",
+          "subtitle": "Все ваши ИИ-озвученные видео в одном месте.",
+          "searchPlaceholder": "Поиск видео…",
+          "filterAll": "Все",
+          "filterDone": "Готово",
+          "filterProcessing": "В обработке",
+          "filterFailed": "Ошибка",
+          "statusDone": "Готово",
+          "statusProcessing": "В обработке",
+          "statusFailed": "Ошибка"
+        },
+        "modal": {
+          "title": "Редактировать профиль",
+          "fullName": "Полное имя",
+          "email": "Электронная почта",
+          "username": "Имя пользователя",
+          "timezone": "Часовой пояс",
+          "cancel": "Отмена",
+          "saveChanges": "Сохранить изменения"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Панель ИИ-движка голоса",
+        "sidebar": {
+          "brand": "Рабочее пространство",
+          "tagline": "ИИ-движок голоса",
+          "newProject": "Новый проект",
+          "projects": "Проекты",
+          "clones": "Клоны",
+          "voiceLab": "Voice Lab",
+          "templates": "Шаблоны",
+          "settings": "Настройки",
+          "profile": "Профиль"
+        },
+        "status": {
+          "idle": "Ожидание",
+          "uploading": "Загрузка",
+          "cloning": "Клонирование",
+          "translating": "Перевод",
+          "rendering": "Рендеринг",
+          "done": "Готово"
+        },
+        "source": {
+          "title": "Исходное видео",
+          "dropTitle": "Перетащите видео сюда, чтобы начать",
+          "dropSubtitle": "MP4, MOV или WEBM (макс. 1MB)",
+          "browseFiles": "Выбрать файлы",
+          "originalLanguage": "Исходный язык",
+          "targetLanguage": "Целевой язык",
+          "startDubbing": "Начать озвучку"
+        },
+        "output": {
+          "title": "Озвученный результат",
+          "processingTitle": "Синтез текстуры голоса",
+          "processingEta": "Оценочное время: 14 с",
+          "translatedScript": "Переведенный сценарий",
+          "editScript": "Редактировать сценарий",
+          "scriptPlaceholder": "Генерация сценария выполняется...",
+          "downloadVideo": "Скачать видео",
+          "share": "Поделиться"
+        },
+        "toast": {
+          "title": "Клон голоса готов",
+          "description": "Голосовой профиль «Alex Narrator» оптимизирован."
+        }
+      }
+    },
+    "pt": {
+      "languageLabel": "Português",
+      "index": {
+        "metaTitle": "Multiva.AI — Motor de Voz com IA",
+        "nav": {
+          "home": "Início",
+          "mission": "Missão",
+          "features": "Recursos",
+          "pricing": "Preços",
+          "demo": "Demo",
+          "login": "Entrar"
+        },
+        "interfaceLanguage": "Idioma da interface",
+        "hero": {
+          "badge": "Clonagem de voz com IA",
+          "title": "Sua voz.<br>Cada idioma.",
+          "subtitle": "Clone sua voz em segundos. Duble seu conteúdo em mais de 50 idiomas com emoção e precisão.",
+          "primaryCta": "Começar grátis",
+          "secondaryCta": "Ver demo"
+        },
+        "mission": {
+          "title": "Quebrando barreiras de idioma — <span class=\"text-tertiary\">uma voz</span> por vez.",
+          "description": "Grandes histórias não devem ficar limitadas a um único idioma. O Multiva.AI ajuda você a soar natural no mundo todo.",
+          "languages": "Idiomas",
+          "accuracy": "Precisão",
+          "videos": "Vídeos dublados"
+        },
+        "features": {
+          "title": "Qualidade de áudio incomparável",
+          "subtitle": "As ferramentas que você precisa para escalar seu conteúdo globalmente.",
+          "voiceCloningTitle": "Clonagem de voz",
+          "voiceCloningDesc": "Clone qualquer voz em 30 segundos preservando tom e emoção.",
+          "multilingualTitle": "Dublagem multilíngue",
+          "multilingualDesc": "Traduza e sincronize seu conteúdo automaticamente para vários idiomas.",
+          "exportTitle": "Exportação instantânea",
+          "exportDesc": "Baixe resultados em alta qualidade otimizados para YouTube, TikTok, cursos e muito mais."
+        },
+        "howItWorks": {
+          "title": "Como funciona",
+          "step1Title": "Envie",
+          "step1Desc": "Envie seu arquivo de vídeo ou áudio.",
+          "step2Title": "Escolha",
+          "step2Desc": "Escolha o idioma e as configurações de voz.",
+          "step3Title": "Baixe",
+          "step3Desc": "Receba seu conteúdo final dublado em poucos minutos.",
+          "button": "Abrir workspace"
+        },
+        "testimonials": {
+          "title": "Confiado por criadores",
+          "quote1": "\"A clonagem de voz soa igual ao locutor real.\"",
+          "quote2": "\"Lançamos nosso curso em 12 idiomas sem complicar o fluxo de trabalho.\"",
+          "quote3": "\"A primeira ferramenta de IA que realmente entende emoção.\""
+        },
+        "pricing": {
+          "title": "Preços simples e transparentes.",
+          "subtitle": "Comece grátis. Escale conforme cresce.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Inicial</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/mês</span></div><p class=\"text-on-surface-variant text-sm\">Para explorar o Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min de dublagem/mês</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 clone de voz</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Processamento em tempo real</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Acesso à API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Começar grátis</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Mais popular</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/mês</span></div><p class=\"text-on-surface-variant text-sm\">Para criadores sérios</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 horas de dublagem/mês</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Todos os 50+ idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 clones de voz</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Processamento em tempo real</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Acesso à API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Iniciar teste Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/mês</span></div><p class=\"text-on-surface-variant text-sm\">Para estúdios e grandes equipes</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Dublagem ilimitada</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Todos os 50+ idiomas</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Clones ilimitados</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Processamento em tempo real</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Acesso completo à API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Falar com vendas</a>"
+        },
+        "cta": {
+          "title": "Pronto para alcançar o mundo?",
+          "description": "Junte-se a mais de 10.000 criadores que usam o Multiva.AI para alcançar públicos no mundo inteiro.",
+          "button": "Começar grátis"
+        },
+        "footer": {
+          "description": "O motor de voz com IA mais avançado do mundo para criadores e empresas globais.",
+          "copyright": "© 2026 Multiva.AI. Todos os direitos reservados.",
+          "productTitle": "Produto",
+          "companyTitle": "Empresa",
+          "connectTitle": "Conectar",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Laboratório de Voz</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Modelos</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Acesso à API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Segurança</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Missão</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Carreiras</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Jurídico</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Privacidade</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Suporte</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Entrar",
+        "leftFeature1Title": "Localização instantânea",
+        "leftFeature1Desc": "Traduza conteúdo para mais de 40 idiomas mantendo o tom.",
+        "leftFeature2Title": "Clonagem neural de voz",
+        "leftFeature2Desc": "Replique sua voz original perfeitamente em qualquer idioma de destino.",
+        "leftFeature3Title": "Sincronização labial com IA",
+        "leftFeature3Desc": "Alinhamento automático dos movimentos da boca para resultados naturais.",
+        "heading": "Bem-vindo de volta",
+        "subheading": "Continue sua jornada criativa com o Multiva.AI.",
+        "emailLabel": "Endereço de e-mail",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Digite um endereço de e-mail válido.",
+        "passwordLabel": "Senha",
+        "forgotPassword": "Esqueceu a senha?",
+        "passwordError": "A senha deve ter pelo menos 6 caracteres.",
+        "rememberMe": "Manter login por 30 dias",
+        "loginButton": "Entrar",
+        "continueWith": "Ou continue com",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Não tem uma conta?",
+        "createAccount": "Criar conta grátis"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Meu Perfil",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "Motor de Voz com IA",
+          "newProject": "Novo projeto",
+          "projects": "Projetos",
+          "clones": "Clones",
+          "voiceLab": "Laboratório de Voz",
+          "templates": "Modelos",
+          "profile": "Perfil",
+          "settings": "Configurações",
+          "goPro": "Virar Pro",
+          "unlockFullAccess": "Desbloquear acesso completo"
+        },
+        "heading": "Meu Perfil",
+        "editProfile": "Editar perfil",
+        "quickAction": "Novo projeto",
+        "details": {
+          "fullName": "Nome completo",
+          "email": "E-mail",
+          "username": "Nome de usuário",
+          "timezone": "Fuso horário",
+          "interfaceLanguage": "Idioma da interface",
+          "memberSince": "Membro desde"
+        },
+        "history": {
+          "title": "Histórico de geração",
+          "subtitle": "Todos os seus vídeos dublados por IA em um só lugar.",
+          "searchPlaceholder": "Buscar vídeos…",
+          "filterAll": "Todos",
+          "filterDone": "Concluídos",
+          "filterProcessing": "Processando",
+          "filterFailed": "Falhou",
+          "statusDone": "Concluído",
+          "statusProcessing": "Processando",
+          "statusFailed": "Falhou"
+        },
+        "modal": {
+          "title": "Editar perfil",
+          "fullName": "Nome completo",
+          "email": "Endereço de e-mail",
+          "username": "Nome de usuário",
+          "timezone": "Fuso horário",
+          "cancel": "Cancelar",
+          "saveChanges": "Salvar alterações"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Painel do Motor de Voz com IA",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "Motor de Voz com IA",
+          "newProject": "Novo projeto",
+          "projects": "Projetos",
+          "clones": "Clones",
+          "voiceLab": "Laboratório de Voz",
+          "templates": "Modelos",
+          "settings": "Configurações",
+          "profile": "Perfil"
+        },
+        "status": {
+          "idle": "Ocioso",
+          "uploading": "Enviando",
+          "cloning": "Clonando",
+          "translating": "Traduzindo",
+          "rendering": "Renderizando",
+          "done": "Concluído"
+        },
+        "source": {
+          "title": "Vídeo de origem",
+          "dropTitle": "Arraste o vídeo aqui para começar",
+          "dropSubtitle": "MP4, MOV ou WEBM (Máx. 1MB)",
+          "browseFiles": "Escolher arquivos",
+          "originalLanguage": "Idioma original",
+          "targetLanguage": "Idioma de destino",
+          "startDubbing": "Iniciar dublagem"
+        },
+        "output": {
+          "title": "Saída dublada",
+          "processingTitle": "Sintetizando textura de voz",
+          "processingEta": "Tempo estimado: 14s",
+          "translatedScript": "Roteiro traduzido",
+          "editScript": "Editar roteiro",
+          "scriptPlaceholder": "A geração do roteiro está em andamento...",
+          "downloadVideo": "Baixar vídeo",
+          "share": "Compartilhar"
+        },
+        "toast": {
+          "title": "Clone de voz pronto",
+          "description": "O perfil de voz \"Alex Narrator\" foi otimizado."
+        }
+      }
+    },
+    "it": {
+      "languageLabel": "Italiano",
+      "index": {
+        "metaTitle": "Multiva.AI — Motore vocale AI",
+        "nav": {
+          "home": "Home",
+          "mission": "Missione",
+          "features": "Funzionalità",
+          "pricing": "Prezzi",
+          "demo": "Demo",
+          "login": "Accedi"
+        },
+        "interfaceLanguage": "Lingua dell'interfaccia",
+        "hero": {
+          "badge": "Clonazione vocale con AI",
+          "title": "La tua voce.<br>Ogni lingua.",
+          "subtitle": "Clona la tua voce in pochi secondi. Doppia i tuoi contenuti in oltre 50 lingue con emozione e precisione.",
+          "primaryCta": "Inizia gratis",
+          "secondaryCta": "Guarda la demo"
+        },
+        "mission": {
+          "title": "Abbattere le barriere linguistiche — <span class=\"text-tertiary\">una voce</span> alla volta.",
+          "description": "Una grande narrazione non dovrebbe essere limitata a una sola lingua. Multiva.AI ti aiuta a suonare naturale ovunque.",
+          "languages": "Lingue",
+          "accuracy": "Precisione",
+          "videos": "Video doppiati"
+        },
+        "features": {
+          "title": "Qualità audio senza pari",
+          "subtitle": "Gli strumenti di cui hai bisogno per scalare i tuoi contenuti a livello globale.",
+          "voiceCloningTitle": "Clonazione vocale",
+          "voiceCloningDesc": "Clona qualsiasi voce in 30 secondi mantenendo tono ed emozione.",
+          "multilingualTitle": "Doppiaggio multilingue",
+          "multilingualDesc": "Traduci e sincronizza automaticamente i tuoi contenuti in molte lingue.",
+          "exportTitle": "Esportazione immediata",
+          "exportDesc": "Scarica risultati di alta qualità ottimizzati per YouTube, TikTok, corsi e altro."
+        },
+        "howItWorks": {
+          "title": "Come funziona",
+          "step1Title": "Carica",
+          "step1Desc": "Carica il tuo file video o audio.",
+          "step2Title": "Seleziona",
+          "step2Desc": "Scegli lingua e impostazioni vocali.",
+          "step3Title": "Scarica",
+          "step3Desc": "Ottieni il tuo contenuto finale doppiato in pochi minuti.",
+          "button": "Apri workspace"
+        },
+        "testimonials": {
+          "title": "Scelto dai creator",
+          "quote1": "\"La clonazione vocale suona proprio come il vero speaker.\"",
+          "quote2": "\"Abbiamo lanciato il nostro corso in 12 lingue senza complicare il flusso di lavoro.\"",
+          "quote3": "\"Il primo strumento AI che sembra capire davvero le emozioni.\""
+        },
+        "pricing": {
+          "title": "Prezzi semplici e trasparenti.",
+          "subtitle": "Inizia gratis. Scala quando cresci.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/mese</span></div><p class=\"text-on-surface-variant text-sm\">Per esplorare Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min di doppiaggio/mese</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 lingue</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 clone vocale</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Elaborazione in tempo reale</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Accesso API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Inizia gratis</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Più popolare</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/mese</span></div><p class=\"text-on-surface-variant text-sm\">Per creator professionali</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 ore di doppiaggio/mese</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Tutte le 50+ lingue</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 cloni vocali</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Elaborazione in tempo reale</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Accesso API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Avvia prova Pro</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/mese</span></div><p class=\"text-on-surface-variant text-sm\">Per studi e grandi team</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Doppiaggio illimitato</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Tutte le 50+ lingue</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Cloni illimitati</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Elaborazione in tempo reale</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Accesso API completo</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Contatta le vendite</a>"
+        },
+        "cta": {
+          "title": "Pronto a crescere globalmente?",
+          "description": "Unisciti a oltre 10.000 creator che usano Multiva.AI per raggiungere audience in tutto il mondo.",
+          "button": "Inizia gratis"
+        },
+        "footer": {
+          "description": "Il motore vocale AI più avanzato al mondo per creator e aziende globali.",
+          "copyright": "© 2026 Multiva.AI. Tutti i diritti riservati.",
+          "productTitle": "Prodotto",
+          "companyTitle": "Azienda",
+          "connectTitle": "Contatti",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Template</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Accesso API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Sicurezza</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Missione</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Carriere</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Legale</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Privacy</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Supporto</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Accedi",
+        "leftFeature1Title": "Localizzazione immediata",
+        "leftFeature1Desc": "Traduci i contenuti in oltre 40 lingue mantenendo il tono.",
+        "leftFeature2Title": "Clonazione vocale neurale",
+        "leftFeature2Desc": "Replica perfettamente la tua voce originale in qualsiasi lingua di destinazione.",
+        "leftFeature3Title": "Lip-sync con AI",
+        "leftFeature3Desc": "Allineamento automatico del movimento della bocca per risultati naturali.",
+        "heading": "Bentornato",
+        "subheading": "Continua il tuo percorso creativo con Multiva.AI.",
+        "emailLabel": "Indirizzo email",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Inserisci un indirizzo email valido.",
+        "passwordLabel": "Password",
+        "forgotPassword": "Password dimenticata?",
+        "passwordError": "La password deve contenere almeno 6 caratteri.",
+        "rememberMe": "Mantienimi connesso per 30 giorni",
+        "loginButton": "Accedi",
+        "continueWith": "Oppure continua con",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Non hai un account?",
+        "createAccount": "Crea un account gratuito"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Il Mio Profilo",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "Motore vocale AI",
+          "newProject": "Nuovo progetto",
+          "projects": "Progetti",
+          "clones": "Cloni",
+          "voiceLab": "Voice Lab",
+          "templates": "Template",
+          "profile": "Profilo",
+          "settings": "Impostazioni",
+          "goPro": "Passa a Pro",
+          "unlockFullAccess": "Sblocca l'accesso completo"
+        },
+        "heading": "Il Mio Profilo",
+        "editProfile": "Modifica profilo",
+        "quickAction": "Nuovo progetto",
+        "details": {
+          "fullName": "Nome completo",
+          "email": "Email",
+          "username": "Nome utente",
+          "timezone": "Fuso orario",
+          "interfaceLanguage": "Lingua dell'interfaccia",
+          "memberSince": "Membro dal"
+        },
+        "history": {
+          "title": "Cronologia generazioni",
+          "subtitle": "Tutti i tuoi video doppiati con AI in un solo posto.",
+          "searchPlaceholder": "Cerca video…",
+          "filterAll": "Tutti",
+          "filterDone": "Completati",
+          "filterProcessing": "In elaborazione",
+          "filterFailed": "Non riusciti",
+          "statusDone": "Completato",
+          "statusProcessing": "In elaborazione",
+          "statusFailed": "Non riuscito"
+        },
+        "modal": {
+          "title": "Modifica profilo",
+          "fullName": "Nome completo",
+          "email": "Indirizzo email",
+          "username": "Nome utente",
+          "timezone": "Fuso orario",
+          "cancel": "Annulla",
+          "saveChanges": "Salva modifiche"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Dashboard del motore vocale AI",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "Motore vocale AI",
+          "newProject": "Nuovo progetto",
+          "projects": "Progetti",
+          "clones": "Cloni",
+          "voiceLab": "Voice Lab",
+          "templates": "Template",
+          "settings": "Impostazioni",
+          "profile": "Profilo"
+        },
+        "status": {
+          "idle": "Inattivo",
+          "uploading": "Caricamento",
+          "cloning": "Clonazione",
+          "translating": "Traduzione",
+          "rendering": "Rendering",
+          "done": "Completato"
+        },
+        "source": {
+          "title": "Video sorgente",
+          "dropTitle": "Trascina qui il video per iniziare",
+          "dropSubtitle": "MP4, MOV o WEBM (Max 1MB)",
+          "browseFiles": "Sfoglia file",
+          "originalLanguage": "Lingua originale",
+          "targetLanguage": "Lingua di destinazione",
+          "startDubbing": "Avvia doppiaggio"
+        },
+        "output": {
+          "title": "Output doppiato",
+          "processingTitle": "Sintesi della texture vocale",
+          "processingEta": "Tempo stimato: 14s",
+          "translatedScript": "Script tradotto",
+          "editScript": "Modifica script",
+          "scriptPlaceholder": "Generazione dello script in corso...",
+          "downloadVideo": "Scarica video",
+          "share": "Condividi"
+        },
+        "toast": {
+          "title": "Clone vocale pronto",
+          "description": "Il profilo vocale \"Alex Narrator\" è stato ottimizzato."
+        }
+      }
+    },
+    "ko": {
+      "languageLabel": "한국어",
+      "index": {
+        "metaTitle": "Multiva.AI — AI 음성 엔진",
+        "nav": {
+          "home": "홈",
+          "mission": "미션",
+          "features": "기능",
+          "pricing": "요금제",
+          "demo": "데모",
+          "login": "로그인"
+        },
+        "interfaceLanguage": "인터페이스 언어",
+        "hero": {
+          "badge": "AI 기반 음성 복제",
+          "title": "당신의 목소리.<br>모든 언어로.",
+          "subtitle": "몇 초 안에 당신만의 목소리를 복제하세요. 감정과 정확도를 유지한 채 50개 이상의 언어로 더빙할 수 있습니다.",
+          "primaryCta": "무료로 시작하기",
+          "secondaryCta": "데모 보기"
+        },
+        "mission": {
+          "title": "언어 장벽을 허물다 — <span class=\"text-tertiary\">하나의 목소리</span>로.",
+          "description": "훌륭한 스토리텔링은 한 언어에만 묶여서는 안 됩니다. Multiva.AI는 전 세계에서 자연스럽게 들리도록 도와줍니다.",
+          "languages": "언어",
+          "accuracy": "정확도",
+          "videos": "더빙된 영상"
+        },
+        "features": {
+          "title": "탁월한 오디오 품질",
+          "subtitle": "글로벌 확장을 위한 모든 도구를 제공합니다.",
+          "voiceCloningTitle": "음성 복제",
+          "voiceCloningDesc": "30초 만에 어떤 목소리든 복제하고 톤과 감정을 유지합니다.",
+          "multilingualTitle": "다국어 더빙",
+          "multilingualDesc": "여러 언어로 자동 번역 및 동기화를 수행합니다.",
+          "exportTitle": "즉시 내보내기",
+          "exportDesc": "YouTube, TikTok, 강의 등 다양한 용도에 맞춘 고품질 결과를 다운로드하세요."
+        },
+        "howItWorks": {
+          "title": "작동 방식",
+          "step1Title": "업로드",
+          "step1Desc": "비디오 또는 오디오 파일을 업로드하세요.",
+          "step2Title": "선택",
+          "step2Desc": "언어와 음성 설정을 선택하세요.",
+          "step3Title": "다운로드",
+          "step3Desc": "몇 분 안에 최종 더빙 결과를 받아보세요.",
+          "button": "워크스페이스 열기"
+        },
+        "testimonials": {
+          "title": "크리에이터가 신뢰합니다",
+          "quote1": "\"음성 복제가 실제 화자와 거의 똑같이 들립니다.\"",
+          "quote2": "\"우리는 워크플로를 바꾸지 않고 12개 언어로 강의를 출시했습니다.\"",
+          "quote3": "\"감정을 정말 이해하는 것처럼 느껴진 첫 AI 도구였습니다.\""
+        },
+        "pricing": {
+          "title": "간단하고 투명한 요금제.",
+          "subtitle": "무료로 시작하고 성장에 맞춰 확장하세요.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/월</span></div><p class=\"text-on-surface-variant text-sm\">Multiva.AI를 체험해보려는 분들을 위해</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>월 10분 더빙</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5개 언어</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>음성 복제 1개</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>실시간 처리</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API 액세스</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">무료로 시작하기</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">가장 인기</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/월</span></div><p class=\"text-on-surface-variant text-sm\">전문 크리에이터를 위한 요금제</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>월 5시간 더빙</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>모든 50+ 언어</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>음성 복제 10개</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>실시간 처리</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API 액세스</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Pro 체험 시작</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/월</span></div><p class=\"text-on-surface-variant text-sm\">스튜디오 및 대규모 팀용</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>무제한 더빙</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>모든 50+ 언어</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>무제한 클론</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>실시간 처리</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>전체 API 액세스</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">영업팀 문의</a>"
+        },
+        "cta": {
+          "title": "글로벌 확장을 시작할 준비가 되었나요?",
+          "description": "Multiva.AI를 사용해 전 세계 시청자에게 도달하는 10,000명 이상의 크리에이터와 함께하세요.",
+          "button": "무료로 시작하기"
+        },
+        "footer": {
+          "description": "전 세계 크리에이터와 기업을 위한 가장 진보된 AI 음성 엔진입니다.",
+          "copyright": "© 2026 Multiva.AI. 모든 권리 보유.",
+          "productTitle": "제품",
+          "companyTitle": "회사",
+          "connectTitle": "연결",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">보이스 랩</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">템플릿</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API 액세스</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">보안</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">미션</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">채용</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">법률</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">개인정보</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">지원</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - 로그인",
+        "leftFeature1Title": "즉시 현지화",
+        "leftFeature1Desc": "톤을 유지하면서 40개 이상의 언어로 콘텐츠를 번역합니다.",
+        "leftFeature2Title": "신경망 음성 복제",
+        "leftFeature2Desc": "어떤 목표 언어에서도 원래 목소리를 자연스럽게 재현합니다.",
+        "leftFeature3Title": "AI 립싱크",
+        "leftFeature3Desc": "자연스러운 결과를 위해 입 움직임을 자동으로 맞춥니다.",
+        "heading": "다시 오신 것을 환영합니다",
+        "subheading": "Multiva.AI와 함께 창작 여정을 이어가세요.",
+        "emailLabel": "이메일 주소",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "유효한 이메일 주소를 입력하세요.",
+        "passwordLabel": "비밀번호",
+        "forgotPassword": "비밀번호를 잊으셨나요?",
+        "passwordError": "비밀번호는 최소 6자 이상이어야 합니다.",
+        "rememberMe": "30일 동안 로그인 상태 유지",
+        "loginButton": "로그인",
+        "continueWith": "또는 다음으로 계속",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "계정이 없나요?",
+        "createAccount": "무료 계정 만들기"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — 내 프로필",
+        "sidebar": {
+          "brand": "워크스페이스",
+          "tagline": "AI 음성 엔진",
+          "newProject": "새 프로젝트",
+          "projects": "프로젝트",
+          "clones": "클론",
+          "voiceLab": "보이스 랩",
+          "templates": "템플릿",
+          "profile": "프로필",
+          "settings": "설정",
+          "goPro": "Pro로 업그레이드",
+          "unlockFullAccess": "전체 액세스 잠금 해제"
+        },
+        "heading": "내 프로필",
+        "editProfile": "프로필 편집",
+        "quickAction": "새 프로젝트",
+        "details": {
+          "fullName": "이름",
+          "email": "이메일",
+          "username": "사용자 이름",
+          "timezone": "시간대",
+          "interfaceLanguage": "인터페이스 언어",
+          "memberSince": "가입일"
+        },
+        "history": {
+          "title": "생성 기록",
+          "subtitle": "모든 AI 더빙 영상을 한 곳에서 확인하세요.",
+          "searchPlaceholder": "영상 검색…",
+          "filterAll": "전체",
+          "filterDone": "완료",
+          "filterProcessing": "처리 중",
+          "filterFailed": "실패",
+          "statusDone": "완료",
+          "statusProcessing": "처리 중",
+          "statusFailed": "실패"
+        },
+        "modal": {
+          "title": "프로필 편집",
+          "fullName": "이름",
+          "email": "이메일 주소",
+          "username": "사용자 이름",
+          "timezone": "시간대",
+          "cancel": "취소",
+          "saveChanges": "변경 사항 저장"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | AI 음성 엔진 대시보드",
+        "sidebar": {
+          "brand": "워크스페이스",
+          "tagline": "AI 음성 엔진",
+          "newProject": "새 프로젝트",
+          "projects": "프로젝트",
+          "clones": "클론",
+          "voiceLab": "보이스 랩",
+          "templates": "템플릿",
+          "settings": "설정",
+          "profile": "프로필"
+        },
+        "status": {
+          "idle": "대기 중",
+          "uploading": "업로드 중",
+          "cloning": "복제 중",
+          "translating": "번역 중",
+          "rendering": "렌더링 중",
+          "done": "완료"
+        },
+        "source": {
+          "title": "원본 비디오",
+          "dropTitle": "시작하려면 여기에 비디오를 드래그하세요",
+          "dropSubtitle": "MP4, MOV 또는 WEBM (최대 1MB)",
+          "browseFiles": "파일 선택",
+          "originalLanguage": "원본 언어",
+          "targetLanguage": "대상 언어",
+          "startDubbing": "더빙 시작"
+        },
+        "output": {
+          "title": "더빙 출력",
+          "processingTitle": "음성 텍스처 합성 중",
+          "processingEta": "예상 시간: 14초",
+          "translatedScript": "번역된 스크립트",
+          "editScript": "스크립트 편집",
+          "scriptPlaceholder": "스크립트를 생성하는 중입니다...",
+          "downloadVideo": "비디오 다운로드",
+          "share": "공유"
+        },
+        "toast": {
+          "title": "음성 클론 준비 완료",
+          "description": "\"Alex Narrator\" 음성 프로필이 최적화되었습니다."
+        }
+      }
+    },
+    "nl": {
+      "languageLabel": "Nederlands",
+      "index": {
+        "metaTitle": "Multiva.AI — AI-stemengine",
+        "nav": {
+          "home": "Home",
+          "mission": "Missie",
+          "features": "Functies",
+          "pricing": "Prijzen",
+          "demo": "Demo",
+          "login": "Inloggen"
+        },
+        "interfaceLanguage": "Interfacetaal",
+        "hero": {
+          "badge": "AI-gestuurde stemkloning",
+          "title": "Jouw stem.<br>Elke taal.",
+          "subtitle": "Kloon je unieke stem in enkele seconden. Dub je content in meer dan 50 talen met emotie en nauwkeurigheid.",
+          "primaryCta": "Gratis starten",
+          "secondaryCta": "Demo bekijken"
+        },
+        "mission": {
+          "title": "Taalbarrières doorbreken — <span class=\"text-tertiary\">één stem</span> tegelijk.",
+          "description": "Geweldige storytelling hoort niet beperkt te zijn tot één taal. Multiva.AI helpt je overal natuurlijk te klinken.",
+          "languages": "Talen",
+          "accuracy": "Nauwkeurigheid",
+          "videos": "Nagesynchroniseerde video's"
+        },
+        "features": {
+          "title": "Ongeëvenaarde audiokwaliteit",
+          "subtitle": "De tools die je nodig hebt om je content wereldwijd op te schalen.",
+          "voiceCloningTitle": "Stemkloning",
+          "voiceCloningDesc": "Kloon elke stem in 30 seconden met behoud van toon en emotie.",
+          "multilingualTitle": "Meertalige dubbing",
+          "multilingualDesc": "Vertaal en synchroniseer je content automatisch naar meerdere talen.",
+          "exportTitle": "Direct exporteren",
+          "exportDesc": "Download hoogwaardige output geoptimaliseerd voor YouTube, TikTok, cursussen en meer."
+        },
+        "howItWorks": {
+          "title": "Hoe het werkt",
+          "step1Title": "Upload",
+          "step1Desc": "Upload je video- of audiobestand.",
+          "step2Title": "Selecteer",
+          "step2Desc": "Kies taal- en steminstellingen.",
+          "step3Title": "Download",
+          "step3Desc": "Ontvang je uiteindelijke nagesynchroniseerde content in enkele minuten.",
+          "button": "Workspace openen"
+        },
+        "testimonials": {
+          "title": "Vertrouwd door creators",
+          "quote1": "\"De stemkloning klinkt net als de echte spreker.\"",
+          "quote2": "\"We lanceerden onze cursus in 12 talen zonder onze workflow te verstoren.\"",
+          "quote3": "\"De eerste AI-tool die echt emotie lijkt te begrijpen.\""
+        },
+        "pricing": {
+          "title": "Eenvoudige, transparante prijzen.",
+          "subtitle": "Begin gratis. Schaal op terwijl je groeit.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/maand</span></div><p class=\"text-on-surface-variant text-sm\">Om Multiva.AI te verkennen</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min dubbing/maand</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 talen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 stemkloon</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Realtime verwerking</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API-toegang</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Gratis starten</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Meest populair</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/maand</span></div><p class=\"text-on-surface-variant text-sm\">Voor serieuze content creators</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 uur dubbing/maand</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Alle 50+ talen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 stemklonen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Realtime verwerking</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>API-toegang</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Start Pro-proefperiode</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/maand</span></div><p class=\"text-on-surface-variant text-sm\">Voor studio's en grote teams</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Onbeperkte dubbing</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Alle 50+ talen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Onbeperkte klonen</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Realtime verwerking</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Volledige API-toegang</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Contact opnemen met sales</a>"
+        },
+        "cta": {
+          "title": "Klaar om wereldwijd te groeien?",
+          "description": "Sluit je aan bij meer dan 10.000 creators die Multiva.AI gebruiken om wereldwijd publiek te bereiken.",
+          "button": "Gratis starten"
+        },
+        "footer": {
+          "description": "De meest geavanceerde AI-stemengine ter wereld voor wereldwijde creators en bedrijven.",
+          "copyright": "© 2026 Multiva.AI. Alle rechten voorbehouden.",
+          "productTitle": "Product",
+          "companyTitle": "Bedrijf",
+          "connectTitle": "Contact",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Sjablonen</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">API-toegang</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Beveiliging</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Missie</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Carrières</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Juridisch</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Privacy</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Support</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Inloggen",
+        "leftFeature1Title": "Directe lokalisatie",
+        "leftFeature1Desc": "Vertaal content naar 40+ talen terwijl de toon behouden blijft.",
+        "leftFeature2Title": "Neurale stemkloning",
+        "leftFeature2Desc": "Reproduceer je originele stem perfect in elke doeltaal.",
+        "leftFeature3Title": "AI-lipsynchronisatie",
+        "leftFeature3Desc": "Automatische uitlijning van mondbewegingen voor natuurlijke resultaten.",
+        "heading": "Welkom terug",
+        "subheading": "Ga verder met je creatieve reis met Multiva.AI.",
+        "emailLabel": "E-mailadres",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Voer een geldig e-mailadres in.",
+        "passwordLabel": "Wachtwoord",
+        "forgotPassword": "Wachtwoord vergeten?",
+        "passwordError": "Het wachtwoord moet minimaal 6 tekens bevatten.",
+        "rememberMe": "30 dagen ingelogd blijven",
+        "loginButton": "Inloggen",
+        "continueWith": "Of ga verder met",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Heb je nog geen account?",
+        "createAccount": "Gratis account aanmaken"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Mijn Profiel",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI-stemengine",
+          "newProject": "Nieuw project",
+          "projects": "Projecten",
+          "clones": "Klonen",
+          "voiceLab": "Voice Lab",
+          "templates": "Sjablonen",
+          "profile": "Profiel",
+          "settings": "Instellingen",
+          "goPro": "Ga Pro",
+          "unlockFullAccess": "Volledige toegang ontgrendelen"
+        },
+        "heading": "Mijn Profiel",
+        "editProfile": "Profiel bewerken",
+        "quickAction": "Nieuw project",
+        "details": {
+          "fullName": "Volledige naam",
+          "email": "E-mail",
+          "username": "Gebruikersnaam",
+          "timezone": "Tijdzone",
+          "interfaceLanguage": "Interfacetaal",
+          "memberSince": "Lid sinds"
+        },
+        "history": {
+          "title": "Generatiegeschiedenis",
+          "subtitle": "Al je AI-gedubde video's op één plek.",
+          "searchPlaceholder": "Video's zoeken…",
+          "filterAll": "Alles",
+          "filterDone": "Voltooid",
+          "filterProcessing": "Bezig",
+          "filterFailed": "Mislukt",
+          "statusDone": "Voltooid",
+          "statusProcessing": "Bezig",
+          "statusFailed": "Mislukt"
+        },
+        "modal": {
+          "title": "Profiel bewerken",
+          "fullName": "Volledige naam",
+          "email": "E-mailadres",
+          "username": "Gebruikersnaam",
+          "timezone": "Tijdzone",
+          "cancel": "Annuleren",
+          "saveChanges": "Wijzigingen opslaan"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Dashboard van de AI-stemengine",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI-stemengine",
+          "newProject": "Nieuw project",
+          "projects": "Projecten",
+          "clones": "Klonen",
+          "voiceLab": "Voice Lab",
+          "templates": "Sjablonen",
+          "settings": "Instellingen",
+          "profile": "Profiel"
+        },
+        "status": {
+          "idle": "Inactief",
+          "uploading": "Uploaden",
+          "cloning": "Klonen",
+          "translating": "Vertalen",
+          "rendering": "Renderen",
+          "done": "Klaar"
+        },
+        "source": {
+          "title": "Bronvideo",
+          "dropTitle": "Sleep hier je video naartoe om te beginnen",
+          "dropSubtitle": "MP4, MOV of WEBM (max. 1MB)",
+          "browseFiles": "Bestanden kiezen",
+          "originalLanguage": "Originele taal",
+          "targetLanguage": "Doeltaal",
+          "startDubbing": "Start dubbing"
+        },
+        "output": {
+          "title": "Gedubde output",
+          "processingTitle": "Stemtextuur wordt gesynthetiseerd",
+          "processingEta": "Geschatte tijd: 14 sec",
+          "translatedScript": "Vertaald script",
+          "editScript": "Script bewerken",
+          "scriptPlaceholder": "Scriptgeneratie wordt uitgevoerd...",
+          "downloadVideo": "Video downloaden",
+          "share": "Delen"
+        },
+        "toast": {
+          "title": "Stemkloon gereed",
+          "description": "Het stemprofiel \"Alex Narrator\" is geoptimaliseerd."
+        }
+      }
+    },
+    "cs": {
+      "languageLabel": "Čeština",
+      "index": {
+        "metaTitle": "Multiva.AI — AI hlasový engine",
+        "nav": {
+          "home": "Domů",
+          "mission": "Mise",
+          "features": "Funkce",
+          "pricing": "Ceník",
+          "demo": "Demo",
+          "login": "Přihlášení"
+        },
+        "interfaceLanguage": "Jazyk rozhraní",
+        "hero": {
+          "badge": "Klonování hlasu pomocí AI",
+          "title": "Váš hlas.<br>Každý jazyk.",
+          "subtitle": "Naklonujte svůj jedinečný hlas během několika sekund. Dabujte svůj obsah do více než 50 jazyků s emocemi a přesností.",
+          "primaryCta": "Začít zdarma",
+          "secondaryCta": "Zobrazit demo"
+        },
+        "mission": {
+          "title": "Bouráme jazykové bariéry — <span class=\"text-tertiary\">jedním hlasem</span> po druhém.",
+          "description": "Skvělé vyprávění by nemělo být omezeno na jediný jazyk. Multiva.AI vám pomůže znít přirozeně po celém světě.",
+          "languages": "Jazyky",
+          "accuracy": "Přesnost",
+          "videos": "Nadabovaná videa"
+        },
+        "features": {
+          "title": "Nepřekonatelná kvalita zvuku",
+          "subtitle": "Nástroje, které potřebujete k rozšíření svého obsahu globálně.",
+          "voiceCloningTitle": "Klonování hlasu",
+          "voiceCloningDesc": "Naklonujte jakýkoli hlas za 30 sekund při zachování tónu i emocí.",
+          "multilingualTitle": "Vícejazyčný dabing",
+          "multilingualDesc": "Automaticky překládejte a synchronizujte obsah do více jazyků.",
+          "exportTitle": "Okamžitý export",
+          "exportDesc": "Stáhněte si vysoce kvalitní výstup optimalizovaný pro YouTube, TikTok, kurzy a další."
+        },
+        "howItWorks": {
+          "title": "Jak to funguje",
+          "step1Title": "Nahrát",
+          "step1Desc": "Nahrajte své video nebo audio.",
+          "step2Title": "Vybrat",
+          "step2Desc": "Vyberte jazyk a nastavení hlasu.",
+          "step3Title": "Stáhnout",
+          "step3Desc": "Získejte svůj finální dabovaný obsah během několika minut.",
+          "button": "Otevřít workspace"
+        },
+        "testimonials": {
+          "title": "Důvěřují nám tvůrci",
+          "quote1": "\"Klonování hlasu zní stejně jako skutečný řečník.\"",
+          "quote2": "\"Spustili jsme náš kurz ve 12 jazycích bez narušení workflow.\"",
+          "quote3": "\"První AI nástroj, který podle nás opravdu rozumí emocím.\""
+        },
+        "pricing": {
+          "title": "Jednoduché a transparentní ceny.",
+          "subtitle": "Začněte zdarma. Škálujte s růstem.",
+          "starterCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Starter</div><div class=\"text-5xl font-bold clash-display\">$0<span class=\"text-xl text-on-surface-variant\">/měsíc</span></div><p class=\"text-on-surface-variant text-sm\">Pro seznámení s Multiva.AI</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 min dabingu/měsíc</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 jazyků</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>1 hlasový klon</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Zpracování v reálném čase</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Přístup k API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Začít zdarma</a>",
+          "proCard": "<div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest\">Nejoblíbenější</div><div class=\"text-xs uppercase tracking-widest text-primary\">Pro</div><div class=\"text-5xl font-bold clash-display\">$49<span class=\"text-xl text-on-surface-variant\">/měsíc</span></div><p class=\"text-on-surface-variant text-sm\">Pro náročné tvůrce obsahu</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>5 hodin dabingu/měsíc</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Všech 50+ jazyků</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>10 hlasových klonů</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Zpracování v reálném čase</li><li class=\"flex items-center gap-2 text-on-surface-variant opacity-50\"><span>✕</span>Přístup k API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all\">Spustit Pro zkušební verzi</a>",
+          "enterpriseCard": "<div class=\"text-xs uppercase tracking-widest text-on-surface-variant\">Enterprise</div><div class=\"text-5xl font-bold clash-display\">$199<span class=\"text-xl text-on-surface-variant\">/měsíc</span></div><p class=\"text-on-surface-variant text-sm\">Pro studia a velké týmy</p><ul class=\"space-y-3 text-sm\"><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Neomezený dabing</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Všech 50+ jazyků</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Neomezené klony</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Zpracování v reálném čase</li><li class=\"flex items-center gap-2 text-on-surface\"><span class=\"text-tertiary\">✓</span>Plný přístup k API</li></ul><a href=\"Login.html\" class=\"block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold\">Kontaktovat obchod</a>"
+        },
+        "cta": {
+          "title": "Jste připraveni růst globálně?",
+          "description": "Přidejte se k více než 10 000 tvůrcům, kteří používají Multiva.AI k oslovení publika po celém světě.",
+          "button": "Začít zdarma"
+        },
+        "footer": {
+          "description": "Nejpokročilejší AI hlasový engine na světě pro globální tvůrce a firmy.",
+          "copyright": "© 2026 Multiva.AI. Všechna práva vyhrazena.",
+          "productTitle": "Produkt",
+          "companyTitle": "Společnost",
+          "connectTitle": "Spojení",
+          "productLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"workspace.html\">Voice Lab</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Šablony</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Přístup k API</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Zabezpečení</a>",
+          "companyLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#mission\">Mise</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Kariéra</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Právní informace</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Soukromí</a>",
+          "connectLinks": "<a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Twitter</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Discord</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">LinkedIn</a><a class=\"hover:text-pink-400 transition-colors\" href=\"#\">Podpora</a>"
+        }
+      },
+      "login": {
+        "metaTitle": "Multiva.AI - Přihlášení",
+        "leftFeature1Title": "Okamžitá lokalizace",
+        "leftFeature1Desc": "Překládejte obsah do více než 40 jazyků při zachování tónu.",
+        "leftFeature2Title": "Neuronové klonování hlasu",
+        "leftFeature2Desc": "Dokonale reprodukujte svůj původní hlas v jakémkoli cílovém jazyce.",
+        "leftFeature3Title": "AI synchronizace rtů",
+        "leftFeature3Desc": "Automatické zarovnání pohybu úst pro přirozený výsledek.",
+        "heading": "Vítejte zpět",
+        "subheading": "Pokračujte ve své kreativní cestě s Multiva.AI.",
+        "emailLabel": "E-mailová adresa",
+        "emailPlaceholder": "name@company.com",
+        "emailError": "Zadejte platnou e-mailovou adresu.",
+        "passwordLabel": "Heslo",
+        "forgotPassword": "Zapomněli jste heslo?",
+        "passwordError": "Heslo musí mít alespoň 6 znaků.",
+        "rememberMe": "Zůstat přihlášen 30 dní",
+        "loginButton": "Přihlásit se",
+        "continueWith": "Nebo pokračovat přes",
+        "google": "Google",
+        "github": "GitHub",
+        "noAccount": "Nemáte účet?",
+        "createAccount": "Vytvořit účet zdarma"
+      },
+      "profile": {
+        "metaTitle": "Multiva.AI — Můj Profil",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI hlasový engine",
+          "newProject": "Nový projekt",
+          "projects": "Projekty",
+          "clones": "Klony",
+          "voiceLab": "Voice Lab",
+          "templates": "Šablony",
+          "profile": "Profil",
+          "settings": "Nastavení",
+          "goPro": "Přejít na Pro",
+          "unlockFullAccess": "Odemknout plný přístup"
+        },
+        "heading": "Můj Profil",
+        "editProfile": "Upravit profil",
+        "quickAction": "Nový projekt",
+        "details": {
+          "fullName": "Celé jméno",
+          "email": "E-mail",
+          "username": "Uživatelské jméno",
+          "timezone": "Časové pásmo",
+          "interfaceLanguage": "Jazyk rozhraní",
+          "memberSince": "Členem od"
+        },
+        "history": {
+          "title": "Historie generování",
+          "subtitle": "Všechna vaše AI dabovaná videa na jednom místě.",
+          "searchPlaceholder": "Hledat videa…",
+          "filterAll": "Vše",
+          "filterDone": "Hotovo",
+          "filterProcessing": "Zpracovává se",
+          "filterFailed": "Neúspěšné",
+          "statusDone": "Hotovo",
+          "statusProcessing": "Zpracovává se",
+          "statusFailed": "Neúspěšné"
+        },
+        "modal": {
+          "title": "Upravit profil",
+          "fullName": "Celé jméno",
+          "email": "E-mailová adresa",
+          "username": "Uživatelské jméno",
+          "timezone": "Časové pásmo",
+          "cancel": "Zrušit",
+          "saveChanges": "Uložit změny"
+        }
+      },
+      "workspace": {
+        "metaTitle": "Multiva.AI | Dashboard AI hlasového enginu",
+        "sidebar": {
+          "brand": "Workspace",
+          "tagline": "AI hlasový engine",
+          "newProject": "Nový projekt",
+          "projects": "Projekty",
+          "clones": "Klony",
+          "voiceLab": "Voice Lab",
+          "templates": "Šablony",
+          "settings": "Nastavení",
+          "profile": "Profil"
+        },
+        "status": {
+          "idle": "Nečinné",
+          "uploading": "Nahrávání",
+          "cloning": "Klonování",
+          "translating": "Překlad",
+          "rendering": "Renderování",
+          "done": "Hotovo"
+        },
+        "source": {
+          "title": "Zdrojové video",
+          "dropTitle": "Přetáhněte sem video a začněte",
+          "dropSubtitle": "MP4, MOV nebo WEBM (max. 1MB)",
+          "browseFiles": "Vybrat soubory",
+          "originalLanguage": "Původní jazyk",
+          "targetLanguage": "Cílový jazyk",
+          "startDubbing": "Spustit dabing"
+        },
+        "output": {
+          "title": "Výstup dabingu",
+          "processingTitle": "Probíhá syntéza hlasové textury",
+          "processingEta": "Odhadovaný čas: 14 s",
+          "translatedScript": "Přeložený skript",
+          "editScript": "Upravit skript",
+          "scriptPlaceholder": "Probíhá generování skriptu...",
+          "downloadVideo": "Stáhnout video",
+          "share": "Sdílet"
+        },
+        "toast": {
+          "title": "Hlasový klon je připraven",
+          "description": "Hlasový profil „Alex Narrator“ byl optimalizován."
+        }
+      }
+    }
   }
 }
