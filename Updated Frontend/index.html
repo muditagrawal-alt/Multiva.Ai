@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Multiva.AI — AI Voice Engine</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap"
+    rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#006251",
+            "on-tertiary": "#006150",
+            "surface-container-highest": "#25252f",
+            "surface-container-low": "#13131a",
+            "surface": "#0e0e15",
+            "inverse-surface": "#fcf8ff",
+            "secondary-fixed": "#eac4ff",
+            "primary-fixed-dim": "#f16092",
+            "on-secondary-container": "#f2d5ff",
+            "surface-bright": "#2b2b36",
+            "surface-tint": "#ff89ad",
+            "on-primary-fixed": "#000000",
+            "on-secondary-fixed": "#530081",
+            "on-tertiary-fixed": "#004236",
+            "outline-variant": "#48474f",
+            "primary-container": "#ff709f",
+            "on-secondary-fixed-variant": "#7d06bd",
+            "secondary-fixed-dim": "#e2b1ff",
+            "tertiary": "#77ffde",
+            "tertiary-container": "#32f4ce",
+            "surface-variant": "#25252f",
+            "secondary-container": "#7c04bc",
+            "primary-dim": "#ff6b9d",
+            "surface-dim": "#0e0e15",
+            "secondary": "#ca7bff",
+            "surface-container-lowest": "#000000",
+            "primary-fixed": "#ff709f",
+            "inverse-on-surface": "#55545d",
+            "on-primary-container": "#4c0022",
+            "primary": "#ff89ad",
+            "on-error-container": "#ffb2b9",
+            "on-primary-fixed-variant": "#5d002b",
+            "outline": "#76747e",
+            "error": "#ff6e84",
+            "on-surface-variant": "#acaab4",
+            "tertiary-fixed-dim": "#05e6c1",
+            "surface-container-high": "#1f1f28",
+            "on-secondary": "#360056",
+            "surface-container": "#191921",
+            "secondary-dim": "#ca7bff",
+            "inverse-primary": "#ad2b5e",
+            "on-tertiary-container": "#005748",
+            "on-surface": "#e7e4ee",
+            "error-container": "#a70138",
+            "background": "#0e0e15",
+            "on-background": "#e7e4ee",
+            "error-dim": "#d73357",
+            "tertiary-dim": "#05e6c1",
+            "tertiary-fixed": "#32f4ce",
+            "on-primary": "#62002e",
+            "on-error": "#490013"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Clash Display", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0e0e15;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      font-family: 'Inter', sans-serif;
+    }
+
+    .clash-display {
+      font-family: 'Clash Display', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .aurora-blur {
+      filter: blur(120px);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="text-on-surface overflow-x-hidden" data-page="index">
+  <!-- Floating Atmosphere Orbs -->
+  <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+    <div class="aurora-blur absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-primary rounded-full"></div>
+    <div class="aurora-blur absolute top-1/2 -right-1/4 w-[700px] h-[700px] bg-secondary rounded-full"></div>
+    <div class="aurora-blur absolute -bottom-1/4 left-1/2 w-[600px] h-[600px] bg-tertiary rounded-full"></div>
+  </div>
+  <!-- TopNavBar -->
+  <nav
+    class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_rgba(191,95,255,0.06)]">
+    <div class="flex justify-between items-center max-w-[1280px] mx-auto px-6 h-20">
+      <div
+        class="text-2xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-amber-400 bg-clip-text text-transparent clash-display">
+        Multiva.AI</div>
+      <div class="hidden md:flex items-center gap-8">
+        <a class="text-pink-400 font-bold border-b-2 border-pink-500 pb-1 text-sm font-medium tracking-tight"
+          href="#">Home</a>
+        <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium tracking-tight hover:bg-white/5"
+          href="#mission">Mission</a>
+        <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium tracking-tight hover:bg-white/5"
+          href="#features">Features</a>
+        <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium tracking-tight hover:bg-white/5"
+          href="#pricing">Pricing</a>
+        <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium tracking-tight hover:bg-white/5"
+          href="#demo">Demo</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <!-- Language Dropdown -->
+        <div class="relative hidden md:block" id="lang-dropdown-wrapper">
+          <button id="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false"
+            class="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-slate-300 text-sm font-medium hover:text-white hover:border-primary/50 hover:shadow-[0_0_14px_rgba(255,137,173,0.2)] transition-all duration-200 group">
+            <span class="material-symbols-outlined text-base text-primary group-hover:text-primary transition-colors"
+              style="font-variation-settings:'FILL' 0,'wght' 300;">language</span>
+            <span id="lang-selected-label">English</span>
+            <span class="material-symbols-outlined text-sm text-slate-400 transition-transform duration-200"
+              id="lang-chevron">expand_more</span>
+          </button>
+
+          <!-- Dropdown Panel -->
+          <div id="lang-dropdown-panel" role="listbox" aria-label="Select language"
+            class="absolute right-0 mt-2 w-52 rounded-2xl border border-white/10 bg-slate-950/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(191,95,255,0.15)] overflow-hidden z-50 opacity-0 scale-95 pointer-events-none transition-all duration-200 origin-top-right">
+            <div class="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant/60">
+              Interface Language</div>
+            <ul
+              class="py-1 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+              id="lang-list">
+              <li role="option" aria-selected="true" data-lang="English" data-lang-code="en"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇺🇸</span> English
+                <span class="material-symbols-outlined text-xs text-primary ml-auto" id="check-English">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Hindi" data-lang-code="hi"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇮🇳</span> Hindi
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Hindi">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Spanish" data-lang-code="es"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇪🇸</span> Spanish
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Spanish">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="French" data-lang-code="fr"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇫🇷</span> French
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-French">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Japanese" data-lang-code="ja"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇯🇵</span> Japanese
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Japanese">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="German" data-lang-code="de"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇩🇪</span> German
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-German">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Arabic" data-lang-code="ar"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇸🇦</span> Arabic
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Arabic">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Turkish" data-lang-code="tr"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇹🇷</span> Turkish
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Turkish">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Russian" data-lang-code="ru"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇷🇺</span> Russian
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Russian">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Portuguese" data-lang-code="pt"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇵🇹</span> Portuguese
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Portuguese">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Italian" data-lang-code="it"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇮🇹</span> Italian
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Italian">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Korean" data-lang-code="ko"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇰🇷</span> Korean
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Korean">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Dutch" data-lang-code="nl"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇳🇱</span> Dutch
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Dutch">check</span>
+              </li>
+              <li role="option" aria-selected="false" data-lang="Czech" data-lang-code="cs"
+                class="lang-option flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 cursor-pointer hover:bg-primary/10 hover:text-white transition-colors">
+                <span class="text-base">🇨🇿</span> Czech
+                <span class="material-symbols-outlined text-xs text-primary ml-auto hidden"
+                  id="check-Czech">check</span>
+              </li>
+            </ul>
+            <!-- gradient bottom accent -->
+            <div class="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+          </div>
+        </div>
+        <!-- /Language Dropdown -->
+        <a href="login.html"
+          class="bg-gradient-to-r from-primary to-secondary text-on-primary-container px-6 py-2.5 rounded-full font-bold text-sm scale-95 active:opacity-80 transition-transform shadow-[0_0_20px_rgba(191,95,255,0.3)]">Login</a>
+      </div>
+    </div>
+  </nav>
+  <main class="pt-20">
+    <!-- Hero Section -->
+    <section class="max-w-[1280px] mx-auto px-6 pt-24 pb-32 grid md:grid-cols-[1.2fr,1fr] gap-12 items-center"
+      id="hero">
+      <div class="space-y-8">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-primary-fixed text-sm font-medium">
+          <span class="material-symbols-outlined text-base">auto_awesome</span>
+          ✦ AI-Powered Voice Cloning
+        </div>
+        <h1 class="text-6xl md:text-8xl clash-display font-bold leading-[1.1] tracking-tight text-on-surface">
+          Your Voice.<br />
+          <span class="bg-gradient-to-r from-primary via-secondary to-amber-400 bg-clip-text text-transparent">Every
+            Language.</span>
+        </h1>
+        <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
+          Clone your unique vocal identity in seconds. Dub your content into 50+ languages with perfect emotional
+          resonance and lip-sync accuracy.
+        </p>
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a href="login.html"
+            class="bg-gradient-to-r from-primary to-secondary px-8 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,137,173,0.4)] transition-all text-on-primary">Get
+            Started Free</a>
+          <a href="#demo"
+            class="px-8 py-4 rounded-full font-bold text-lg border border-white/10 hover:bg-white/5 transition-all text-on-surface">Watch
+            Demo</a>
+        </div>
+      </div>
+      <div class="relative group">
+        <div
+          class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur-2xl group-hover:opacity-75 transition duration-1000">
+        </div>
+        <div class="relative bg-surface-container-high rounded-lg p-6 border border-white/5 shadow-2xl overflow-hidden">
+          <div class="aspect-video rounded-md bg-surface-container-lowest relative overflow-hidden group">
+            <img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+              alt="Futuristic video interface showing a person speaking with glowing audio waveform overlays and neon purple data visualizations"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYedsyhciXXWDIQ8FJ3jvXi1fpIqoASGHNIdkFP6GA77qLQfPVxg5AUPYXQI6EdTT3pN4B46B_lbqDgKUsEnr22mqJ69MIDOM5c8nuxDgRTnOxDGYrXmH1-VWED2kh9VPba0IscI4YDxCbCP0EByqE6VFKnZzE8Rvp3UB0KAwoPDFMy_xOl5Zrz2yZ2PYaD2xnGOzUBTKOaVAocuC7roFe1bPBCgmuYGO4FXkuUCEmu1lixkj2sEkKfu4ww5GVW_BfTUh3_zLm5ms" />
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div
+                class="w-20 h-20 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <span class="material-symbols-outlined text-4xl text-white"
+                  style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+              </div>
+            </div>
+            <div class="absolute bottom-4 left-4 right-4 h-1 bg-white/10 rounded-full">
+              <div class="h-full w-2/3 bg-secondary shadow-[0_0_15px_#ca7bff] rounded-full relative">
+                <div
+                  class="absolute -right-2 -top-2 w-5 h-5 rounded-full bg-secondary border-2 border-surface shadow-[0_0_10px_#ca7bff]">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 flex gap-4 items-center">
+            <div class="flex-1 space-y-2">
+              <div class="h-1.5 w-3/4 bg-white/10 rounded-full"></div>
+              <div class="h-1.5 w-1/2 bg-white/5 rounded-full"></div>
+            </div>
+            <div class="flex gap-2">
+              <div
+                class="w-8 h-8 rounded-full bg-tertiary/20 border border-tertiary/40 flex items-center justify-center">
+                <span class="material-symbols-outlined text-xs text-tertiary"
+                  style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Marquee Strip -->
+    <div class="w-full bg-surface-container-lowest/50 border-y border-white/5 py-10 overflow-hidden">
+      <div class="flex whitespace-nowrap gap-12 items-center animate-marquee">
+        <!-- Repeated set for infinite look -->
+        <div
+          class="flex shrink-0 items-center gap-12 text-2xl font-bold clash-display text-white/30 tracking-widest uppercase">
+          <span>Hindi</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Spanish</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Japanese</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>French</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>German</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Mandarin</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Arabic</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+        </div>
+        <div
+          class="flex shrink-0 items-center gap-12 text-2xl font-bold clash-display text-white/30 tracking-widest uppercase">
+          <span>Hindi</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Spanish</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Japanese</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>French</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>German</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Mandarin</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+          <span>Arabic</span> <span class="w-2 h-2 rotate-45 bg-primary"></span>
+        </div>
+      </div>
+    </div>
+    <!-- Mission Section -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32" id="mission">
+      <div class="grid md:grid-cols-2 gap-20 items-center">
+        <div class="space-y-6">
+          <h2 class="text-5xl clash-display font-bold leading-tight text-on-surface">
+            Breaking language barriers — <span class="text-tertiary">one voice</span> at a time.
+          </h2>
+          <p class="text-on-surface-variant text-lg leading-relaxed">We believe high-quality storytelling shouldn't be
+            limited by geography. Multiva.AI combines deep neural rendering with linguistic nuance to create voice
+            clones that feel human, not robotic.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="p-8 rounded-lg bg-surface-container-low border border-white/5 space-y-2">
+            <div
+              class="text-4xl font-bold clash-display bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent">
+              50+</div>
+            <div class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Languages</div>
+          </div>
+          <div class="p-8 rounded-lg bg-surface-container-low border border-white/5 space-y-2">
+            <div
+              class="text-4xl font-bold clash-display bg-gradient-to-br from-secondary to-tertiary bg-clip-text text-transparent">
+              99%</div>
+            <div class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Accuracy</div>
+          </div>
+          <div class="p-8 rounded-lg bg-surface-container-low border border-white/5 space-y-2">
+            <div
+              class="text-4xl font-bold clash-display bg-gradient-to-br from-tertiary to-amber-400 bg-clip-text text-transparent">
+              2M+</div>
+            <div class="text-xs uppercase tracking-widest text-on-surface-variant font-medium">Videos Dubbed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Features Section -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32" id="features">
+      <div class="text-center mb-20 space-y-4">
+        <h2 class="text-4xl md:text-5xl clash-display font-bold">Unrivaled Audio Fidelity</h2>
+        <p class="text-on-surface-variant">The tools you need to take your content global.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Feature Card 1 -->
+        <div
+          class="group relative p-10 rounded-lg bg-surface-container-low border border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden">
+          <div
+            class="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <div class="w-14 h-14 rounded-md bg-gradient-to-br from-primary to-secondary p-[1px] mb-8">
+            <div class="w-full h-full bg-surface-container-low rounded-[15px] flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary"
+                style="font-variation-settings: 'FILL' 1;">mic_external_on</span>
+            </div>
+          </div>
+          <h3 class="text-2xl clash-display font-bold mb-4">Voice Cloning</h3>
+          <p class="text-on-surface-variant leading-relaxed">Clone any voice with just 30 seconds of audio sample.
+            Maintains emotion, accent, and inflection across all output.</p>
+        </div>
+        <!-- Feature Card 2 -->
+        <div
+          class="group relative p-10 rounded-lg bg-surface-container-low border border-white/5 hover:border-secondary/40 transition-all duration-500 overflow-hidden">
+          <div
+            class="absolute -right-10 -top-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <div class="w-14 h-14 rounded-md bg-gradient-to-br from-secondary to-tertiary p-[1px] mb-8">
+            <div class="w-full h-full bg-surface-container-low rounded-[15px] flex items-center justify-center">
+              <span class="material-symbols-outlined text-secondary"
+                style="font-variation-settings: 'FILL' 1;">translate</span>
+            </div>
+          </div>
+          <h3 class="text-2xl clash-display font-bold mb-4">Multilingual Dubbing</h3>
+          <p class="text-on-surface-variant leading-relaxed">Automatic translation and synchronization. Our AI adjusts
+            the speed and timing to perfectly match the original video.</p>
+        </div>
+        <!-- Feature Card 3 -->
+        <div
+          class="group relative p-10 rounded-lg bg-surface-container-low border border-white/5 hover:border-tertiary/40 transition-all duration-500 overflow-hidden">
+          <div
+            class="absolute -right-10 -top-10 w-40 h-40 bg-tertiary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <div class="w-14 h-14 rounded-md bg-gradient-to-br from-tertiary to-primary p-[1px] mb-8">
+            <div class="w-full h-full bg-surface-container-low rounded-[15px] flex items-center justify-center">
+              <span class="material-symbols-outlined text-tertiary"
+                style="font-variation-settings: 'FILL' 1;">cloud_download</span>
+            </div>
+          </div>
+          <h3 class="text-2xl clash-display font-bold mb-4">Instant Export</h3>
+          <p class="text-on-surface-variant leading-relaxed">High-bitrate studio quality output. Export in various
+            formats optimized for YouTube, TikTok, and professional cinema.</p>
+        </div>
+      </div>
+    </section>
+    <!-- How It Works -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32" id="demo">
+      <div class="bg-surface-container-low rounded-lg p-16 border border-white/5">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl clash-display font-bold mb-4">How It Works</h2>
+          <p class="text-on-surface-variant">Three steps to a dubbed masterpiece.</p>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-start gap-12 relative">
+          <!-- Connector Lines (Visual Only) -->
+          <div
+            class="hidden md:block absolute top-12 left-1/4 right-1/4 h-[2px] border-t-2 border-dashed border-white/10 -z-0">
+          </div>
+          <div class="flex-1 space-y-6 relative z-10 text-center md:text-left">
+            <div
+              class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary text-2xl font-bold clash-display mx-auto md:mx-0 shadow-[0_0_20px_rgba(255,137,173,0.3)]">
+              1</div>
+            <h4 class="text-2xl font-bold clash-display">Upload</h4>
+            <p class="text-on-surface-variant">Drag your video or audio file into our secure AI workspace.</p>
+          </div>
+          <div class="flex-1 space-y-6 relative z-10 text-center md:text-left">
+            <div
+              class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-on-secondary text-2xl font-bold clash-display mx-auto md:mx-0 shadow-[0_0_20px_rgba(202,123,255,0.3)]">
+              2</div>
+            <h4 class="text-2xl font-bold clash-display">Select</h4>
+            <p class="text-on-surface-variant">Choose target languages and fine-tune voice characteristics.</p>
+          </div>
+          <div class="flex-1 space-y-6 relative z-10 text-center md:text-left">
+            <div
+              class="w-16 h-16 rounded-full bg-tertiary flex items-center justify-center text-on-tertiary text-2xl font-bold clash-display mx-auto md:mx-0 shadow-[0_0_20px_rgba(5,230,193,0.3)]">
+              3</div>
+            <h4 class="text-2xl font-bold clash-display">Download</h4>
+            <p class="text-on-surface-variant">Get your localized content in minutes, ready to share globally.</p>
+          </div>
+        </div>
+        <div class="mt-16 text-center">
+          <a href="workspace.html"
+            class="bg-gradient-to-r from-primary to-secondary px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(255,137,173,0.4)] transition-all text-on-primary inline-block">Open
+            Workspace →</a>
+        </div>
+      </div>
+    </section>
+    <!-- Testimonials -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32" id="testimonials">
+      <h2 class="text-4xl clash-display font-bold mb-16">Trusted by Creators</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div
+          class="p-8 rounded-lg bg-surface-container-low border-l-4 border-primary border-t border-r border-b border-white/5 space-y-6">
+          <p class="italic text-on-surface leading-relaxed">"The voice cloning is indistinguishable from my real voice.
+            It's saved us hundreds of hours in the recording studio."</p>
+          <div class="flex items-center gap-4">
+            <img class="w-12 h-12 rounded-full object-cover"
+              alt="Professional portrait of a male tech creator with modern glasses and minimalist background"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBClYV44kBt7aR48zlgsCUp51fPbuWAG7KxExscXt_f3mIS-ByHR7yYVlhcxVQTMwbMFoCeLI7wuOuFLdZZo8Zpvm8oUz05zTycUcTjjft-EITkHHwihc6nCj9uMrBu__WGsMFitom4Y-6GXmBu67RAI6O2fn-DMG5OdHnSsNm9QHDtT-mKenEeUMeJipNSHx91FGWpNarV30yct9Wr_fwnKrwt3j8tv0pDOglyqOImYMgiIDWskVdNyruZjumkIaTjkFSx_0xOrfE" />
+            <div>
+              <div class="font-bold">Marcus Chen</div>
+              <div class="text-xs text-on-surface-variant uppercase tracking-widest">YouTube Content Lead</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="p-8 rounded-lg bg-surface-container-low border-l-4 border-secondary border-t border-r border-b border-white/5 space-y-6">
+          <p class="italic text-on-surface leading-relaxed">"VoxShift allowed us to launch our masterclass in 12
+            different languages simultaneously. The growth has been exponential."</p>
+          <div class="flex items-center gap-4">
+            <img class="w-12 h-12 rounded-full object-cover"
+              alt="Confident businesswoman in her 30s, creative director style, soft studio lighting"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX0ZG_BBJk9wRL7mhr14PvmPTAyKcIG0dKOMlZf9Ry_kHrV4Sy1qLhUcEIzWbHxsx9td5XUnSM-R2cKb0rIgdg5reh0zYlL7-HtQtPpz0UlV40WC5DuRegiOFLp7rWYCysr4VzPuEgFnz9lOEaGpdokUCAyO79TAgc_2z0Xaz9pTUUgSXhzNLKHVftA0opkdt7VTu_rThWxU0sxdH8ppSpYI1NJtLFlTnDVOIFD8KJ2ZdOYXe9yIucC3mPufkfJQqKnWavR2t06ww" />
+            <div>
+              <div class="font-bold">Elena Rodriguez</div>
+              <div class="text-xs text-on-surface-variant uppercase tracking-widest">EdTech Founder</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="p-8 rounded-lg bg-surface-container-low border-l-4 border-tertiary border-t border-r border-b border-white/5 space-y-6">
+          <p class="italic text-on-surface leading-relaxed">"Unbelievable emotional range. It's the first AI dubbing
+            tool that actually captures sarcasm and excitement correctly."</p>
+          <div class="flex items-center gap-4">
+            <img class="w-12 h-12 rounded-full object-cover"
+              alt="Enthusiastic young male podcaster with professional headphones, vibrant neon lighting background"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvKC4vIsWGQ1GRPYdAWIwJ57WfgNmdA_2BYGyg8LUeUHF2XpNJF20ee6v4Q192o2XOIwbnJaPcSq0djVNiAUhwTohEE6HuC2K7WqLCNqtZ9y7EkSGpF5pOJh83n1oQC8EIreSRNcUEOScLCl2N-2Erf-O021k_GmRe51xs9HqWhXI5vV1iyQUguqtwCmhdDYxFz5M6nrFxVxtTk9HMpO1EhoH9EeJ8xz8CgstTPXmKbSb-cEVGumXKShv7gOpreHFcXCiWLJJ9nKc" />
+            <div>
+              <div class="font-bold">David S.</div>
+              <div class="text-xs text-on-surface-variant uppercase tracking-widest">Film Producer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Pricing -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32" id="pricing">
+      <div class="text-center mb-16 space-y-4">
+        <h2 class="text-4xl md:text-5xl clash-display font-bold">Simple, transparent pricing.</h2>
+        <p class="text-on-surface-variant">Start free. Scale as you grow.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-10 rounded-lg bg-surface-container-low border border-white/5 space-y-6">
+          <div class="text-xs uppercase tracking-widest text-on-surface-variant">Starter</div>
+          <div class="text-5xl font-bold clash-display">$0<span class="text-xl text-on-surface-variant">/mo</span></div>
+          <p class="text-on-surface-variant text-sm">For exploring Multiva.AI</p>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> 10 min
+              dubbing/month
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> 5 languages</li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> 1 voice clone</li>
+            <li class="flex items-center gap-2 text-on-surface-variant opacity-50"><span>✗</span> Real-time processing
+            </li>
+            <li class="flex items-center gap-2 text-on-surface-variant opacity-50"><span>✗</span> API access</li>
+          </ul>
+          <a href="login.html"
+            class="block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold">Get
+            Started Free</a>
+        </div>
+        <div
+          class="p-10 rounded-lg bg-surface-container-low border border-primary/30 space-y-6 relative shadow-[0_0_30px_rgba(255,137,173,0.1)]">
+          <div
+            class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-on-primary text-xs font-bold px-4 py-1 rounded-full uppercase tracking-widest">
+            Most Popular</div>
+          <div class="text-xs uppercase tracking-widest text-primary">Pro</div>
+          <div class="text-5xl font-bold clash-display">$49<span class="text-xl text-on-surface-variant">/mo</span>
+          </div>
+          <p class="text-on-surface-variant text-sm">For serious content creators</p>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> 5 hours
+              dubbing/month</li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> All 50+ languages
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> 10 voice clones
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> Real-time
+              processing</li>
+            <li class="flex items-center gap-2 text-on-surface-variant opacity-50"><span>✗</span> API access</li>
+          </ul>
+          <a href="login.html"
+            class="block w-full text-center py-4 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-bold hover:shadow-[0_0_20px_rgba(255,137,173,0.4)] transition-all">Start
+            Pro Trial</a>
+        </div>
+        <div class="p-10 rounded-lg bg-surface-container-low border border-white/5 space-y-6">
+          <div class="text-xs uppercase tracking-widest text-on-surface-variant">Enterprise</div>
+          <div class="text-5xl font-bold clash-display">$199<span class="text-xl text-on-surface-variant">/mo</span>
+          </div>
+          <p class="text-on-surface-variant text-sm">For studios and large teams</p>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> Unlimited dubbing
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> All 50+ languages
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> Unlimited clones
+            </li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> Real-time
+              processing</li>
+            <li class="flex items-center gap-2 text-on-surface"><span class="text-tertiary">✓</span> Full API access
+            </li>
+          </ul>
+          <a href="login.html"
+            class="block w-full text-center py-4 rounded-full border border-white/10 hover:bg-white/5 transition-all font-bold">Contact
+            Sales</a>
+        </div>
+      </div>
+    </section>
+    <!-- CTA Banner -->
+    <section class="max-w-[1280px] mx-auto px-6 py-32">
+      <div
+        class="relative overflow-hidden rounded-lg p-16 md:p-24 bg-gradient-to-br from-primary via-secondary to-slate-950 flex flex-col items-center text-center">
+        <div
+          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none">
+        </div>
+        <div class="relative z-10 space-y-8">
+          <h2 class="text-5xl md:text-7xl clash-display font-bold tracking-tight text-white">Ready to go global?</h2>
+          <p class="text-xl text-white/80 max-w-2xl mx-auto">Join 10,000+ creators who are using Multiva.AI to reach
+            audiences in every corner of the world.</p>
+          <div class="pt-6">
+            <a href="login.html"
+              class="bg-white text-slate-950 px-12 py-5 rounded-full font-bold text-xl hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] transition-all inline-block">Start
+              Free</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!-- Footer -->
+  <footer class="bg-slate-950 w-full py-16 px-8 border-t border-white/5">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-7xl mx-auto">
+      <div class="space-y-6">
+        <div
+          class="text-xl font-black bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent clash-display">
+          Multiva.AI</div>
+        <p class="text-sm leading-relaxed text-slate-400">The world's most advanced AI voice engine for global creators
+          and enterprises.</p>
+        <div class="text-sm leading-relaxed text-slate-500">© 2026 Multiva.AI. All rights reserved.</div>
+      </div>
+      <div class="space-y-6">
+        <h5 class="text-white font-bold clash-display">Product</h5>
+        <div class="flex flex-col gap-4 text-sm text-slate-500">
+          <a class="hover:text-pink-400 transition-colors" href="workspace.html">Voice Lab</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Templates</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">API Access</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Security</a>
+        </div>
+      </div>
+      <div class="space-y-6">
+        <h5 class="text-white font-bold clash-display">Company</h5>
+        <div class="flex flex-col gap-4 text-sm text-slate-500">
+          <a class="hover:text-pink-400 transition-colors" href="#mission">Mission</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Careers</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Legal</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Privacy</a>
+        </div>
+      </div>
+      <div class="space-y-6">
+        <h5 class="text-white font-bold clash-display">Connect</h5>
+        <div class="flex flex-col gap-4 text-sm text-slate-500">
+          <a class="hover:text-pink-400 transition-colors" href="#">Twitter</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Discord</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">LinkedIn</a>
+          <a class="hover:text-pink-400 transition-colors" href="#">Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <style>
+    @keyframes marquee {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .animate-marquee {
+      animation: marquee 30s linear infinite;
+    }
+
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+  </style>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
