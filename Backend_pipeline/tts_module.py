@@ -51,16 +51,13 @@ def clean_text(text: str) -> str:
     return text
 
 
-def split_sentences(text: str) -> list:
+def split_sentences(text: str):
     """
-    Split on sentence-ending punctuation BUT protect abbreviations.
-    e.g. 'बी.टेक', 'B.Tech', 'Dr.Smith' are NOT split.
+    Split on sentence punctuation while protecting short abbreviations
+    like B.Tech, Dr.Smith, etc.
     """
-    # Protect abbreviations: short word + '.' + immediately another word char
-    protected = re.sub(r'(?<=\S{1,4})\.\s*(?=\S)', '<<DOT>>', text)
-    # Also protect single-letter abbrevs before uppercase / Devanagari
-    protected = re.sub(r'(\b\w{1,3})\.\s+(?=[A-Z\u0900-\u097F])', r'\1<<DOT>>', protected)
 
+    protected = re.sub(r'(\S{1,4})\.(?=\S)', r'\1<<DOT>>', text)
     pattern = r'(?<=[.!?।。！？؟…])\s+'
     sentences = re.split(pattern, protected)
     sentences = [s.replace('<<DOT>>', '.').strip() for s in sentences]

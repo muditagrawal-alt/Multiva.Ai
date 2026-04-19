@@ -94,3 +94,4 @@ key.pem
 
 indicf5_env/
 Backend_pipeline/IndicF5/
+Backend_pipeline/Wav2Lip
