@@ -98,6 +98,8 @@ export interface FitResult {
   was_seconds?: number;
   fits?: boolean;
   attempts: Array<{ text: string; seconds: number; source: string }>;
+  /** Words that may have been dropped rather than rephrased. Advisory. */
+  check?: string[];
   detail?: string;
 }
 
