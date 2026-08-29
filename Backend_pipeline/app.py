@@ -1,28 +1,215 @@
-# Checkpoint: 29/3/26
-
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, File, UploadFile, Query, HTTPException
-from fastapi.responses import FileResponse
+import asyncio
 import os
-import json
 import shutil
-import subprocess
+import sys
+import threading
+import traceback
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
-# 🔥 DB MANAGER IMPORT (ADDED)
-from Database.manager.data_manager import (
-    create_video_entry,
-    update_video_status,
-    save_final_video,
-    mark_video_failed
-)
+# Ensure Backend_pipeline and root directory are in sys.path
+_CURRENT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _CURRENT_DIR.parent
+for _p in (str(_CURRENT_DIR), str(_PROJECT_ROOT)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
-from video_processing import extract_audio
-from speech_to_text import transcribe_audio
-from translation import translate_text
-from tts_module import synthesize_voice
+from fastapi import (BackgroundTasks, Body, FastAPI, File, Form, HTTPException,
+                     Query, UploadFile)
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 
-app = FastAPI(title="Multilingual Voice Cloning API")
+# ---------------------------------------------------------------------------
+# Database integration (graceful degradation)
+# ---------------------------------------------------------------------------
+try:
+    from Database.manager.data_manager import (
+        create_video_entry,
+        delete_video_entry,
+        get_expired_videos,
+        get_user_videos,
+        mark_video_failed,
+        save_final_video,
+        update_video_status,
+    )
+    DB_INTEGRATION_AVAILABLE = True
+except Exception as db_import_error:
+    DB_INTEGRATION_AVAILABLE = False
+    create_video_entry = update_video_status = save_final_video = None
+    mark_video_failed = get_user_videos = delete_video_entry = None
+    get_expired_videos = None
+    print(f"[APP] Database integration disabled: {db_import_error}")
+
+# ---------------------------------------------------------------------------
+# Cloudflare R2 (graceful degradation)
+# ---------------------------------------------------------------------------
+try:
+    from cloudflare_r2 import delete_file_from_r2, upload_file_to_r2
+except Exception as r2_error:
+    upload_file_to_r2 = delete_file_from_r2 = None
+    print(f"[APP] Cloudflare R2 integration disabled: {r2_error}")
+
+# ---------------------------------------------------------------------------
+# Pipeline modules
+# ---------------------------------------------------------------------------
+import numpy as np
+
+import av_sync
+import dubbing
+import project
+import subtitles
+import voiceover
+import languages as L
+import reference_audio
+import tts_engines
+from lip_sync import generate_lip_synced_video
+from speech_to_text_v2 import transcribe_audio
+from translation_v2 import translate_segments
+
+jobs: dict = {}
+
+UPLOAD_DIR = os.path.abspath(os.path.join(_PROJECT_ROOT, "temp_uploads"))
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# The heavy stages (TTS + Wav2Lip) share one GPU. Running two jobs through them
+# at once thrashes MPS and makes both slower than running them back to back.
+_HEAVY = threading.Semaphore(int(os.getenv("PIPELINE_CONCURRENCY", 1)))
+
+KEEP_INTERMEDIATE = os.getenv("KEEP_INTERMEDIATE", "").lower() in ("1", "true", "yes")
+
+
+# ---------------------------------------------------------------------------
+# Cleanup task
+# ---------------------------------------------------------------------------
+async def cleanup_loop():
+    while True:
+        try:
+            if DB_INTEGRATION_AVAILABLE and get_expired_videos and delete_file_from_r2:
+                for vid in get_expired_videos():
+                    vid_id = vid.get("video_id") or vid.get("id")
+                    for key in ("original_url", "dubbed_url"):
+                        if vid.get(key):
+                            delete_file_from_r2(vid[key].split("/")[-1])
+                    if delete_video_entry and vid_id:
+                        delete_video_entry(vid_id)
+                    print(f"[Cleanup] Deleted expired video: {vid_id}")
+        except Exception as e:
+            print(f"[Cleanup] Error: {e}")
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    restored = project.scan(UPLOAD_DIR)
+    if restored:
+        jobs.update(restored)
+        print(f"[APP] Reopened {len(restored)} saved project(s)")
+    task = asyncio.create_task(cleanup_loop())
+    if os.getenv("WARMUP_ON_START", "1") not in ("0", "false", "no"):
+        threading.Thread(target=_warmup, daemon=True).start()
+    yield
+    task.cancel()
+
+
+def _voice_match(ref_path: str, dub_path: str, source_path: str):
+    """
+    How close the dub sounds to the reference speaker, on a 0..1 scale.
+
+    A bare WavLM cosine is not reportable: this model returns roughly 0.9 for
+    almost any pair, so the raw number looks excellent even for a failed clone.
+    eval_harness already solved this by anchoring against two references, and
+    the same anchors are available here for free:
+
+        ceiling  reference vs the speaker's own source audio
+        floor    reference vs unrelated speakers (the IndicF5 prompt clips)
+
+    The reported value is where the dub falls between them. Best effort: a
+    scoring failure must never fail a render that otherwise succeeded.
+    """
+    if os.getenv("VOICE_MATCH", "1") in ("0", "false", "no"):
+        return None
+    try:
+        from eval_harness import SpeakerScorer
+        scorer = SpeakerScorer()
+        ref = scorer.embed(ref_path)
+        dub = scorer.embed(dub_path)
+        if ref is None or dub is None:
+            return None
+        raw = scorer.cosine(ref, dub)
+        ceiling = scorer.cosine(ref, scorer.embed(source_path))
+        floor = scorer.floor(ref_path)
+        import math
+        if any(math.isnan(v) for v in (raw, ceiling, floor)) or ceiling <= floor:
+            return None
+        norm = (raw - floor) / (ceiling - floor)
+        return {"score": round(max(0.0, min(1.0, norm)), 3),
+                "cosine": round(raw, 4)}
+    except Exception as e:                                   # noqa: BLE001
+        print(f"[APP] Voice match unavailable: {e}")
+        return None
+
+
+# What the splash screen reports while the window is still closed. These are
+# the real model loads, in the order they happen, not a progress animation.
+BOOT = {"stage": "Starting", "index": 0, "total": 4, "ready": False, "notes": []}
+
+
+def _boot(stage: str, index: int):
+    BOOT["stage"] = stage
+    BOOT["index"] = index
+    print(f"[BOOT] {index}/{BOOT['total']} {stage}")
+
+
+def _warmup():
+    """
+    Preload weights so the first render does not pay the load cost.
+
+    Everything here used to load lazily on first use, which meant the first
+    dub of a session was several minutes slower than the rest for reasons the
+    user could not see. Loading it up front costs the same time somewhere the
+    user is already waiting, and gives the splash something true to report.
+    """
+    steps = [
+        ("Loading voice model", lambda: tts_engines.warmup(os.getenv("WARMUP_LANG", "hi"))),
+        ("Loading speech recognition", _warm_asr),
+        ("Loading translator", _warm_translator),
+        ("Loading lip sync", _warm_lipsync),
+    ]
+    BOOT["total"] = len(steps)
+    for i, (label, fn) in enumerate(steps, 1):
+        _boot(label, i)
+        try:
+            fn()
+        except Exception as e:                               # noqa: BLE001
+            # A component that will not load is not fatal at boot; the stage
+            # that needs it will fail with a real message. Record it so the
+            # splash can say so rather than claiming everything is ready.
+            print(f"[BOOT] {label} failed: {e}")
+            BOOT["notes"].append(f"{label} unavailable")
+    BOOT["stage"] = "Ready"
+    BOOT["ready"] = True
+    print("[BOOT] Warmup complete")
+
+
+def _warm_asr():
+    from speech_to_text_v2 import _load_model
+    _load_model()
+
+
+def _warm_translator():
+    from translation_v2 import _load_model
+    _load_model()
+
+
+def _warm_lipsync():
+    import lip_sync
+    lip_sync.warmup()
+
+
+app = FastAPI(title="Multiva.Ai — Indian-language Voice Cloning API",
+              lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,151 +219,1055 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = "temp_uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def format_duration(seconds: float) -> str:
+    return f"{int(seconds // 60)}:{int(seconds % 60):02d}"
 
 
-def get_duration(path: str) -> float:
-    result = subprocess.run([
-        "ffprobe", "-v", "quiet",
-        "-print_format", "json",
-        "-show_streams", path
-    ], capture_output=True, text=True, check=True)
-    data = json.loads(result.stdout)
-    for stream in data["streams"]:
-        if "duration" in stream:
-            return float(stream["duration"])
-    raise ValueError(f"Could not read duration from {path}")
+class JobCancelled(Exception):
+    """Raised inside the pipeline when the user has asked it to stop."""
 
 
-def stretch_audio_to_duration(audio_path: str, target_duration: float) -> str:
-    audio_duration = get_duration(audio_path)
-    ratio = audio_duration / target_duration
-
-    print(f"[SYNC] TTS={audio_duration:.2f}s | Video={target_duration:.2f}s | ratio={ratio:.3f}")
-
-    if abs(ratio - 1.0) < 0.02:
-        print("[SYNC] Within 2% — skipping stretch.")
-        return audio_path
-
-    filters = []
-    r = ratio
-    while r > 2.0:
-        filters.append("atempo=2.0")
-        r /= 2.0
-    while r < 0.5:
-        filters.append("atempo=0.5")
-        r /= 0.5
-    filters.append(f"atempo={r:.6f}")
-    atempo_filter = ",".join(filters)
-
-    stretched_path = audio_path.replace(".wav", "_stretched.wav")
-    subprocess.run([
-        "ffmpeg", "-y",
-        "-i", audio_path,
-        "-filter:a", atempo_filter,
-        stretched_path
-    ], check=True)
-
-    print(f"[SYNC] Stretched audio → {stretched_path} ({get_duration(stretched_path):.2f}s)")
-    return stretched_path
+def _set(job_id: str, **kw):
+    job = jobs.get(job_id)
+    if job is None:
+        return
+    job.update(kw)
+    # Every step report doubles as a cancellation checkpoint. The two longest
+    # stages report per segment and per frame batch, so a cancel lands within
+    # seconds instead of at the end of the run. Terminal updates carry a
+    # `status` and must never raise.
+    if "step" in kw and "status" not in kw and job.get("cancel_requested"):
+        raise JobCancelled()
 
 
-@app.post("/process_video/")
-async def process_video(
-    file: UploadFile = File(...),
-    target_language: str = Query(..., description="Target language code")
-):
-    input_path = os.path.join(UPLOAD_DIR, file.filename)
+# ---------------------------------------------------------------------------
+# Pipeline
+# ---------------------------------------------------------------------------
+def process_video_task(job_id: str, input_path: str, original_language: str,
+                       target_language: str, filename: str,
+                       user_id: str = "anonymous",
+                       trim_start: float = None, trim_end: float = None,
+                       music_path: str = None, music_gain: float = -18.0):
+    """
+    Segment-level dubbing pipeline.
+
+    The dubbed track is built to exactly the video's duration (see `dubbing`),
+    so lip sync receives matched streams and the output cannot drift, loop or
+    truncate. There is no post-hoc tempo correction anywhere in this function.
+    """
+    video_id = None
+    workdir = os.path.join(UPLOAD_DIR, f"job_{job_id}")
+    os.makedirs(workdir, exist_ok=True)
+
+    stem = os.path.splitext(os.path.basename(filename))[0]
 
     try:
-        # 1️⃣ Save uploaded video locally
-        with open(input_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
+        _set(job_id, status="processing", step="validating")
 
         if not os.path.exists(input_path) or os.path.getsize(input_path) < 1000:
-            raise HTTPException(status_code=400, detail="Uploaded file is missing or too small")
+            raise ValueError("Uploaded file is missing or too small")
 
-        print(f"[APP] Input video: {input_path} ({os.path.getsize(input_path)} bytes)")
+        info = av_sync.probe(input_path)
+        if not info["video"]:
+            raise ValueError("Uploaded file has no video stream")
+        video_dur = info["duration"]
 
-        # 🔥 DB: CREATE ENTRY + R2 UPLOAD
-        user_id = "demo-user-id"  # ⚠️ replace later with auth user
-        db_result = create_video_entry(user_id, input_path)
+        # In and out points, applied before anything else looks at the file, so
+        # transcription, reference selection and the timeline all agree on what
+        # "the clip" is.
+        if trim_start is not None or trim_end is not None:
+            a = max(0.0, float(trim_start or 0.0))
+            b = min(video_dur, float(trim_end if trim_end is not None else video_dur))
+            if b - a < 1.0:
+                raise ValueError(
+                    f"The trimmed range is only {max(0.0, b - a):.2f}s; "
+                    f"at least a second is needed.")
+            if a > 0.0 or b < video_dur - 0.01:
+                trimmed = os.path.join(workdir, f"{stem}_trimmed.mp4")
+                av_sync.trim(input_path, trimmed, a, b)
+                input_path = trimmed
+                video_dur = av_sync.duration(trimmed)
+                print(f"[APP] Trimmed to {a:.2f}s-{b:.2f}s ({video_dur:.2f}s)")
+                _set(job_id, duration=format_duration(video_dur))
+        _set(job_id, duration=format_duration(video_dur))
 
-        if not db_result:
-            raise HTTPException(status_code=500, detail="Failed to store video")
+        # Validate the target up front — a clear error beats bad audio.
+        try:
+            target_language = L.normalize(target_language)
+            L.engine_for(target_language)
+        except L.UnsupportedLanguage as e:
+            raise ValueError(str(e))
 
-        video_id = db_result["video_id"]
+        print(f"[APP] {filename}: {video_dur:.2f}s, "
+              f"{info['video']['width']}x{info['video']['height']} @ "
+              f"{info['video']['fps']:.3f}fps -> {L.display_name(target_language)}")
 
-        # 🔥 DB: mark processing
-        update_video_status(video_id, "processing")
+        # ── DB entry ──
+        if DB_INTEGRATION_AVAILABLE and create_video_entry:
+            db_result = create_video_entry(user_id, filename, original_language,
+                                           target_language, format_duration(video_dur))
+            if db_result:
+                video_id = db_result["id"]
 
-        # 2️⃣ Extract audio
-        audio_path = extract_audio(input_path)
-        print(f"[APP] Extracted audio: {audio_path}")
+        # ── Upload original ──
+        if upload_file_to_r2:
+            original_r2_url = upload_file_to_r2(input_path, f"uploads/{job_id}_{filename}")
+            if DB_INTEGRATION_AVAILABLE and video_id and update_video_status:
+                update_video_status(video_id, "processing", original_url=original_r2_url)
 
-        # 3️⃣ Transcribe
-        result = transcribe_audio(audio_path)
-        original_text = result["text"]
-        source_language = result["language"]
-        print(f"[APP] Transcribed ({source_language}): {original_text[:80]}...")
+        # ── 1. Audio for STT (16 kHz mono is what Whisper wants) ──
+        _set(job_id, step="extracting_audio")
+        stt_audio = av_sync.extract_audio(
+            input_path, os.path.join(workdir, f"{stem}_stt.wav"), 16000, 1)
 
-        # 4️⃣ Translate
-        translated_text = translate_text(original_text, source_language, target_language)
-        print(f"[APP] Translated ({target_language}): {translated_text[:80]}...")
+        # ── 2. Transcribe with word timestamps ──
+        _set(job_id, step="transcribing")
+        result = transcribe_audio(stt_audio)
+        segments = result.get("segments") or []
+        original_text = result.get("text", "")
+        _set(job_id, original_text=original_text)
 
-        # 5️⃣ TTS
-        synthesized_audio_path = synthesize_voice(
-            translated_text,
-            language=target_language,
-            speaker_wav=audio_path
-        )
+        if not segments:
+            raise RuntimeError(
+                "No speech detected in the video — nothing to dub.")
 
-        if not os.path.exists(synthesized_audio_path):
-            raise HTTPException(status_code=500, detail="TTS synthesis produced no output file")
+        # Prefer what the user selected; fall back to detection. The old code
+        # ignored the UI value entirely and trusted Whisper, which mis-detects
+        # on short or accented audio and then mistranslates the whole video.
+        source_language = original_language or result.get("language")
+        try:
+            source_language = L.normalize(source_language)
+        except L.UnsupportedLanguage:
+            source_language = L.normalize(result.get("language") or "en")
+        print(f"[APP] Source language: {source_language} "
+              f"(detected {result.get('language')}, requested {original_language})")
 
-        tts_size = os.path.getsize(synthesized_audio_path)
-        if tts_size < 1000:
-            raise HTTPException(status_code=500, detail=f"TTS output suspiciously small: {tts_size} bytes")
+        # ── 3. Reference clip for cloning ──
+        _set(job_id, step="selecting_reference")
+        reference = reference_audio.build_reference(
+            input_path, segments, video_dur,
+            os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
 
-        print(f"[APP] TTS audio: {synthesized_audio_path} ({tts_size} bytes, {get_duration(synthesized_audio_path):.2f}s)")
+        # ── 4. Translate segment by segment ──
+        _set(job_id, step="translating")
+        translated = translate_segments(segments, source_language, target_language)
+        from translation_v2 import fix_code_switching
+        translated = fix_code_switching(translated, target_language)
+        _set(job_id, translated_text=" ".join(t for t in translated if t).strip())
 
-        # 6️⃣ Stretch audio
-        video_duration = get_duration(input_path)
-        synthesized_audio_path = stretch_audio_to_duration(synthesized_audio_path, video_duration)
+        if not any(t.strip() for t in translated):
+            raise RuntimeError("Translation produced no text")
 
-        # 7️⃣ Merge video
-        output_video_path = Path(UPLOAD_DIR) / f"output_{file.filename}"
+        with _HEAVY:
+            # ── 5. Build the dubbed track (exact length by construction) ──
+            _set(job_id, step="synthesizing_voice")
 
-        subprocess.run([
-            "ffmpeg", "-y",
-            "-i", input_path,
-            "-i", synthesized_audio_path,
-            "-map", "0:v:0",
-            "-map", "1:a:0",
-            "-c:v", "copy",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            str(output_video_path)
-        ], check=True)
+            def tts_progress(done, total):
+                _set(job_id, step=f"synthesizing_voice ({done + 1}/{total})")
+
+            dub_path = os.path.join(workdir, f"{stem}_dub.wav")
+            units_dir = os.path.join(workdir, "units")
+            plan = dubbing.build_dubbed_track(
+                segments, translated, reference, target_language, video_dur,
+                dub_path,
+                source_lang=source_language, progress=tts_progress,
+                source_audio=stt_audio, cache_dir=units_dir)
+
+            # ── 6. Lip sync (single encode, audio muxed in the same pass) ──
+            _set(job_id, step="lip_syncing")
+            output_video_path = os.path.join(workdir, f"{stem}_dubbed.mp4")
+
+            def w2l_progress(done, total):
+                _set(job_id, step=f"lip_syncing ({done}/{total} frames)")
+
+            # The dub track stays voice-only so it can still be A/B'd against
+            # the reference; the bed is mixed into a separate file that the
+            # picture is muxed with.
+            audio_for_video = dub_path
+            if music_path:
+                mixed = os.path.join(workdir, f"{stem}_mixed.wav")
+                av_sync.mix_music(dub_path, music_path, mixed, gain_db=music_gain)
+                audio_for_video = mixed
+                print(f"[APP] Mixed a music bed at {music_gain:.0f} dB")
+
+            generate_lip_synced_video(
+                input_path, audio_for_video, output_video_path,
+                wav2lip_batch_size=int(os.getenv("W2L_BATCH", 64)),
+                face_det_batch_size=int(os.getenv("W2L_DET_BATCH", 16)),
+                crf=int(os.getenv("OUTPUT_CRF", 18)),
+                preset=os.getenv("OUTPUT_PRESET", "medium"),
+                progress=w2l_progress)
 
         if not os.path.exists(output_video_path):
-            raise HTTPException(status_code=500, detail="ffmpeg merge produced no output file")
+            raise RuntimeError("Lip sync produced no output file")
 
-        print(f"[APP] Output video: {output_video_path} ({os.path.getsize(output_video_path)} bytes)")
+        # ── 7. Verify audio and video actually agree ──
+        _set(job_id, step="verifying")
+        check = av_sync.verify_sync(output_video_path,
+                                    tolerance=float(os.getenv("SYNC_TOLERANCE", 0.15)))
+        print(f"[APP] Sync check: {check['reason']}")
+        _set(job_id, sync=check)
+        if not check["ok"]:
+            print(f"[APP] WARNING — output failed sync check: {check['reason']}")
 
-        # 🔥 DB: SAVE FINAL VIDEO
-        final_url = save_final_video(video_id, str(output_video_path))
+        match = _voice_match(reference["path"], dub_path, stt_audio)
+        if match:
+            print(f"[APP] Voice match: {match['score']:.3f} (cosine {match['cosine']})")
+            _set(job_id, voice_match=match)
 
-        return {
-            "video_id": video_id,
-            "output_url": final_url,
-            "local_file": str(output_video_path)
-        }
+        # ── 8. Upload ──
+        final_url = None
+        if upload_file_to_r2:
+            _set(job_id, step="uploading_result")
+            final_url = upload_file_to_r2(
+                output_video_path, f"generated/{job_id}_output_{stem}.mp4")
 
+        if DB_INTEGRATION_AVAILABLE and video_id and final_url and save_final_video:
+            save_final_video(video_id, final_url)
+
+        # The reference clip is what the voice was cloned FROM, and the dub is
+        # what came out. Being able to hear both side by side is the only way a
+        # user can judge clone quality, so keep them and expose them.
+        _set(job_id, status="done", step="complete", video_id=video_id,
+             url=final_url, output_path=output_video_path,
+             video_stale=False,
+             reference_path=reference["path"],
+             reference_text=reference.get("text", ""),
+             reference_seconds=round(reference.get("duration", 0.0), 2),
+             dub_path=dub_path,
+             source_language=source_language,
+             segment_count=len(segments),
+             # Whisper's per-segment timings and the translation aligned to
+             # them. Both were computed and discarded; keeping them is what
+             # makes transcript and subtitle export possible.
+             plan=plan, units_dir=units_dir, workdir=workdir,
+             music_path=music_path, music_gain=music_gain,
+             word_segments=segments,
+             input_path=input_path, video_duration=video_dur,
+             reference={"path": reference["path"],
+                        "text": reference.get("text", ""),
+                        "duration": reference.get("duration", 0.0),
+                        "start": reference.get("start")},
+             target_language=target_language,
+             segments=[{"start": float(sg.get("start", 0.0)),
+                        "end": float(sg.get("end", 0.0)),
+                        "text": (sg.get("text") or "").strip()}
+                       for sg in segments],
+             translated_segments=list(translated))
+        project.save(job_id, jobs[job_id])
+        print(f"[APP] Job {job_id} completed")
+
+    except JobCancelled:
+        print(f"[APP] Job {job_id} cancelled by the user")
+        jobs.get(job_id, {}).update(
+            {"status": "cancelled", "step": "cancelled",
+             "error": "Cancelled before it finished."})
     except Exception as e:
+        traceback.print_exc()
+        _set(job_id, status="failed", step="error", error=str(e))
+        if DB_INTEGRATION_AVAILABLE and video_id and mark_video_failed:
+            mark_video_failed(video_id, str(e))
+
+    finally:
+        if not KEEP_INTERMEDIATE:
+            job = jobs.get(job_id, {})
+            # Revising a finished dub needs more than the three output files:
+            # the (possibly trimmed) source to re-run lip sync against, and the
+            # per-phrase cache so one phrase can be rebuilt without redoing all
+            # of them. Deleting these turned "edit a word" into a failed job.
+            keep = {job.get("output_path"), job.get("reference_path"),
+                    job.get("dub_path"), job.get("input_path")}
+            output = job.get("output_path")
+            for name in os.listdir(workdir) if os.path.isdir(workdir) else []:
+                path = os.path.join(workdir, name)
+                # The manifest is the index for everything kept above, not an
+                # intermediate. Sweeping it away deleted the project the moment
+                # it was saved.
+                if name == project.MANIFEST:
+                    continue
+                if path not in keep and os.path.isfile(path):
+                    try:
+                        os.remove(path)
+                    except OSError:
+                        pass
+
+
+# ---------------------------------------------------------------------------
+# Static frontend
+# ---------------------------------------------------------------------------
+# The frontend used to be opened straight off disk, which is why profile.html
+# had http://localhost:8000 hardcoded while workspace.html computed its own
+# base URL. Serving it here gives one origin, kills the CORS/file:// problem,
+# and makes every fetch a same-origin relative path.
+_WEB_DIR = os.path.join(_PROJECT_ROOT, "web")
+if os.path.isdir(_WEB_DIR):
+    from fastapi.responses import FileResponse, RedirectResponse
+    from fastapi.staticfiles import StaticFiles
+
+    # Hashed build assets are immutable, so they can be cached hard.
+    app.mount("/app/assets",
+              StaticFiles(directory=os.path.join(_WEB_DIR, "assets")),
+              name="assets")
+
+    @app.get("/")
+    async def _root():
+        return RedirectResponse("/app/")
+
+    @app.get("/app")
+    @app.get("/app/{path:path}")
+    async def _spa(path: str = ""):
+        """
+        Serve the built single-page app.
+
+        React Router owns /app/studio and /app/library, which do not exist on
+        disk. Without this fallback a refresh or a direct link to either one
+        would 404 against StaticFiles. Real files (favicon, etc.) are still
+        served from disk; everything else returns index.html and lets the
+        router resolve it.
+        """
+        candidate = os.path.normpath(os.path.join(_WEB_DIR, path))
+        if (path and candidate.startswith(_WEB_DIR) and os.path.isfile(candidate)):
+            return FileResponse(candidate)
+        return FileResponse(os.path.join(_WEB_DIR, "index.html"))
+
+
+# ---------------------------------------------------------------------------
+# API
+# ---------------------------------------------------------------------------
+@app.post("/process_video/")
+async def process_video(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    original_language: str = Query(..., description="Source language code"),
+    target_language: str = Query(..., description="Target language code"),
+    user_id: str = Query("anonymous", description="Owner of this job"),
+    trim_start: float = Query(None, description="In point in seconds"),
+    trim_end: float = Query(None, description="Out point in seconds"),
+    music_gain: float = Query(-18.0, description="Music bed level in dB"),
+    music: UploadFile = File(None),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    try:
+        target_language = L.normalize(target_language)
+        L.engine_for(target_language)
+    except L.UnsupportedLanguage as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    content = await file.read()
+    if len(content) > 200 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large (max 200MB)")
+    if len(content) < 1000:
+        raise HTTPException(status_code=400, detail="File too small or empty")
+
+    job_id = str(uuid.uuid4())[:12]
+    safe_filename = f"{job_id}_{file.filename.replace(' ', '_')}"
+    input_path = os.path.join(UPLOAD_DIR, safe_filename)
+    with open(input_path, "wb") as f:
+        f.write(content)
+
+    jobs[job_id] = {
+        "status": "queued",
+        "step": "uploaded",
+        "kind": "dub",
+        "filename": file.filename,
+        "original_language": original_language,
+        "target_language": target_language,
+        "user_id": user_id,
+        "created_at": asyncio.get_event_loop().time(),
+    }
+
+    music_path = None
+    if music is not None and music.filename:
+        music_bytes = await music.read()
+        if len(music_bytes) > 50 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Music file too large (max 50MB)")
+        music_path = os.path.join(UPLOAD_DIR, f"{job_id}_music_"
+                                  f"{music.filename.replace(' ', '_')}")
+        with open(music_path, "wb") as f:
+            f.write(music_bytes)
+
+    background_tasks.add_task(process_video_task, job_id, input_path,
+                             original_language, target_language, safe_filename,
+                             user_id, trim_start, trim_end, music_path, music_gain)
+
+    return JSONResponse({
+        "status": "accepted",
+        "job_id": job_id,
+        "message": "Video processing started. Poll /jobs/{job_id}/status.",
+    })
+
+
+@app.get("/jobs/{job_id}/status")
+async def get_job_status(job_id: str):
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    response = {"job_id": job_id, "status": job["status"],
+                "step": job.get("step", "unknown"),
+                "kind": job.get("kind", "dub")}
+
+    if job["status"] == "cancelled":
+        response["error"] = job.get("error", "Cancelled.")
+
+    if job["status"] == "done":
+        response["url"] = job.get("url")
+        response["video_id"] = job.get("video_id")
+        response["translated_script"] = job.get("translated_text")
+        response["original_text"] = job.get("original_text")
+        response["sync"] = job.get("sync")
+        response["source_language"] = job.get("source_language")
+        response["segment_count"] = job.get("segment_count")
+        response["reference_text"] = job.get("reference_text")
+        response["reference_seconds"] = job.get("reference_seconds")
+        response["voice_match"] = job.get("voice_match")
+        response["voiceover_seconds"] = job.get("voiceover_seconds")
+        response["has_transcript"] = bool(job.get("segments"))
+        response["editable"] = bool(job.get("plan"))
+        response["video_duration"] = job.get("video_duration")
+        response["video_stale"] = bool(job.get("video_stale"))
+        if job.get("reference_path"):
+            response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
+        if job.get("dub_path"):
+            response["dub_audio"] = f"/jobs/{job_id}/audio/dub"
+    if job["status"] == "failed":
+        response["error"] = job.get("error", "Unknown error")
+
+    return JSONResponse(response)
+
+
+@app.get("/jobs/{job_id}/audio/{which}")
+async def get_job_audio(job_id: str, which: str):
+    """Serve a finished job's reference clip or dubbed track for playback."""
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    key = {"reference": "reference_path", "dub": "dub_path"}.get(which)
+    if not key:
+        raise HTTPException(status_code=404, detail="Unknown audio track")
+    path = job.get(key)
+    if not path or not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="Audio no longer on disk")
+    from fastapi.responses import FileResponse
+    return FileResponse(path, media_type="audio/wav")
+
+
+def voiceover_task(job_id: str, input_path: str, script: str,
+                   language: str, filename: str, user_id: str):
+    """
+    Speak a typed script in the voice of an uploaded reference clip.
+
+    Shares the front of the dubbing pipeline (extract, transcribe, choose the
+    cleanest reference window) and then skips translation, timeline fitting and
+    lip sync entirely, because the user supplied the words and there is no
+    video to stay in sync with.
+    """
+    workdir = os.path.join(UPLOAD_DIR, f"job_{job_id}")
+    os.makedirs(workdir, exist_ok=True)
+    stem = os.path.splitext(os.path.basename(filename))[0]
+
+    try:
+        _set(job_id, status="processing", step="validating")
+        if not os.path.exists(input_path) or os.path.getsize(input_path) < 1000:
+            raise ValueError("Uploaded file is missing or too small")
+
+        info = av_sync.probe(input_path)
+        media_dur = info["duration"]
+
+        _set(job_id, step="extracting_audio")
+        stt_audio = av_sync.extract_audio(
+            input_path, os.path.join(workdir, f"{stem}_stt.wav"), 16000, 1)
+
+        _set(job_id, step="transcribing")
+        result = transcribe_audio(stt_audio)
+        segments = result.get("segments") or []
+        if not segments:
+            raise RuntimeError(
+                "No speech found in the reference clip, so there is no voice to copy.")
+
+        _set(job_id, step="selecting_reference")
+        reference = reference_audio.build_reference(
+            input_path, segments, media_dur,
+            os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
+
+        with _HEAVY:
+            _set(job_id, step="synthesizing_voice")
+
+            def progress(done, total):
+                _set(job_id, step=f"synthesizing_voice ({done + 1}/{total})")
+
+            out_path = os.path.join(workdir, f"{stem}_voiceover.wav")
+            result_info = voiceover.render(
+                reference["path"], reference.get("text", ""), script,
+                language, out_path, progress=progress)
+
+        jobs[job_id].update({
+            "status": "done", "step": "complete",
+            "dub_path": result_info["path"],
+            "reference_path": reference["path"],
+            "reference_text": reference.get("text", ""),
+            "reference_seconds": round(reference.get("duration", 0.0), 2),
+            "segment_count": result_info["chunks"],
+            "voiceover_seconds": result_info["duration"],
+            "source_language": language,
+            "translated_text": script,
+        })
+        project.save(job_id, jobs[job_id])
+        print(f"[APP] Voice-over {job_id} completed "
+              f"({result_info['duration']}s, {result_info['chunks']} chunks)")
+
+    except JobCancelled:
+        print(f"[APP] Voice-over {job_id} cancelled by the user")
+        jobs.get(job_id, {}).update(
+            {"status": "cancelled", "step": "cancelled",
+             "error": "Cancelled before it finished."})
+    except Exception as e:                                   # noqa: BLE001
+        traceback.print_exc()
+        jobs.get(job_id, {}).update(
+            {"status": "failed", "step": "error", "error": str(e)})
+
+
+def _source_text_at(segments: list, start: float, duration: float) -> str:
+    """The source line a phrase overlaps most, for showing beside the edit box."""
+    best, best_overlap = "", 0.0
+    end = start + duration
+    for seg in segments:
+        overlap = min(end, seg["end"]) - max(start, seg["start"])
+        if overlap > best_overlap:
+            best_overlap, best = overlap, (seg.get("text") or "").strip()
+    return best
+
+
+def _require_editable(job_id: str) -> dict:
+    """A job whose phrases can still be rebuilt: finished, with its plan kept."""
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if not job.get("plan"):
+        raise HTTPException(
+            status_code=409,
+            detail="This run has no editable timeline. Only dubs finished "
+                   "since script editing was added can be revised.")
+    return job
+
+
+def _rebuild_track(job: dict) -> float:
+    """
+    Re-lay every cached phrase onto the track and rewrite the dub WAV.
+
+    Only the edited phrase is ever re-synthesized; the rest are read back from
+    the unit cache, so a one-word change costs one phrase and not a whole run.
+    """
+    plan = job["plan"]
+    waves = {}
+    for unit in plan:
+        wave = dubbing.read_unit(job["units_dir"], unit["index"])
+        if wave is not None:
+            waves[unit["index"]] = wave
+
+    track = dubbing.assemble(plan, waves, job["video_duration"])
+    import soundfile as sf
+    sf.write(job["dub_path"], track, dubbing.SAMPLE_RATE, subtype="PCM_16")
+    # The rendered video still carries the previous audio until it is redone.
+    job["video_stale"] = True
+    return round(len(track) / dubbing.SAMPLE_RATE, 3)
+
+
+@app.get("/jobs/{job_id}/segments")
+async def list_segments(job_id: str):
+    """The editable phrase timeline: where each one sits and what it says."""
+    job = _require_editable(job_id)
+    source = job.get("segments") or []
+    return JSONResponse({
+        "video_duration": job.get("video_duration"),
+        "video_stale": bool(job.get("video_stale")),
+        "target_language": job.get("target_language"),
+        "segments": [
+            {
+                "index": u["index"],
+                "start": round(u["start"], 3),
+                "duration": round(u["duration"], 3),
+                "text": u["text"],
+                # Units come from phrase splitting, so their index does not
+                # line up with the source segments. Match on time instead: the
+                # source line a phrase was spoken over.
+                "source_text": _source_text_at(source, u["start"], u["duration"]),
+                "seed": u.get("seed"),
+            }
+            for u in job["plan"]
+        ],
+    })
+
+
+@app.post("/jobs/{job_id}/segments/{index}")
+async def revise_segment(job_id: str, index: int, body: dict = Body(default={})):
+    """
+    Rewrite one phrase, re-roll its delivery, or both.
+
+    `text` replaces what the phrase says. `seed` changes the sampling draw,
+    which is how you get a different take of the same words: IndicF5 is
+    stochastic and the pipeline otherwise pins the seed for reproducibility.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is still rendering.")
+
+    unit = next((u for u in job["plan"] if u["index"] == index), None)
+    if unit is None:
+        raise HTTPException(status_code=404, detail=f"No phrase {index} in this timeline")
+
+    text = body.get("text")
+    if text is not None:
+        text = str(text).strip()
+        if not text:
+            raise HTTPException(status_code=400, detail="A phrase cannot be empty")
+        unit["text"] = text
+
+    seed = body.get("seed")
+    if seed is not None:
         try:
-            mark_video_failed(video_id)
-        except:
-            pass
-        raise HTTPException(status_code=500, detail=str(e))
+            seed = int(seed)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Seed must be a whole number")
+        unit["seed"] = seed
+
+    ref = job["reference"]
+    try:
+        with _HEAVY:
+            wave = dubbing.synth_unit(unit, ref["path"], ref["text"],
+                                      ref["duration"], job["target_language"],
+                                      seed=unit.get("seed"))
+    except Exception as e:                                   # noqa: BLE001
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Could not speak that phrase: {e}")
+
+    if wave.size == 0 or float(np.max(np.abs(wave))) < 1e-4:
+        raise HTTPException(
+            status_code=500,
+            detail="That phrase came back silent. Try different wording or another seed.")
+
+    dubbing.write_unit(job["units_dir"], index, wave)
+    duration = _rebuild_track(job)
+    project.save(job_id, job)
+    spoken = round(len(wave) / dubbing.SAMPLE_RATE, 3)
+    print(f"[APP] Job {job_id} phrase {index} revised "
+          f"({spoken}s in a {unit['duration']:.2f}s slot)")
+
+    return JSONResponse({
+        "index": index,
+        "text": unit["text"],
+        "seed": unit.get("seed"),
+        "spoken_seconds": spoken,
+        "slot_seconds": round(unit["duration"], 3),
+        # Longer than its slot means the phrase was shortened to fit; that is
+        # worth surfacing rather than hiding.
+        "overruns": spoken >= round(unit["duration"], 3) - 0.02,
+        "track_seconds": duration,
+        "video_stale": True,
+    })
+
+
+@app.get("/jobs/{job_id}/segments/{index}/audio")
+async def segment_audio(job_id: str, index: int):
+    """Play back one phrase on its own, without rendering anything."""
+    job = _require_editable(job_id)
+    path = dubbing.segment_path(job["units_dir"], index)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="That phrase has no audio yet")
+    from fastapi.responses import FileResponse
+    return FileResponse(path, media_type="audio/wav")
+
+
+@app.post("/jobs/{job_id}/rerender")
+async def rerender_video(job_id: str, background_tasks: BackgroundTasks):
+    """
+    Re-run lip sync against the current audio.
+
+    Editing phrases rewrites the audio immediately so it can be auditioned in
+    seconds. The picture is only redone on request, because that is the part
+    that costs minutes.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is already rendering.")
+
+    job.update({"status": "processing", "step": "lip_syncing",
+                "cancel_requested": False, "error": None})
+    background_tasks.add_task(rerender_task, job_id)
+    return JSONResponse({"job_id": job_id, "status": "processing"})
+
+
+def rerender_task(job_id: str):
+    job = jobs.get(job_id)
+    if not job:
+        return
+    try:
+        def w2l_progress(done, total):
+            _set(job_id, step=f"lip_syncing ({done}/{total} frames)")
+
+        with _HEAVY:
+            generate_lip_synced_video(
+                job["input_path"], job["dub_path"], job["output_path"],
+                wav2lip_batch_size=int(os.getenv("W2L_BATCH", 64)),
+                face_det_batch_size=int(os.getenv("W2L_DET_BATCH", 16)),
+                crf=int(os.getenv("OUTPUT_CRF", 18)),
+                preset=os.getenv("OUTPUT_PRESET", "medium"),
+                progress=w2l_progress)
+
+        _set(job_id, step="verifying")
+        check = av_sync.verify_sync(
+            job["output_path"], tolerance=float(os.getenv("SYNC_TOLERANCE", 0.15)))
+
+        final_url = job.get("url")
+        if upload_file_to_r2:
+            _set(job_id, step="uploading_result")
+            final_url = upload_file_to_r2(
+                job["output_path"], f"generated/{job_id}_revised.mp4")
+
+        jobs[job_id].update({"status": "done", "step": "complete",
+                             "sync": check, "url": final_url,
+                             "video_stale": False})
+        project.save(job_id, jobs[job_id])
+        print(f"[APP] Job {job_id} re-rendered")
+    except JobCancelled:
+        jobs.get(job_id, {}).update(
+            {"status": "cancelled", "step": "cancelled",
+             "error": "Cancelled before it finished."})
+    except Exception as e:                                   # noqa: BLE001
+        traceback.print_exc()
+        jobs.get(job_id, {}).update(
+            {"status": "failed", "step": "error", "error": str(e)})
+
+
+@app.get("/jobs/{job_id}/reference/candidates")
+async def reference_candidates(job_id: str):
+    """
+    The best few windows the voice could be cloned from.
+
+    Which window is chosen drives most of the cloning quality, and until now it
+    was picked automatically with no way to disagree.
+    """
+    job = _require_editable(job_id)
+    source = job.get("segments") or []
+    if not source:
+        raise HTTPException(status_code=409, detail="This run kept no transcript.")
+
+    # candidate_windows needs word timings; the stored segments are sentence
+    # level, so re-read the words from the transcript kept on the job.
+    words = job.get("word_segments")
+    if not words:
+        raise HTTPException(
+            status_code=409,
+            detail="This run finished before reference picking was added. "
+                   "Re-render to enable it.")
+
+    current = job.get("reference", {})
+    return JSONResponse({
+        "current": {"start": current.get("start"),
+                    "duration": current.get("duration"),
+                    "text": current.get("text", "")},
+        "candidates": reference_audio.candidate_windows(
+            words, job.get("video_duration") or 0.0, limit=5),
+    })
+
+
+@app.post("/jobs/{job_id}/reference")
+async def choose_reference(job_id: str, background_tasks: BackgroundTasks,
+                           body: dict = Body(...)):
+    """
+    Clone from a different window and speak the whole script again.
+
+    Unlike a phrase edit this cannot reuse the unit cache: every phrase was
+    spoken in the old voice window, so all of them have to be redone.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is already rendering.")
+
+    try:
+        start = float(body["start"])
+        duration = float(body["duration"])
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="Pass a numeric start and duration")
+    if duration < 2.0:
+        raise HTTPException(status_code=400,
+                            detail="A reference under two seconds will not clone well")
+
+    job.update({"status": "processing", "step": "selecting_reference",
+                "cancel_requested": False, "error": None})
+    background_tasks.add_task(reclone_task, job_id, start, duration)
+    return JSONResponse({"job_id": job_id, "status": "processing"})
+
+
+def reclone_task(job_id: str, start: float, duration: float):
+    job = jobs.get(job_id)
+    if not job:
+        return
+    try:
+        ref_path = os.path.join(job["workdir"], f"ref_{int(start * 100)}.wav")
+        reference_audio.extract_reference(
+            job["input_path"], start, duration, ref_path, sample_rate=24000)
+
+        # Measure what was actually written, never what was asked for. F5
+        # derives the reference length from the real waveform, so if the two
+        # disagree every generated phrase comes out the wrong length and gets
+        # time-stretched to compensate, which is what sounds robotic.
+        actual = duration
+        try:
+            actual = av_sync.duration(ref_path)
+        except Exception as e:                               # noqa: BLE001
+            print(f"[APP] Could not probe the new reference ({e}); "
+                  f"using the requested {duration:.2f}s")
+
+        # The window's words come from the transcript already on the job rather
+        # than a second ASR pass, and must describe the same span of audio.
+        words = job.get("word_segments") or []
+        spoken = [w["word"] for seg in words for w in (seg.get("words") or [])
+                  if w["start"] >= start and w["end"] <= start + actual]
+        reference = {"path": ref_path, "text": " ".join(spoken).strip(),
+                     "duration": actual, "start": start}
+        if not reference["text"]:
+            raise RuntimeError(
+                "No transcribed words fall inside that window, so there is no "
+                "reference text to pair with the audio.")
+
+        def progress(done, total):
+            _set(job_id, step=f"synthesizing_voice ({done + 1}/{total})")
+
+        with _HEAVY:
+            _set(job_id, step="synthesizing_voice")
+            track = dubbing.synthesize_timeline(
+                job["plan"], reference["path"], reference["text"],
+                reference["duration"], job["target_language"],
+                job["video_duration"], progress, cache_dir=job["units_dir"])
+
+        import soundfile as sf
+        sf.write(job["dub_path"], track, dubbing.SAMPLE_RATE, subtype="PCM_16")
+
+        jobs[job_id].update({
+            "status": "done", "step": "complete",
+            "reference": reference,
+            "reference_path": reference["path"],
+            "reference_text": reference["text"],
+            "reference_seconds": round(reference["duration"], 2),
+            "video_stale": True,
+        })
+        project.save(job_id, jobs[job_id])
+        print(f"[APP] Job {job_id} re-cloned from {start:.2f}s "
+              f"(+{reference['duration']:.2f}s)")
+    except JobCancelled:
+        jobs.get(job_id, {}).update(
+            {"status": "cancelled", "step": "cancelled",
+             "error": "Cancelled before it finished."})
+    except Exception as e:                                   # noqa: BLE001
+        traceback.print_exc()
+        jobs.get(job_id, {}).update(
+            {"status": "failed", "step": "error", "error": str(e)})
+
+
+EXPORTS = {
+    # kind: (filename suffix, media type, builder)
+    "transcript.txt": ("transcript", "text/plain",
+                       lambda segs, tr: subtitles.plain(segs)),
+    "translation.txt": ("translation", "text/plain",
+                        lambda segs, tr: subtitles.plain(segs, tr)),
+    "source.srt": ("source", "application/x-subrip",
+                   lambda segs, tr: subtitles.srt(segs)),
+    "source.vtt": ("source", "text/vtt",
+                   lambda segs, tr: subtitles.vtt(segs)),
+    "dub.srt": ("dub", "application/x-subrip",
+                lambda segs, tr: subtitles.srt(segs, tr)),
+    "dub.vtt": ("dub", "text/vtt",
+                lambda segs, tr: subtitles.vtt(segs, tr)),
+}
+
+
+@app.get("/jobs/{job_id}/export/{kind}")
+async def export_job_text(job_id: str, kind: str):
+    """
+    Transcript and subtitle files for a finished job.
+
+    Everything served here is formatting over data the run already produced:
+    Whisper's segment timings and the translation aligned to them. No model is
+    invoked and nothing is recomputed.
+    """
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    spec = EXPORTS.get(kind)
+    if not spec:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown export. Available: {', '.join(sorted(EXPORTS))}")
+
+    segments = job.get("segments")
+    if not segments:
+        raise HTTPException(
+            status_code=409,
+            detail="This job has no stored transcript. Only runs finished "
+                   "since transcript export was added can be exported.")
+
+    suffix, media_type, build = spec
+    translated = job.get("translated_segments") or []
+    if "dub" in kind or "translation" in kind:
+        if not translated:
+            raise HTTPException(status_code=409,
+                                detail="This job has no stored translation.")
+
+    body = build(segments, translated)
+    ext = kind.rsplit(".", 1)[-1]
+    name = f"{job_id[:8]}_{suffix}.{ext}"
+    return Response(
+        content=body,
+        media_type=f"{media_type}; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{name}"'},
+    )
+
+
+@app.get("/api/boot")
+async def boot_status():
+    """What the engine is loading, for the splash screen to report."""
+    return JSONResponse(BOOT)
+
+
+@app.post("/jobs/{job_id}/cancel")
+async def cancel_job(job_id: str):
+    """
+    Ask a running job to stop.
+
+    Cooperative: the flag is checked at every stage report, and the two long
+    stages report per segment and per frame batch, so this lands within
+    seconds. A job that has already finished is left alone.
+    """
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if job["status"] in ("done", "failed", "cancelled"):
+        return JSONResponse({"status": job["status"], "cancelled": False})
+    job["cancel_requested"] = True
+    return JSONResponse({"status": "cancelling", "cancelled": True})
+
+
+@app.post("/voiceover/")
+async def create_voiceover(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    script: str = Form(..., description="What the voice should say"),
+    language: str = Query(..., description="Language of the script"),
+    user_id: str = Query("anonymous"),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No reference clip provided")
+    script = (script or "").strip()
+    if not script:
+        raise HTTPException(status_code=400, detail="The script is empty")
+    if len(script) > 20000:
+        raise HTTPException(status_code=400, detail="Script is too long (max 20000 characters)")
+
+    try:
+        language = L.normalize(language)
+        L.engine_for(language)
+    except L.UnsupportedLanguage as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    content = await file.read()
+    if len(content) > 200 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Reference clip too large (max 200MB)")
+    if len(content) < 1000:
+        raise HTTPException(status_code=400, detail="Reference clip too small or empty")
+
+    job_id = str(uuid.uuid4())[:12]
+    safe_filename = f"{job_id}_{file.filename.replace(' ', '_')}"
+    input_path = os.path.join(UPLOAD_DIR, safe_filename)
+    with open(input_path, "wb") as f:
+        f.write(content)
+
+    jobs[job_id] = {
+        "status": "queued", "step": "uploaded", "kind": "voiceover",
+        "filename": file.filename, "target_language": language,
+        "user_id": user_id,
+        "created_at": asyncio.get_event_loop().time(),
+    }
+    background_tasks.add_task(voiceover_task, job_id, input_path, script,
+                             language, safe_filename, user_id)
+    return JSONResponse({"job_id": job_id, "status": "queued"})
+
+
+@app.get("/languages")
+async def get_languages():
+    """Supported dubbing targets, Indian languages first."""
+    return JSONResponse(L.supported_targets())
+
+
+@app.get("/api/health")
+async def health():
+    return JSONResponse({
+        "status": "ok",
+        "db": DB_INTEGRATION_AVAILABLE,
+        "r2": upload_file_to_r2 is not None,
+        "active_jobs": sum(1 for j in jobs.values() if j["status"] == "processing"),
+    })
+
+
+@app.get("/videos/")
+async def get_videos(user_id: str = "anonymous"):
+    # Local projects are the source of truth. The database is an index of what
+    # was rendered, not of what exists: this app runs on the user's machine and
+    # must show their work whether or not the cloud is reachable.
+    local = []
+    for job_id, job in jobs.items():
+        if job.get("user_id") != user_id or job.get("status") != "done":
+            continue
+        created = job.get("saved_at")
+        local.append({
+            "id": job.get("video_id") or job_id,
+            "video_id": job.get("video_id"),
+            "job_id": job_id,
+            "openable": True,
+            "title": job.get("filename") or job_id,
+            "original_language": job.get("source_language"),
+            "target_language": job.get("target_language"),
+            "duration": job.get("duration"),
+            "processing_status": "done",
+            "dubbed_url": job.get("url"),
+            "created_at": (datetime.fromtimestamp(created, timezone.utc).isoformat()
+                           if created else None),
+        })
+
+    if not DB_INTEGRATION_AVAILABLE or not get_user_videos:
+        return JSONResponse(local)
+
+    seen_videos = {r["video_id"] for r in local if r.get("video_id")}
+    try:
+        for row in get_user_videos(user_id) or []:
+            vid = row.get("video_id") or row.get("id")
+            if vid in seen_videos:
+                continue
+            # Recorded in the database but with no working files left: still
+            # worth listing, but only the finished video can be offered.
+            row["job_id"] = None
+            row["openable"] = False
+            local.append(row)
+    except Exception as e:                                   # noqa: BLE001
+        # A cloud outage is not a reason to hide local work, but it does mean
+        # the list is incomplete and the client should be able to say so.
+        print(f"[APP] Listing local projects only: {e}")
+        return JSONResponse(local, headers={"X-Projects-Partial": "1"})
+
+    local.sort(key=lambda r: r.get("created_at") or "", reverse=True)
+    return JSONResponse(local)
+
+
+@app.delete("/videos/{video_id}")
+async def delete_video(video_id: str):
+    if not DB_INTEGRATION_AVAILABLE or not delete_video_entry:
+        return JSONResponse({"status": "error", "message": "DB not enabled"})
+    delete_video_entry(video_id)
+    return JSONResponse({"status": "success"})
