@@ -1,30 +1,57 @@
 # Core
-fastapi==0.111.1
-uvicorn[standard]==0.30.1
-python-multipart==0.0.9
-pydantic==2.6.4
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+pydantic>=2.6.0
 
-# Torch stack (MATCHED)
-torch==2.2.1
-torchaudio==2.2.1
-torchvision==0.17.1
+# Torch stack
+torch>=2.2.0
+torchaudio>=2.2.0
+torchvision>=0.17.0
 
 # Audio / Video
 ffmpeg-python==0.2.0
-librosa==0.10.1.post2
-soundfile==0.12.1
-numpy==1.26.4
-scipy==1.11.4
+librosa>=0.10.0
+soundfile>=0.12.0
+numpy>=1.26.0
+scipy>=1.11.0
+opencv-python>=4.8.0
 
-# TTS / Voice Cloning
-TTS==0.22.0
+# STT — faster-whisper (CTranslate2 backend, replaces openai-whisper)
+faster-whisper>=1.0.0
+ctranslate2>=4.0.0
 
-# Translation / Whisper
-transformers==4.42.2
-sentencepiece==0.1.99
-faster-whisper==2024.2.0
-huggingface-hub==0.23.0
+# Translation — NLLB-200 (replaces IndicTrans2)
+transformers>=4.36.0
+sentencepiece>=0.1.99
+huggingface-hub>=0.30,<1.0  # <1.0: transformers 4.49 refuses hub 1.x
+
+# TTS / Voice Cloning — IndicF5 (ai4bharat) for Indian languages.
+# Weights come from the HF cache at runtime; nothing hits the network at
+# inference time. edge-tts is GONE: it was a round-trip to Azure, so the old
+# pipeline was never actually local.
+f5-tts>=0.1.0
+vocos>=0.1.0
+x-transformers>=1.31.0
+torchdiffeq>=0.2.3
+num2words>=0.5.13
+accelerate>=0.30.0
+
+# Foreign-language cloning (phase 2). Coqui Public Model License is
+# NON-COMMERCIAL — check this before shipping XTTS in a paid product.
+# TTS>=0.22.0
+
+# Cloud Storage & Database
+boto3>=1.34.0
+python-dotenv>=1.0.0
+supabase>=2.0.0
+
+# Test harness UI (Backend_pipeline/gradio_app.py)
+# MUST stay on 5.x: gradio 6 requires huggingface-hub>=1.16, but transformers
+# 4.49 requires <1.0, and installing gradio 6 breaks NLLB + IndicF5 at import.
+gradio>=5,<6
 
 # Utilities
-requests==2.31.0
-typing-extensions==4.12.2
+requests>=2.31.0
+typing-extensions>=4.12.0
+pydub>=0.25.0
