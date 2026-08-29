@@ -84,6 +84,21 @@ export interface Health {
   db: boolean;
   r2: boolean;
   active_jobs: number;
+  /** Whether script rewriting is configured. Off unless a key is set, and the
+      only stage that sends text off this machine. */
+  script_intelligence?: boolean;
+}
+
+export interface FitResult {
+  index: number;
+  changed: boolean;
+  text: string;
+  slot_seconds: number;
+  spoken_seconds: number;
+  was_seconds?: number;
+  fits?: boolean;
+  attempts: Array<{ text: string; seconds: number; source: string }>;
+  detail?: string;
 }
 
 export class ApiError extends Error {
@@ -228,6 +243,14 @@ export const revisePhrase = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  });
+
+/** Rewrite a phrase until it fits its slot when spoken. */
+export const fitPhrase = (id: string, index: number) =>
+  request<FitResult>(`/jobs/${encodeURIComponent(id)}/segments/${index}/fit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
   });
 
 export const phraseAudioUrl = (id: string, index: number) =>
