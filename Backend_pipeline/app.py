@@ -58,6 +58,7 @@ import numpy as np
 
 import av_sync
 import dubbing
+import llm
 import project
 import subtitles
 import voiceover
@@ -1071,6 +1072,118 @@ def reclone_task(job_id: str, start: float, duration: float):
             {"status": "failed", "step": "error", "error": str(e)})
 
 
+@app.post("/jobs/{job_id}/segments/{index}/fit")
+async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
+    """
+    Rewrite a phrase until it fits its slot when spoken.
+
+    The pipeline's answer to an overlong line has always been to compress it,
+    and compression past about 0.8x is what makes a dub sound robotic. This
+    changes the words instead of the speed.
+
+    The loop is measured, not hopeful: `natural_duration` mirrors F5's own
+    internal length heuristic exactly and costs nothing to evaluate, so each
+    rewrite is checked against the real target before anything is synthesized.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is still rendering.")
+    if not llm.configured():
+        raise HTTPException(
+            status_code=503,
+            detail="Script intelligence is off. Set ANTHROPIC_API_KEY to enable "
+                   "it. Unlike every other stage, it sends the script text off "
+                   "this machine.")
+
+    unit = next((u for u in job["plan"] if u["index"] == index), None)
+    if unit is None:
+        raise HTTPException(status_code=404, detail=f"No phrase {index} in this timeline")
+
+    engine = tts_engines.get_engine(job["target_language"])
+    if not hasattr(engine, "natural_duration"):
+        raise HTTPException(
+            status_code=409,
+            detail="This voice engine cannot estimate spoken length, so a fit "
+                   "cannot be checked.")
+
+    ref = job["reference"]
+    lang = L.synth_lang(job["target_language"])
+    slot = float(unit["duration"])
+    measure = lambda t: engine.natural_duration(t, ref["path"], ref["text"], lang=lang)
+
+    # A little headroom: landing exactly on the slot still leaves the fitter
+    # shaving the tail off the last word.
+    target = slot * float(body.get("headroom", 0.96))
+    original = unit["text"]
+    natural = measure(original)
+
+    attempts = [{"text": original, "seconds": round(natural, 3), "source": "original"}]
+    if natural <= target:
+        return JSONResponse({
+            "index": index, "changed": False, "text": original,
+            "slot_seconds": round(slot, 3), "spoken_seconds": round(natural, 3),
+            "attempts": attempts,
+            "detail": "This phrase already fits its slot.",
+        })
+
+    source_text = _source_text_at(job.get("segments") or [], unit["start"], slot)
+    best_text, best_seconds = original, natural
+    candidate = original
+
+    for _ in range(int(body.get("tries", 3))):
+        try:
+            candidate = llm.shorten(
+                candidate, L.display_name(job["target_language"]),
+                target / measure(candidate), source_text=source_text)
+        except llm.Unavailable as e:
+            raise HTTPException(status_code=503, detail=str(e))
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        seconds = measure(candidate)
+        attempts.append({"text": candidate, "seconds": round(seconds, 3),
+                         "source": "rewrite"})
+        if seconds < best_seconds:
+            best_text, best_seconds = candidate, seconds
+        if seconds <= target:
+            break
+
+    if best_text == original:
+        return JSONResponse({
+            "index": index, "changed": False, "text": original,
+            "slot_seconds": round(slot, 3), "spoken_seconds": round(natural, 3),
+            "attempts": attempts,
+            "detail": "No rewrite came out shorter than the original.",
+        })
+
+    unit["text"] = best_text
+    try:
+        with _HEAVY:
+            wave = dubbing.synth_unit(unit, ref["path"], ref["text"],
+                                      ref["duration"], job["target_language"],
+                                      seed=unit.get("seed"))
+    except Exception as e:                                   # noqa: BLE001
+        unit["text"] = original
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Could not speak the rewrite: {e}")
+
+    dubbing.write_unit(job["units_dir"], index, wave)
+    _rebuild_track(job)
+    project.save(job_id, job)
+    print(f"[APP] Job {job_id} phrase {index} fitted "
+          f"({natural:.2f}s -> {best_seconds:.2f}s for a {slot:.2f}s slot)")
+
+    return JSONResponse({
+        "index": index, "changed": True, "text": best_text,
+        "slot_seconds": round(slot, 3),
+        "spoken_seconds": round(best_seconds, 3),
+        "was_seconds": round(natural, 3),
+        "fits": best_seconds <= target,
+        "attempts": attempts,
+        "video_stale": True,
+    })
+
+
 EXPORTS = {
     # kind: (filename suffix, media type, builder)
     "transcript.txt": ("transcript", "text/plain",
@@ -1213,6 +1326,9 @@ async def health():
         "db": DB_INTEGRATION_AVAILABLE,
         "r2": upload_file_to_r2 is not None,
         "active_jobs": sum(1 for j in jobs.values() if j["status"] == "processing"),
+        # Off unless a key is configured. It is the only stage that sends text
+        # off this machine, so the client says so before using it.
+        "script_intelligence": llm.configured(),
     })
 
 
