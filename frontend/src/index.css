@@ -1,0 +1,236 @@
+@import "tailwindcss";
+@import "./fonts/fonts.css";
+
+/* ===========================================================================
+   Theme. Tailwind v4 reads @theme and generates utilities from it, so
+   `bg-paper`, `text-ink-2`, `rounded-shell` etc. all come from here.
+
+   Palette: saffron on cool ink. The product dubs Indian-language video, so the
+   accent is warm and culturally placed rather than the default AI violet. The
+   base carries a faint teal cast so the warm accent has something to push
+   against.
+   =========================================================================== */
+@theme {
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-indic: "Noto Sans Devanagari", "Noto Sans", "Outfit", sans-serif;
+
+  --color-paper: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-surface-2: #eceae3;
+  --color-ink: #12181a;
+  --color-ink-2: #35434a;
+  --color-ink-3: #64777f;
+  --color-line: #ddd9cf;
+  --color-line-2: #c4bfb2;
+
+  --color-accent: #d4741f;
+  --color-accent-2: #b25f14;
+  --color-accent-wash: #f7e6d2;
+  --color-on-accent: #ffffff;
+
+  --color-ok: #2f6f4f;
+  --color-warn: #9a6b12;
+  --color-bad: #a33327;
+
+  --radius-shell: 2rem;
+  --radius-core: 1.625rem;
+
+  /* Heavy, physical easing. Nothing in this app uses linear or ease-in-out. */
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark is the default expression of the brand; light is fully supported. */
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html[data-theme="dark"],
+  html:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --color-paper: #0b1113;
+      --color-surface: #121a1d;
+      --color-surface-2: #182327;
+      --color-ink: #eef1f0;
+      --color-ink-2: #a8b6bb;
+      --color-ink-3: #71838a;
+      --color-line: #243136;
+      --color-line-2: #35474e;
+      --color-accent: #f0993f;
+      --color-accent-2: #ffb264;
+      --color-accent-wash: #2a1d10;
+      --color-on-accent: #17120b;
+      --color-ok: #5fbf8d;
+      --color-warn: #d9a441;
+      --color-bad: #e2705f;
+    }
+  }
+
+  html[data-theme="dark"] {
+    --color-paper: #0b1113;
+    --color-surface: #121a1d;
+    --color-surface-2: #182327;
+    --color-ink: #eef1f0;
+    --color-ink-2: #a8b6bb;
+    --color-ink-3: #71838a;
+    --color-line: #243136;
+    --color-line-2: #35474e;
+    --color-accent: #f0993f;
+    --color-accent-2: #ffb264;
+    --color-accent-wash: #2a1d10;
+    --color-on-accent: #17120b;
+    --color-ok: #5fbf8d;
+    --color-warn: #d9a441;
+    --color-bad: #e2705f;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* The [hidden] attribute only sets display:none at user-agent priority, so
+     any author rule setting display silently beats it. */
+  [hidden] { display: none !important; }
+}
+
+@layer utilities {
+  .font-indic { font-family: var(--font-indic); }
+}
+
+/* ===========================================================================
+   Console theme — the editor chrome.
+
+   Deliberately separate from the palette above and deliberately not
+   theme-aware. Colour work is judged against its surround, so every NLE
+   (Resolve, Premiere, Avid) pins its chrome to a mid-dark neutral and stays
+   there. A light mode would change how the footage in the viewer reads, so
+   the console does not offer one.
+
+   Greys carry a very faint blue cast (~215deg) so the warm accent has
+   something to sit against and the panels do not read as muddy brown.
+   =========================================================================== */
+@theme {
+  --color-c-void: #0e0f11;   /* gutters between panels, viewer letterbox */
+  --color-c-well: #141518;   /* recessed: inputs, timeline bed, track lanes */
+  --color-c-panel: #1c1e21;  /* panel body */
+  --color-c-raise: #24262a;  /* panel headers, buttons at rest */
+  --color-c-hover: #2c2f34;  /* buttons under the cursor */
+  --color-c-edge: #0a0b0c;   /* hard divider, darker than any surface */
+  --color-c-rule: #303338;   /* soft divider inside a panel */
+
+  --color-c-text: #dcdee2;
+  --color-c-dim: #90969d;
+  --color-c-mute: #61656c;
+
+  --color-c-accent: #ff8c1a;  /* playhead, active tab, primary action */
+  --color-c-accent-dim: #7a4410;
+  --color-c-good: #4ea87a;
+  --color-c-warn: #d99b2b;
+  --color-c-bad: #d95c4a;
+}
+
+@layer components {
+  /* The console owns the whole window and never scrolls as a page — panels
+     scroll internally, the way a docked editor layout does. */
+  .console {
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--color-c-void);
+    color: var(--color-c-text);
+    /* The chrome uses the platform UI face, not the brand display face.
+       Outfit is geometric and drawn for headlines; at 10-11px its wide round
+       forms blur together, and a tool that reads as native is worth more here
+       than one that carries the marketing typeface into its panel furniture. */
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+    /* Chrome is not content: dragging a selection across panel furniture is
+       always accidental. Text inside panels re-enables it. */
+    user-select: none;
+  }
+  .console ::selection { background: var(--color-c-accent); color: #17120b; }
+
+  /* The launch screen shares the console's material and type so entering the
+     studio is continuous rather than a theme change. It differs in rhythm:
+     the studio is dense because it is a workspace, the launch screen is
+     spacious because it is a threshold. */
+  .launch {
+    min-height: 100dvh;
+    background: var(--color-c-void);
+    color: var(--color-c-text);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+  }
+  .launch ::selection { background: var(--color-c-accent); color: #17120b; }
+
+  .console-text { user-select: text; }
+
+  /* Every readout is a number that changes in place; proportional digits
+     would make the whole row jitter on each poll. */
+  .tnum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Thin overlay scrollbars, matched to the panel they sit in. */
+  .console *::-webkit-scrollbar { width: 9px; height: 9px; }
+  .console *::-webkit-scrollbar-track { background: transparent; }
+  .console *::-webkit-scrollbar-thumb {
+    background: #3a3e44;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 5px;
+  }
+  .console *::-webkit-scrollbar-thumb:hover { background-clip: padding-box; background-color: #4c5158; }
+  .console * { scrollbar-width: thin; scrollbar-color: #3a3e44 transparent; }
+
+  /* A single light source, top-left: raised furniture gets a 1px highlight on
+     its top edge, recessed wells get a shadow on their top edge instead. */
+  .raised {
+    background: var(--color-c-raise);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  .recessed {
+    background: var(--color-c-well);
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.5);
+  }
+
+  .console select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0h9L4.5 6z' fill='%2390969d'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+    padding-right: 26px;
+  }
+  .console select option { background: var(--color-c-raise); color: var(--color-c-text); }
+
+  .console :focus-visible {
+    outline: 1px solid var(--color-c-accent);
+    outline-offset: -1px;
+    border-radius: 2px;
+  }
+}
