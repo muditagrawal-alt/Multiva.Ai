@@ -16,11 +16,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Play, Pause, Stop, SkipBack, FilePlus, Warning, ArrowSquareOut, Trash,
-  DownloadSimple, MusicNotes, Shuffle, X,
+  DownloadSimple, MusicNotes, Shuffle, X, ArrowsInLineHorizontal,
 } from "@phosphor-icons/react";
 import {
   getLanguages, getHealth, submitVideo, submitVoiceover, cancelJob, getJob,
-  getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo,
+  getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase,
   getReferenceWindows, chooseReference,
   EXPORTS, exportUrl, langName,
   type Language, type JobStatus, type Health, type Phrase,
@@ -298,6 +298,35 @@ export default function Studio() {
           : `Spoken in ${result.spoken_seconds.toFixed(2)}s of a ${result.slot_seconds.toFixed(2)}s slot.`
       );
       // The rebuilt track has the same URL, so the waveform needs a nudge.
+      setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
+    } catch (err) {
+      setPhraseNote((err as Error).message);
+    } finally {
+      setPhraseBusy(false);
+    }
+  }
+
+  async function fitToSlot() {
+    if (selected == null || !jobId.current) return;
+    setPhraseBusy(true);
+    setPhraseNote("");
+    try {
+      const r = await fitPhrase(jobId.current, selected);
+      if (!r.changed) {
+        setPhraseNote(r.detail ?? "Nothing to shorten.");
+        return;
+      }
+      setPhrases((list) =>
+        list?.map((ph) => (ph.index === r.index ? { ...ph, text: r.text } : ph)) ?? null
+      );
+      setDraft(r.text);
+      setStale(true);
+      setPhraseNote(
+        `${r.was_seconds?.toFixed(2)}s to ${r.spoken_seconds.toFixed(2)}s in a ` +
+        `${r.slot_seconds.toFixed(2)}s slot, over ${r.attempts.length - 1} rewrite` +
+        `${r.attempts.length === 2 ? "" : "s"}.` +
+        (r.fits ? "" : " Still long; edit it by hand or run it again.")
+      );
       setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
     } catch (err) {
       setPhraseNote((err as Error).message);
@@ -817,6 +846,22 @@ export default function Studio() {
                       icon={<Play size={11} weight="fill" />}
                     />
                   </div>
+                  {health?.script_intelligence && (
+                    <div className="mt-1.5">
+                      <Tool
+                        onClick={fitToSlot}
+                        disabled={phraseBusy}
+                        className="w-full"
+                        title="Rewrite this line shorter so it is spoken at a natural pace"
+                      >
+                        <ArrowsInLineHorizontal size={11} /> Fit to slot
+                      </Tool>
+                      <p className="mt-1 text-[10px] leading-relaxed text-c-mute">
+                        Rewriting sends this line off your machine. Every other
+                        stage stays local.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <Stat k="Slot" v={`${selectedPhrase.duration.toFixed(2)}s`} />
                 {selectedPhrase.seed != null && (
