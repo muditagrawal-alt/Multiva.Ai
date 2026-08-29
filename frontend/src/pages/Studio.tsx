@@ -325,7 +325,9 @@ export default function Studio() {
         `${r.was_seconds?.toFixed(2)}s to ${r.spoken_seconds.toFixed(2)}s in a ` +
         `${r.slot_seconds.toFixed(2)}s slot, over ${r.attempts.length - 1} rewrite` +
         `${r.attempts.length === 2 ? "" : "s"}.` +
-        (r.fits ? "" : " Still long; edit it by hand or run it again.")
+        (r.fits ? "" : " Still long; edit it by hand or run it again.") +
+        // A small model shortens by deleting nouns. Read it before you keep it.
+        (r.check?.length ? ` Check it still says: ${r.check.join(", ")}.` : "")
       );
       setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
     } catch (err) {
@@ -857,8 +859,8 @@ export default function Studio() {
                         <ArrowsInLineHorizontal size={11} /> Fit to slot
                       </Tool>
                       <p className="mt-1 text-[10px] leading-relaxed text-c-mute">
-                        Rewriting sends this line off your machine. Every other
-                        stage stays local.
+                        Rewrites the line shorter so it is spoken at a natural
+                        pace instead of being compressed. Read it before keeping it.
                       </p>
                     </div>
                   )}
