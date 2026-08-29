@@ -1128,13 +1128,16 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
 
     source_text = _source_text_at(job.get("segments") or [], unit["start"], slot)
     best_text, best_seconds = original, natural
-    candidate = original
 
-    for _ in range(int(body.get("tries", 3))):
+    # Each attempt rewrites the ORIGINAL, not the previous attempt. Chaining
+    # compounds drift: in testing, the third link in the chain had invented a
+    # clause that was never in the source. Asking harder each round instead
+    # keeps every candidate one step from the truth.
+    for attempt in range(int(body.get("tries", 3))):
         try:
             candidate = llm.shorten(
-                candidate, L.display_name(job["target_language"]),
-                target / measure(candidate), source_text=source_text)
+                original, L.display_name(job["target_language"]),
+                (target / natural) * (0.9 ** attempt), source_text=source_text)
         except llm.Unavailable as e:
             raise HTTPException(status_code=503, detail=str(e))
         except ValueError as e:
@@ -1180,6 +1183,10 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
         "was_seconds": round(natural, 3),
         "fits": best_seconds <= target,
         "attempts": attempts,
+        # Words that may have been dropped rather than rephrased. Advisory:
+        # a shorter synonym looks the same to a string comparison, so this is
+        # for the person reading the line, not a blocking check.
+        "check": llm.dropped_words(original, best_text)[:4],
         "video_stale": True,
     })
 
