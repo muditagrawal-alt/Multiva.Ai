@@ -56,7 +56,7 @@ requests>=2.31.0
 typing-extensions>=4.12.0
 pydub>=0.25.0
 
-# Script intelligence — length-aware rewriting and translation repair.
-# Optional: every feature using it degrades cleanly when no key is set, and it
-# is the only stage that sends text off the machine.
-anthropic>=1.0
+# Script intelligence — length-aware rewriting, run locally through Ollama.
+# No Python package required: it speaks Ollama's HTTP API with `requests`.
+#   ollama pull qwen2.5:7b
+# Optional. Every feature using it degrades cleanly when Ollama is not running.
