@@ -1,55 +1,77 @@
 # =========================
+# Secrets
+# =========================
+.env
+.env.*
+!.env.example
+cert.pem
+key.pem
+
+# =========================
 # Python
 # =========================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
 *.so
 *.egg-info/
 build/
 dist/
 .eggs/
+*.bak
 
 # =========================
-# Virtual Environments
+# Virtual environments
 # =========================
 venv/
-env/
-transify/
 .venv/
+env/
 conda-env/
 *.conda
-.env
+
 # =========================
-# HuggingFace & Model Caches
+# Node / Rust build output
+# =========================
+node_modules/
+frontend/src-tauri/target/
+# The compiled SPA. app.py serves it, but it is produced by `npm run build`
+# and should not be versioned.
+web/
+
+# =========================
+# Model weights and caches
 # =========================
 .cache/
 .huggingface/
 hf_cache/
-models/
+whisper_models/
+tts_models/
 checkpoints/
 *.bin
 *.pt
 *.pth
 *.ckpt
 *.safetensors
+# Vendored third-party model code, cloned during setup.
+Backend_pipeline/IndicF5/
+Backend_pipeline/Wav2Lip/
 
 # =========================
-# Whisper / XTTS Downloads
+# Runtime working directories
 # =========================
-whisper_models/
-tts_models/
-
-# =========================
-# Logs
-# =========================
+# Holds live projects: source clips, per-phrase caches, renders and manifests.
+temp_uploads/
+gradio_runs/
+.gradio/
+eval_runs/
 logs/
 *.log
 
 # =========================
-# Audio / Video Files
+# Media
 # =========================
+# Test footage and renders live outside version control.
+output_videos/
+test_videos/
 *.wav
 *.mp3
 *.flac
@@ -61,37 +83,12 @@ logs/
 *.avi
 
 # =========================
-# Output Files
-# =========================
-outputs/
-generated/
-final_videos/
-
-# =========================
-# OS Files
+# Editors and OS
 # =========================
 .DS_Store
-Thumbs.db
-
-# =========================
-# Jupyter
-# =========================
-.ipynb_checkpoints/
-
-# =========================
-# VSCode / IDE
-# =========================
-.vscode/
-.idea/
-
-# =========================
-# Mac Specific
-# =========================
 .AppleDouble
 .LSOverride
-cert.pem
-key.pem
-
-indicf5_env/
-Backend_pipeline/IndicF5/
-Backend_pipeline/Wav2Lip
+Thumbs.db
+.vscode/
+.idea/
+.ipynb_checkpoints/
