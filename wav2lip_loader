@@ -1,0 +1,17 @@
+import torch
+import os
+
+MODEL_PATH = "models/wav2lip_gan.pth"
+
+def load_wav2lip_model():
+    if not os.path.exists(MODEL_PATH):
+        raise FileNotFoundError(f"Wav2Lip model not found at {MODEL_PATH}")
+    
+    # Load the model
+    model = torch.load(MODEL_PATH, map_location='cpu')
+    model.eval()  # Set to evaluation mode
+    return model
+
+if __name__ == "__main__":
+    model = load_wav2lip_model()
+    print("Wav2Lip model loaded successfully!")
