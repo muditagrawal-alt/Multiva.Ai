@@ -19,6 +19,7 @@ import {
   type VideoRecord,
 } from "@/lib/api";
 import { Tool, Lamp, TitleBar, StatusBar } from "@/components/console";
+import { ScriptModel } from "@/components/ScriptModel";
 import { cx } from "@/lib/cx";
 
 type View = "loading" | "list" | "empty" | "offline";
@@ -234,6 +235,7 @@ export default function Home() {
               )}
             </>
           )}
+          <ScriptModel />
         </div>
       </main>
 
