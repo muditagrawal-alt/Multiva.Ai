@@ -746,6 +746,43 @@ def _source_text_at(segments: list, start: float, duration: float) -> str:
     return best
 
 
+# How many phrase edits can be walked back. Each step keeps one WAV, so the
+# ceiling is on disk use as much as on memory.
+HISTORY_DEPTH = 20
+
+
+def _push_history(job: dict, unit: dict) -> None:
+    """
+    Record a phrase's state before it is overwritten.
+
+    The audio is copied rather than regenerated on undo: re-synthesizing would
+    give a different take, because the engine is stochastic, so "undo" would
+    not actually return what was there.
+    """
+    index = unit["index"]
+    current = dubbing.segment_path(job["units_dir"], index)
+    backup = None
+    if os.path.exists(current):
+        backup = os.path.join(job["units_dir"], f"undo_{index}_{uuid.uuid4().hex[:8]}.wav")
+        try:
+            shutil.copyfile(current, backup)
+        except OSError as e:                                 # noqa: BLE001
+            print(f"[APP] Could not snapshot phrase {index}: {e}")
+            backup = None
+
+    history = job.setdefault("history", [])
+    history.append({"index": index, "text": unit["text"],
+                    "seed": unit.get("seed"), "wav": backup})
+
+    while len(history) > HISTORY_DEPTH:
+        stale = history.pop(0)
+        if stale.get("wav") and os.path.exists(stale["wav"]):
+            try:
+                os.remove(stale["wav"])
+            except OSError:
+                pass
+
+
 def _require_editable(job_id: str) -> dict:
     """A job whose phrases can still be rebuilt: finished, with its plan kept."""
     job = jobs.get(job_id)
@@ -789,6 +826,7 @@ async def list_segments(job_id: str):
     return JSONResponse({
         "video_duration": job.get("video_duration"),
         "video_stale": bool(job.get("video_stale")),
+        "can_undo": len(job.get("history") or []),
         "target_language": job.get("target_language"),
         "segments": [
             {
@@ -824,6 +862,11 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
     if unit is None:
         raise HTTPException(status_code=404, detail=f"No phrase {index} in this timeline")
 
+    # Snapshot BEFORE the mutations below. Taking it afterwards records the
+    # new state as the thing to restore, so undo returns the edit rather than
+    # reversing it - which is exactly what it did until this was moved.
+    previous = {"text": unit["text"], "seed": unit.get("seed")}
+
     text = body.get("text")
     if text is not None:
         text = str(text).strip()
@@ -854,6 +897,7 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
             status_code=500,
             detail="That phrase came back silent. Try different wording or another seed.")
 
+    _push_history(job, {"index": index, **previous})
     dubbing.write_unit(job["units_dir"], index, wave)
     duration = _rebuild_track(job)
     project.save(job_id, job)
@@ -871,6 +915,62 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
         # worth surfacing rather than hiding.
         "overruns": spoken >= round(unit["duration"], 3) - 0.02,
         "track_seconds": duration,
+        "video_stale": True,
+        "can_undo": len(job.get("history", [])),
+    })
+
+
+@app.post("/jobs/{job_id}/undo")
+async def undo_phrase(job_id: str):
+    """
+    Walk back the last phrase edit.
+
+    Restores the previous text, seed and audio. The audio is restored from a
+    copy rather than re-synthesized: the engine is stochastic, so regenerating
+    would hand back a different take than the one being undone.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is still rendering.")
+
+    history = job.get("history") or []
+    if not history:
+        raise HTTPException(status_code=409, detail="Nothing to undo.")
+
+    entry = history.pop()
+    unit = next((u for u in job["plan"] if u["index"] == entry["index"]), None)
+    if unit is None:
+        raise HTTPException(status_code=409,
+                            detail="That phrase is no longer in the timeline.")
+
+    unit["text"] = entry["text"]
+    if entry.get("seed") is None:
+        unit.pop("seed", None)
+    else:
+        unit["seed"] = entry["seed"]
+
+    restored_audio = False
+    if entry.get("wav") and os.path.exists(entry["wav"]):
+        try:
+            shutil.copyfile(entry["wav"],
+                            dubbing.segment_path(job["units_dir"], entry["index"]))
+            os.remove(entry["wav"])
+            restored_audio = True
+        except OSError as e:                                 # noqa: BLE001
+            print(f"[APP] Could not restore phrase {entry['index']}: {e}")
+
+    duration = _rebuild_track(job)
+    project.save(job_id, job)
+    print(f"[APP] Job {job_id} undid phrase {entry['index']}")
+
+    return JSONResponse({
+        "index": entry["index"], "text": unit["text"],
+        "seed": unit.get("seed"),
+        # False means the text is back but the audio could not be restored, so
+        # the phrase needs re-speaking. Saying so beats a silent mismatch.
+        "audio_restored": restored_audio,
+        "track_seconds": duration,
+        "can_undo": len(history),
         "video_stale": True,
     })
 
@@ -1189,6 +1289,7 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
         # for the person reading the line, not a blocking check.
         "check": llm.dropped_words(original, best_text)[:4],
         "video_stale": True,
+        "can_undo": len(job.get("history", [])),
     })
 
 
