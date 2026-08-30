@@ -15,7 +15,11 @@ import torch
 # ---------------------------------------------------------------------------
 # Priority: WHISPER_MODEL env var > "large-v3" > "medium" > "base"
 _DEFAULT_MODEL = "large-v3"
-MODEL_SIZE = os.getenv("WHISPER_MODEL", _DEFAULT_MODEL)
+import engines
+
+# engines.get() already lets WHISPER_MODEL win, so an explicitly pinned
+# environment still overrides whatever the setup screen stored.
+MODEL_SIZE = engines.get("stt") or _DEFAULT_MODEL
 
 
 def _get_compute_type():
