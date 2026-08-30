@@ -81,8 +81,8 @@ export interface JobStatus {
 
 export interface Health {
   status: string;
-  db: boolean;
-  r2: boolean;
+  /** Finished projects on this machine. There is no remote store. */
+  projects: number;
   active_jobs: number;
   /** Whether script rewriting is configured. Off unless a key is set, and the
       only stage that sends text off this machine. */
