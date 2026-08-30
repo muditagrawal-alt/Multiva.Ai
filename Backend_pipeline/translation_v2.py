@@ -14,7 +14,9 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-MODEL_NAME = os.getenv("NLLB_MODEL", "facebook/nllb-200-distilled-600M")
+import engines
+
+MODEL_NAME = engines.get("mt") or "facebook/nllb-200-distilled-600M"
 
 
 def _get_device():
