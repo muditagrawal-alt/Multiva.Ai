@@ -31,7 +31,7 @@ PERSISTED = (
     "duration", "video_duration", "input_path", "workdir", "units_dir",
     "plan", "segments", "word_segments", "translated_segments",
     "translated_text", "original_text",
-    "reference", "sync", "voice_match", "video_stale",
+    "reference", "sync", "voice_match", "video_stale", "history",
     "music_path", "music_gain", "voiceover_seconds",
 )
 
