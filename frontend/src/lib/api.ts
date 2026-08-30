@@ -282,11 +282,55 @@ export const chooseReference = (id: string, start: number, duration: number) =>
       body: JSON.stringify({ start, duration }),
     });
 
+/* --- engines -------------------------------------------------------------- */
+
+export interface EngineOption {
+  id: string;
+  label: string;
+  size: string;
+  note?: string;
+  /** A reason not to pick this, shown in place of the note. */
+  warn?: string;
+  /** False means it is not on disk yet. */
+  ready: boolean;
+  /** How it is obtained: fetched from the Hub, or placed by hand. */
+  source: "download" | "manual" | "builtin";
+  /** Where a manual file belongs, relative to Backend_pipeline. */
+  local?: string;
+}
+
+export interface EngineStage {
+  label: string;
+  why: string;
+  default: string;
+  current: string;
+  /** Fixed by an environment variable; the UI cannot change it. */
+  pinned: boolean;
+  options: EngineOption[];
+}
+
+export interface EngineSettings {
+  configured: boolean;
+  stages: Record<string, EngineStage>;
+}
+
+export const getEngines = () => request<EngineSettings>("/api/settings/engines");
+
+export const saveEngines = (choices: Record<string, string>) =>
+  request<EngineSettings & { restart_required: boolean }>(
+    "/api/settings/engines", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(choices),
+    });
+
 /* --- script intelligence -------------------------------------------------- */
 
 export interface LlmProvider {
   label: string;
   needs_key: boolean;
+  /** Needs a base URL as well as a key: any OpenAI-compatible endpoint. */
+  needs_url?: boolean;
   default_model: string;
   suggested: string[];
   note: string;
@@ -300,6 +344,7 @@ export interface LlmStatus {
   local: boolean;
   has_key: boolean;
   ollama_host: string;
+  custom_url: string;
   providers: Record<string, LlmProvider>;
   /** Models Ollama has actually pulled. Empty for hosted providers. */
   installed: string[];
@@ -313,6 +358,7 @@ export const saveLlmSettings = (body: {
   /** Omit to keep the stored key; send "" to delete it. */
   api_key?: string;
   ollama_host?: string;
+  custom_url?: string;
 }) =>
   request<LlmStatus>("/api/settings/llm", {
     method: "POST",
