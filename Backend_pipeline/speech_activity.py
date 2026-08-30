@@ -37,6 +37,17 @@ MIN_PAUSE = 0.08
 # merged into its neighbour.
 MIN_PHRASE = 0.35
 
+# A phrase has to carry enough text to be worth its own slot. Splitting on
+# detected pauses alone can produce more phrases than the translation has words,
+# and the splitter then guarantees each one a word - which is how a sentence
+# ended up spoken as "कर", "रहे", "हैं।", three separate one-word utterances
+# with pauses between them.
+MIN_PHRASE_WORDS = 2
+# Used only to cap how many phrases a segment can have, never to judge whether
+# a produced phrase is too thin: in Devanagari a perfectly good two-word phrase
+# is often under ten codepoints.
+MIN_PHRASE_CHARS = 10
+
 
 def detect_speech_runs(audio_path: str, silence_db: float = SILENCE_DB,
                        min_pause: float = MIN_PAUSE) -> list:
@@ -125,6 +136,63 @@ def _split_text_by_weights(text: str, weights: list) -> list:
     return [p.strip() for p in parts]
 
 
+def _merge_thin(units: list) -> list:
+    """
+    Fold any unit too thin to be spoken on its own into its neighbour.
+
+    A one-word unit is not a phrase; given its own slot and its own pause on
+    either side, it is delivered as an isolated utterance. Merging joins the
+    time spans too, so the pause it used to own becomes part of the phrase.
+    """
+    if len(units) <= 1:
+        return units
+
+    out = []
+    for unit in units:
+        thin = len(unit["target"].split()) < MIN_PHRASE_WORDS
+        if thin and out:
+            prev = out[-1]
+            prev["end"] = unit["end"]
+            prev["target"] = f"{prev['target']} {unit['target']}".strip()
+            prev["text"] = f"{prev['text']} {unit['text']}".strip()
+        else:
+            out.append(dict(unit))
+
+    # A thin FIRST unit has no predecessor, so it folds forward instead.
+    if len(out) > 1 and len(out[0]["target"].split()) < MIN_PHRASE_WORDS:
+        head, nxt = out[0], out[1]
+        nxt["start"] = head["start"]
+        nxt["target"] = f"{head['target']} {nxt['target']}".strip()
+        nxt["text"] = f"{head['text']} {nxt['text']}".strip()
+        out = out[1:]
+    return out
+
+
+def _cap_by_text(runs: list, text: str) -> list:
+    """
+    Reduce `runs` until there is enough text to give each one a real phrase.
+
+    Merging is done by repeatedly joining the pair separated by the shortest
+    silence, so the longest pauses - the ones a listener actually hears as
+    phrasing - are the last to go.
+    """
+    words = len((text or "").split())
+    if words == 0:
+        return runs
+    cap = max(1, min(words // MIN_PHRASE_WORDS, len(text) // MIN_PHRASE_CHARS))
+    if len(runs) <= cap:
+        return runs
+
+    runs = [list(r) for r in runs]
+    while len(runs) > cap:
+        # Gap between consecutive runs; the smallest is the least missed.
+        gaps = [runs[i + 1][0] - runs[i][1] for i in range(len(runs) - 1)]
+        i = gaps.index(min(gaps))
+        runs[i][1] = runs[i + 1][1]
+        del runs[i + 1]
+    return runs
+
+
 def build_phrase_units(segments: list, translated: list, speech_runs: list,
                        min_phrase: float = MIN_PHRASE) -> list:
     """
@@ -175,15 +243,23 @@ def build_phrase_units(segments: list, translated: list, speech_runs: list,
             else:
                 merged.append([lo, hi])
 
+        # Cap the phrase count by what the text can actually fill. When merging
+        # is forced, absorb the SMALLEST gap first so the pauses that carry the
+        # most rhythm are the ones that survive.
+        merged = _cap_by_text(merged, text)
+
         weights = [hi - lo for lo, hi in merged]
         tgt_chunks = _split_text_by_weights(text, weights)
         src_chunks = _split_text_by_weights(source_text, weights)
 
-        for (lo, hi), tgt, src in zip(merged, tgt_chunks, src_chunks):
-            if tgt.strip():
-                units.append({"start": lo, "end": hi,
-                              "text": src.strip() or tgt.strip(),
-                              "target": tgt.strip(), "segment": seg_i})
+        made = [{"start": lo, "end": hi,
+                 "text": src.strip() or tgt.strip(),
+                 "target": tgt.strip(), "segment": seg_i}
+                for (lo, hi), tgt, src in zip(merged, tgt_chunks, src_chunks)
+                if tgt.strip()]
+        # The cap bounds the phrase count on average, but a weighted split can
+        # still starve the last part. This is where the guarantee has to hold.
+        units.extend(_merge_thin(made))
 
     units.sort(key=lambda u: u["start"])
     return units
