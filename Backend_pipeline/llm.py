@@ -1,5 +1,5 @@
 """
-Script intelligence, running locally.
+Script intelligence.
 
 The hard problems left in this pipeline are linguistic, not visual. The
 translator works one sentence at a time with no memory of the last one, and a
@@ -7,11 +7,20 @@ translation that does not fit its slot gets time-stretched, which is what makes
 a dub sound robotic. Both are language problems, so this is where a language
 model earns its place.
 
-It runs against Ollama on this machine, so the property every other stage has
-holds here too: nothing leaves the box. The cost is capability. A 7B model
-follows instructions far less reliably than a frontier one, so everything here
-is written defensively: the output is scrubbed of preamble, and every caller
-checks the result rather than trusting it.
+Provider-agnostic on purpose. Ollama is the default because it keeps the
+property every other stage has - nothing leaves the machine - but a 7B model is
+markedly weaker at Indian languages than at English, and this product is about
+Indian languages. So a user can point it at their own Claude, Gemini or OpenAI
+key instead.
+
+What crosses the network differs enormously by choice, and it is worth being
+precise: with Ollama, nothing. With a hosted key, ONE LINE of already-translated
+text per rewrite. The video, the audio, the voice and the reference clip never
+leave the machine under any setting.
+
+Raw HTTP for every provider rather than four SDKs: this is one small JSON
+request per provider, and a dependency per vendor would be a poor trade for a
+tool whose whole pitch is that it runs on your own hardware.
 """
 
 from __future__ import annotations
@@ -19,47 +28,185 @@ from __future__ import annotations
 import json
 import os
 import re
+import stat
 import time
 
 import requests
-
-HOST = (os.getenv("MULTIVA_LLM_URL")
-        or os.getenv("OLLAMA_HOST")
-        or "http://127.0.0.1:11434").rstrip("/")
-if not HOST.startswith("http"):
-    HOST = f"http://{HOST}"
-
-MODEL = os.getenv("MULTIVA_LLM_MODEL", "qwen2.5:7b")
-TIMEOUT = float(os.getenv("MULTIVA_LLM_TIMEOUT", "90"))
-
-# Availability is a network check, and /api/health asks for it on every poll.
-_probe = {"at": 0.0, "ok": False}
-PROBE_TTL = 30.0
 
 
 class Unavailable(RuntimeError):
     """No model is reachable. Callers degrade instead of failing."""
 
 
+# ---------------------------------------------------------------------------
+# Providers
+# ---------------------------------------------------------------------------
+
+# `suggested` is a convenience list, not a whitelist: any model id the provider
+# accepts can be typed in. Only the Anthropic ids here are taken from current
+# first-party documentation; the others are sensible defaults that the user can
+# correct, which is why the field is free text everywhere.
+PROVIDERS = {
+    "ollama": {
+        "label": "Ollama (this machine)",
+        "needs_key": False,
+        "default_model": "qwen2.5:7b",
+        "suggested": ["qwen2.5:7b", "aya-expanse:8b", "gemma2:9b", "qwen2.5:14b"],
+        "note": "Nothing leaves your machine. Weakest at Indian languages.",
+    },
+    "anthropic": {
+        "label": "Claude",
+        "needs_key": True,
+        "default_model": "claude-opus-5",
+        "suggested": ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"],
+        "note": "Sends one line of translated text per rewrite.",
+    },
+    "google": {
+        "label": "Gemini",
+        "needs_key": True,
+        "default_model": "gemini-2.0-flash",
+        "suggested": ["gemini-2.0-flash"],
+        "note": "Sends one line of translated text per rewrite.",
+    },
+    "openai": {
+        "label": "OpenAI",
+        "needs_key": True,
+        "default_model": "gpt-4o-mini",
+        "suggested": ["gpt-4o-mini", "gpt-4o"],
+        "note": "Sends one line of translated text per rewrite.",
+    },
+}
+
+TIMEOUT = float(os.getenv("MULTIVA_LLM_TIMEOUT", "90"))
+
+# Kept outside the checkout: an API key does not belong anywhere near a repo.
+SETTINGS_PATH = os.path.expanduser(
+    os.getenv("MULTIVA_SETTINGS", "~/.multiva/llm.json"))
+
+_DEFAULTS = {
+    "provider": "ollama",
+    "model": PROVIDERS["ollama"]["default_model"],
+    "keys": {},
+    "ollama_host": "http://127.0.0.1:11434",
+}
+
+
+def load_settings() -> dict:
+    """Stored settings, overlaid on the defaults and then on the environment."""
+    data = dict(_DEFAULTS)
+    try:
+        with open(SETTINGS_PATH, encoding="utf-8") as f:
+            stored = json.load(f)
+        if isinstance(stored, dict):
+            data.update({k: v for k, v in stored.items() if k in _DEFAULTS})
+    except FileNotFoundError:
+        pass
+    except Exception as e:                                   # noqa: BLE001
+        print(f"[LLM] Ignoring unreadable settings at {SETTINGS_PATH}: {e}")
+
+    # The environment wins, so a deployment can pin configuration without a
+    # settings file and without the UI being able to override it.
+    if os.getenv("MULTIVA_LLM_PROVIDER"):
+        data["provider"] = os.environ["MULTIVA_LLM_PROVIDER"]
+    if os.getenv("MULTIVA_LLM_MODEL"):
+        data["model"] = os.environ["MULTIVA_LLM_MODEL"]
+    if os.getenv("MULTIVA_LLM_URL") or os.getenv("OLLAMA_HOST"):
+        data["ollama_host"] = (os.getenv("MULTIVA_LLM_URL")
+                               or os.getenv("OLLAMA_HOST"))
+
+    keys = dict(data.get("keys") or {})
+    for provider, var in (("anthropic", "ANTHROPIC_API_KEY"),
+                          ("google", "GEMINI_API_KEY"),
+                          ("openai", "OPENAI_API_KEY")):
+        if os.getenv(var):
+            keys[provider] = os.environ[var]
+    data["keys"] = keys
+
+    if data["provider"] not in PROVIDERS:
+        data["provider"] = "ollama"
+    return data
+
+
+def save_settings(provider: str, model: str, key: str = None,
+                  ollama_host: str = None) -> dict:
+    """
+    Persist the choice, and the key if one was given.
+
+    A blank key is not the same as no key: blank clears the stored one, absent
+    leaves it alone, so re-saving the provider does not wipe a working key.
+    """
+    if provider not in PROVIDERS:
+        raise ValueError(f"Unknown provider: {provider}")
+
+    try:
+        with open(SETTINGS_PATH, encoding="utf-8") as f:
+            stored = json.load(f)
+    except Exception:                                        # noqa: BLE001
+        stored = {}
+    if not isinstance(stored, dict):
+        stored = {}
+
+    stored["provider"] = provider
+    stored["model"] = (model or "").strip() or PROVIDERS[provider]["default_model"]
+    if ollama_host:
+        stored["ollama_host"] = ollama_host.strip()
+
+    keys = dict(stored.get("keys") or {})
+    if key is not None:
+        if key.strip():
+            keys[provider] = key.strip()
+        else:
+            keys.pop(provider, None)
+    stored["keys"] = keys
+
+    os.makedirs(os.path.dirname(SETTINGS_PATH), exist_ok=True)
+    tmp = f"{SETTINGS_PATH}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(stored, f, indent=2)
+    # Owner-only, before it is in place: the file holds API keys.
+    os.chmod(tmp, stat.S_IRUSR | stat.S_IWUSR)
+    os.replace(tmp, SETTINGS_PATH)
+
+    _probe.update(at=0.0, ok=False)          # force a fresh reachability check
+    return load_settings()
+
+
+# ---------------------------------------------------------------------------
+# Availability
+# ---------------------------------------------------------------------------
+
+_probe = {"at": 0.0, "ok": False}
+PROBE_TTL = 30.0
+
+
 def configured() -> bool:
     """
-    Whether the local model is reachable and pulled.
+    Whether a model can actually be reached right now.
 
-    Cached briefly: this is called from the health endpoint, which the studio
-    polls, and a TCP round trip per poll is a waste.
+    For a hosted provider that means a key is present; the request itself is
+    the real test. For Ollama it means the server answers and the model is
+    pulled, because "installed but not pulled" is the common case and produces
+    a confusing failure at the worst moment.
     """
     if os.getenv("MULTIVA_LLM", "").lower() in ("0", "off", "false", "no"):
         return False
+
+    cfg = load_settings()
+    provider = cfg["provider"]
+
+    if PROVIDERS[provider]["needs_key"]:
+        return bool(cfg["keys"].get(provider))
+
     now = time.time()
     if now - _probe["at"] < PROBE_TTL:
         return _probe["ok"]
     ok = False
     try:
-        r = requests.get(f"{HOST}/api/tags", timeout=2.0)
+        r = requests.get(f"{cfg['ollama_host'].rstrip('/')}/api/tags", timeout=2.0)
         if r.ok:
             names = {m.get("name", "") for m in r.json().get("models", [])}
-            # Ollama reports "qwen2.5:7b"; a bare "qwen2.5" should still match.
-            ok = any(n == MODEL or n.split(":")[0] == MODEL.split(":")[0]
+            want = cfg["model"]
+            ok = any(n == want or n.split(":")[0] == want.split(":")[0]
                      for n in names)
     except Exception:                                        # noqa: BLE001
         ok = False
@@ -67,47 +214,159 @@ def configured() -> bool:
     return ok
 
 
+def installed_models() -> list:
+    """Models Ollama has pulled, so the UI can offer them instead of guessing."""
+    cfg = load_settings()
+    try:
+        r = requests.get(f"{cfg['ollama_host'].rstrip('/')}/api/tags", timeout=2.0)
+        if r.ok:
+            return sorted(m.get("name", "") for m in r.json().get("models", []))
+    except Exception:                                        # noqa: BLE001
+        pass
+    return []
+
+
 def status() -> dict:
-    """What the client should say about script intelligence."""
-    return {"enabled": configured(), "model": MODEL, "host": HOST, "local": True}
+    """
+    What the client should say about script intelligence.
+
+    Never returns a key. It reports only whether one is stored, which is all
+    the UI needs to render its state.
+    """
+    cfg = load_settings()
+    provider = cfg["provider"]
+    return {
+        "enabled": configured(),
+        "provider": provider,
+        "model": cfg["model"],
+        "local": not PROVIDERS[provider]["needs_key"],
+        "has_key": bool(cfg["keys"].get(provider)),
+        "ollama_host": cfg["ollama_host"],
+        "providers": {
+            name: {k: v for k, v in spec.items()}
+            for name, spec in PROVIDERS.items()
+        },
+        "installed": installed_models() if provider == "ollama" else [],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Completion
+# ---------------------------------------------------------------------------
+
+def _post(url: str, *, headers: dict = None, payload: dict) -> dict:
+    try:
+        r = requests.post(url, headers=headers or {}, json=payload, timeout=TIMEOUT)
+    except requests.Timeout as e:
+        raise Unavailable(f"The model timed out after {TIMEOUT:.0f}s.") from e
+    except requests.RequestException as e:
+        raise Unavailable(f"Could not reach the model: {e}") from e
+    if not r.ok:
+        # The provider's own message is far more useful than a status code.
+        raise Unavailable(f"{r.status_code} from the model: {r.text[:200]}")
+    try:
+        return r.json()
+    except json.JSONDecodeError as e:
+        raise Unavailable("The model returned a response that was not JSON.") from e
+
+
+def _ollama(cfg, system, user, max_tokens):
+    data = _post(
+        f"{cfg['ollama_host'].rstrip('/')}/api/chat",
+        payload={
+            "model": cfg["model"], "stream": False,
+            "messages": [{"role": "system", "content": system},
+                         {"role": "user", "content": user}],
+            # Low but not zero: at zero a failed rewrite repeats verbatim on
+            # every retry, so the loop can never escape.
+            "options": {"temperature": 0.35, "top_p": 0.9,
+                        "num_predict": max_tokens},
+        })
+    return (data.get("message") or {}).get("content", "")
+
+
+def _anthropic(cfg, system, user, max_tokens):
+    data = _post(
+        "https://api.anthropic.com/v1/messages",
+        headers={"x-api-key": cfg["keys"]["anthropic"],
+                 "anthropic-version": "2023-06-01",
+                 "content-type": "application/json"},
+        payload={
+            "model": cfg["model"], "max_tokens": max_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+        })
+    # content is a list of blocks; only the text ones are the answer.
+    return "".join(b.get("text", "") for b in data.get("content", [])
+                   if b.get("type") == "text")
+
+
+def _google(cfg, system, user, max_tokens):
+    model = cfg["model"]
+    data = _post(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+        headers={"x-goog-api-key": cfg["keys"]["google"],
+                 "content-type": "application/json"},
+        payload={
+            "system_instruction": {"parts": [{"text": system}]},
+            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "generationConfig": {"temperature": 0.35,
+                                 "maxOutputTokens": max_tokens},
+        })
+    try:
+        parts = data["candidates"][0]["content"]["parts"]
+        return "".join(p.get("text", "") for p in parts)
+    except (KeyError, IndexError, TypeError):
+        # A safety block returns a well-formed response with no candidate.
+        raise Unavailable("Gemini returned no text for that line.")
+
+
+def _openai(cfg, system, user, max_tokens):
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {cfg['keys']['openai']}",
+               "content-type": "application/json"}
+    payload = {
+        "model": cfg["model"],
+        "messages": [{"role": "system", "content": system},
+                     {"role": "user", "content": user}],
+        "temperature": 0.35,
+        "max_completion_tokens": max_tokens,
+    }
+    try:
+        data = _post(url, headers=headers, payload=payload)
+    except Unavailable as e:
+        # Older models take `max_tokens` and reject the newer name. Retrying is
+        # cheaper than maintaining a list of which model wants which.
+        if "max_completion_tokens" not in str(e):
+            raise
+        payload.pop("max_completion_tokens")
+        payload["max_tokens"] = max_tokens
+        data = _post(url, headers=headers, payload=payload)
+    try:
+        return data["choices"][0]["message"]["content"] or ""
+    except (KeyError, IndexError, TypeError):
+        raise Unavailable("OpenAI returned no text for that line.")
+
+
+_CALL = {"ollama": _ollama, "anthropic": _anthropic,
+         "google": _google, "openai": _openai}
 
 
 def complete(system: str, user: str, max_tokens: int = 300) -> str:
     """One short completion. Deterministic: this is a rewrite, not brainstorming."""
-    if not configured():
-        raise Unavailable(
-            f"No local model. Start Ollama and run: ollama pull {MODEL}")
-    try:
-        r = requests.post(
-            f"{HOST}/api/chat",
-            json={
-                "model": MODEL,
-                "stream": False,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                "options": {
-                    # Low but not zero: at 0 a failed rewrite repeats verbatim
-                    # on every retry, so the loop can never escape.
-                    "temperature": 0.35,
-                    "top_p": 0.9,
-                    "num_predict": max_tokens,
-                },
-            },
-            timeout=TIMEOUT,
-        )
-    except requests.Timeout as e:
-        raise Unavailable(f"The local model timed out after {TIMEOUT:.0f}s.") from e
-    except requests.RequestException as e:
-        raise Unavailable(f"Could not reach the local model at {HOST}.") from e
+    cfg = load_settings()
+    provider = cfg["provider"]
 
-    if not r.ok:
-        raise Unavailable(f"The local model returned {r.status_code}: {r.text[:160]}")
-    try:
-        return (r.json()["message"]["content"] or "").strip()
-    except (KeyError, TypeError, json.JSONDecodeError) as e:
-        raise Unavailable("The local model returned an unreadable response.") from e
+    if PROVIDERS[provider]["needs_key"] and not cfg["keys"].get(provider):
+        raise Unavailable(
+            f"No API key set for {PROVIDERS[provider]['label']}. "
+            f"Add one in the studio, or switch back to Ollama.")
+    if provider == "ollama" and not configured():
+        raise Unavailable(
+            f"Ollama is not serving {cfg['model']}. "
+            f"Start it and run: ollama pull {cfg['model']}")
+
+    return (_CALL[provider](cfg, system, user, max_tokens) or "").strip()
 
 
 # ---------------------------------------------------------------------------
