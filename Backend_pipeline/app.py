@@ -58,6 +58,7 @@ import numpy as np
 
 import av_sync
 import dubbing
+import engines
 import llm
 import project
 import subtitles
@@ -1320,6 +1321,40 @@ async def create_voiceover(
     return JSONResponse({"job_id": job_id, "status": "queued"})
 
 
+@app.get("/api/settings/engines")
+async def get_engine_settings():
+    """
+    Which model runs each stage, and which of them are already downloaded.
+
+    `configured` is how the app knows whether to show setup on launch.
+    """
+    return JSONResponse({
+        "configured": engines.configured(),
+        "stages": engines.catalog(),
+    })
+
+
+@app.post("/api/settings/engines")
+async def set_engine_settings(body: dict = Body(...)):
+    """
+    Store stage choices.
+
+    These are read at import by the module that owns each stage and cached for
+    the life of the process, so the response says plainly that a restart is
+    needed rather than pretending the change is live.
+    """
+    try:
+        chosen = engines.save(body or {})
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Could not save settings: {e}")
+    return JSONResponse({
+        "configured": True,
+        "chosen": chosen,
+        "restart_required": True,
+        "stages": engines.catalog(),
+    })
+
+
 @app.get("/api/settings/llm")
 async def get_llm_settings():
     """
@@ -1349,6 +1384,7 @@ async def set_llm_settings(body: dict = Body(...)):
             (body.get("model") or "").strip(),
             key=body.get("api_key"),
             ollama_host=(body.get("ollama_host") or "").strip() or None,
+            custom_url=body.get("custom_url"),
         )
     except OSError as e:
         raise HTTPException(status_code=500,
