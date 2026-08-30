@@ -10,16 +10,15 @@
    =========================================================================== */
 
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Plus, ArrowClockwise, Trash, DownloadSimple, PencilSimple, Warning,
 } from "@phosphor-icons/react";
 import {
-  listVideos, removeVideo, langName, relativeTime,
+  listVideos, removeVideo, getEngines, langName, relativeTime,
   type VideoRecord,
 } from "@/lib/api";
 import { Tool, Lamp, TitleBar, StatusBar } from "@/components/console";
-import { ScriptModel } from "@/components/ScriptModel";
 import { cx } from "@/lib/cx";
 
 type View = "loading" | "list" | "empty" | "offline";
@@ -35,6 +34,9 @@ export default function Home() {
   const [problem, setProblem] = useState("");
   const [confirming, setConfirming] = useState("");
   const [actionError, setActionError] = useState("");
+  // null until known: a launch should not flash the projects grid before
+  // deciding whether this is a first run.
+  const [configured, setConfigured] = useState<boolean | null>(null);
 
   const load = useCallback(async () => {
     setView("loading");
@@ -52,6 +54,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    let live = true;
+    getEngines()
+      .then((d) => live && setConfigured(d.configured))
+      // If the check itself fails, show the projects screen rather than
+      // trapping someone in setup because one endpoint is unreachable.
+      .catch(() => live && setConfigured(true));
+    return () => { live = false; };
+  }, []);
 
   async function destroy(id: string) {
     setActionError("");
@@ -79,9 +91,21 @@ export default function Home() {
     </Link>
   );
 
+  if (configured === false) return <Navigate to="/setup" replace />;
+
   return (
     <div className="console grid" style={{ gridTemplateRows: "30px minmax(0,1fr) 22px" }}>
-      <TitleBar active="projects" />
+      <TitleBar
+        active="projects"
+        right={
+          <Link
+            to="/setup"
+            className="rounded-[2px] px-2 py-[3px] text-[10px] uppercase tracking-[0.12em] text-c-mute transition-colors hover:bg-c-hover hover:text-c-text"
+          >
+            Models
+          </Link>
+        }
+      />
 
       {/* Home carries no panel chrome. The studio is dense because it is a
           workspace; this is where you arrive, and it should breathe more. */}
@@ -235,7 +259,6 @@ export default function Home() {
               )}
             </>
           )}
-          <ScriptModel />
         </div>
       </main>
 
