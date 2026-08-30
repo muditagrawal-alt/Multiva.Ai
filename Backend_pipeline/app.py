@@ -1320,6 +1320,60 @@ async def create_voiceover(
     return JSONResponse({"job_id": job_id, "status": "queued"})
 
 
+@app.get("/api/settings/llm")
+async def get_llm_settings():
+    """
+    Which model does the script rewriting, and whether it can be reached.
+
+    Never returns an API key, only whether one is stored.
+    """
+    return JSONResponse(llm.status())
+
+
+@app.post("/api/settings/llm")
+async def set_llm_settings(body: dict = Body(...)):
+    """
+    Choose a provider and model, and optionally store a key for it.
+
+    Omitting `api_key` leaves any stored key untouched, so changing the model
+    does not silently log you out; sending an empty one deletes it.
+    """
+    provider = (body.get("provider") or "").strip()
+    if provider not in llm.PROVIDERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown provider. Choose one of: {', '.join(llm.PROVIDERS)}")
+    try:
+        llm.save_settings(
+            provider,
+            (body.get("model") or "").strip(),
+            key=body.get("api_key"),
+            ollama_host=(body.get("ollama_host") or "").strip() or None,
+        )
+    except OSError as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Could not save settings: {e}")
+    return JSONResponse(llm.status())
+
+
+@app.post("/api/settings/llm/test")
+async def test_llm_settings():
+    """
+    Prove the current setting works, before someone relies on it mid-render.
+
+    Deliberately a real completion rather than a reachability ping: a key can
+    be valid and the model name wrong, and that only shows up on a real call.
+    """
+    try:
+        reply = llm.complete(
+            "Reply with exactly the word: ok",
+            "Say ok.", max_tokens=16)
+    except llm.Unavailable as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    return JSONResponse({"ok": True, "reply": llm.clean_line(reply)[:80],
+                         **llm.status()})
+
+
 @app.get("/languages")
 async def get_languages():
     """Supported dubbing targets, Indian languages first."""
@@ -1336,6 +1390,8 @@ async def health():
         # Off unless a key is configured. It is the only stage that sends text
         # off this machine, so the client says so before using it.
         "script_intelligence": llm.configured(),
+        "llm": {k: v for k, v in llm.status().items()
+                if k in ("provider", "model", "local", "has_key")},
     })
 
 
