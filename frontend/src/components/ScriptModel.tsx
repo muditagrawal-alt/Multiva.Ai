@@ -28,6 +28,7 @@ export function ScriptModel() {
   const [provider, setProvider] = useState("ollama");
   const [model, setModel] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [customUrl, setCustomUrl] = useState("");
   const [busy, setBusy] = useState("");
   const [note, setNote] = useState("");
   const [failed, setFailed] = useState(false);
@@ -40,6 +41,7 @@ export function ScriptModel() {
         setStatus(s);
         setProvider(s.provider);
         setModel(s.model);
+        setCustomUrl(s.custom_url ?? "");
       })
       .catch(() => {});
     return () => { live = false; };
@@ -64,6 +66,7 @@ export function ScriptModel() {
         model,
         // Undefined keeps any stored key; "" would delete it.
         ...(apiKey ? { api_key: apiKey } : {}),
+        ...(spec?.needs_url ? { custom_url: customUrl } : {}),
       });
       setStatus(s);
       setApiKey("");
@@ -91,7 +94,11 @@ export function ScriptModel() {
   }
 
   const dirty =
-    !!status && (provider !== status.provider || model !== status.model || !!apiKey);
+    !!status &&
+    (provider !== status.provider ||
+      model !== status.model ||
+      !!apiKey ||
+      (!!spec?.needs_url && customUrl !== status.custom_url));
 
   return (
     <section className="mt-8 border-t border-c-rule pt-4">
@@ -169,6 +176,23 @@ export function ScriptModel() {
             <p className="mt-1 text-[10px] text-c-warn">
               Ollama is not answering. Start it, then pull a model.
             </p>
+          )}
+
+          {spec?.needs_url && (
+            <>
+              <Label>Base URL</Label>
+              <input
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                spellCheck={false}
+                placeholder="https://your-server/v1"
+                className="recessed mt-2 h-[26px] w-full rounded-[2px] border border-c-edge px-2 text-[11px] text-c-text placeholder:text-c-mute"
+              />
+              <p className="mt-1 text-[10px] leading-relaxed text-c-mute">
+                The endpoint's root, without /chat/completions. Anything that
+                speaks the OpenAI chat API works.
+              </p>
+            </>
           )}
 
           {spec?.needs_key && (
