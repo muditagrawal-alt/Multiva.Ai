@@ -22,34 +22,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 # ---------------------------------------------------------------------------
-# Database integration (graceful degradation)
+# Storage
 # ---------------------------------------------------------------------------
-try:
-    from Database.manager.data_manager import (
-        create_video_entry,
-        delete_video_entry,
-        get_expired_videos,
-        get_user_videos,
-        mark_video_failed,
-        save_final_video,
-        update_video_status,
-    )
-    DB_INTEGRATION_AVAILABLE = True
-except Exception as db_import_error:
-    DB_INTEGRATION_AVAILABLE = False
-    create_video_entry = update_video_status = save_final_video = None
-    mark_video_failed = get_user_videos = delete_video_entry = None
-    get_expired_videos = None
-    print(f"[APP] Database integration disabled: {db_import_error}")
-
-# ---------------------------------------------------------------------------
-# Cloudflare R2 (graceful degradation)
-# ---------------------------------------------------------------------------
-try:
-    from cloudflare_r2 import delete_file_from_r2, upload_file_to_r2
-except Exception as r2_error:
-    upload_file_to_r2 = delete_file_from_r2 = None
-    print(f"[APP] Cloudflare R2 integration disabled: {r2_error}")
+# There is no database and no object store. Everything a project needs lives in
+# its own folder on this machine, indexed by the manifest project.py writes,
+# and renders are served straight off disk. Nothing is uploaded anywhere.
 
 # ---------------------------------------------------------------------------
 # Pipeline modules
@@ -85,34 +62,15 @@ KEEP_INTERMEDIATE = os.getenv("KEEP_INTERMEDIATE", "").lower() in ("1", "true", 
 # ---------------------------------------------------------------------------
 # Cleanup task
 # ---------------------------------------------------------------------------
-async def cleanup_loop():
-    while True:
-        try:
-            if DB_INTEGRATION_AVAILABLE and get_expired_videos and delete_file_from_r2:
-                for vid in get_expired_videos():
-                    vid_id = vid.get("video_id") or vid.get("id")
-                    for key in ("original_url", "dubbed_url"):
-                        if vid.get(key):
-                            delete_file_from_r2(vid[key].split("/")[-1])
-                    if delete_video_entry and vid_id:
-                        delete_video_entry(vid_id)
-                    print(f"[Cleanup] Deleted expired video: {vid_id}")
-        except Exception as e:
-            print(f"[Cleanup] Error: {e}")
-        await asyncio.sleep(3600)
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     restored = project.scan(UPLOAD_DIR)
     if restored:
         jobs.update(restored)
         print(f"[APP] Reopened {len(restored)} saved project(s)")
-    task = asyncio.create_task(cleanup_loop())
     if os.getenv("WARMUP_ON_START", "1") not in ("0", "false", "no"):
         threading.Thread(target=_warmup, daemon=True).start()
     yield
-    task.cancel()
 
 
 def _voice_match(ref_path: str, dub_path: str, source_path: str):
@@ -261,7 +219,6 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
     so lip sync receives matched streams and the output cannot drift, loop or
     truncate. There is no post-hoc tempo correction anywhere in this function.
     """
-    video_id = None
     workdir = os.path.join(UPLOAD_DIR, f"job_{job_id}")
     os.makedirs(workdir, exist_ok=True)
 
@@ -307,19 +264,6 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         print(f"[APP] {filename}: {video_dur:.2f}s, "
               f"{info['video']['width']}x{info['video']['height']} @ "
               f"{info['video']['fps']:.3f}fps -> {L.display_name(target_language)}")
-
-        # ── DB entry ──
-        if DB_INTEGRATION_AVAILABLE and create_video_entry:
-            db_result = create_video_entry(user_id, filename, original_language,
-                                           target_language, format_duration(video_dur))
-            if db_result:
-                video_id = db_result["id"]
-
-        # ── Upload original ──
-        if upload_file_to_r2:
-            original_r2_url = upload_file_to_r2(input_path, f"uploads/{job_id}_{filename}")
-            if DB_INTEGRATION_AVAILABLE and video_id and update_video_status:
-                update_video_status(video_id, "processing", original_url=original_r2_url)
 
         # ── 1. Audio for STT (16 kHz mono is what Whisper wants) ──
         _set(job_id, step="extracting_audio")
@@ -421,20 +365,15 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             print(f"[APP] Voice match: {match['score']:.3f} (cosine {match['cosine']})")
             _set(job_id, voice_match=match)
 
-        # ── 8. Upload ──
-        final_url = None
-        if upload_file_to_r2:
-            _set(job_id, step="uploading_result")
-            final_url = upload_file_to_r2(
-                output_video_path, f"generated/{job_id}_output_{stem}.mp4")
-
-        if DB_INTEGRATION_AVAILABLE and video_id and final_url and save_final_video:
-            save_final_video(video_id, final_url)
+        # ── 8. Publish ──
+        # The render stays where it was written; this is the URL that serves it.
+        _set(job_id, step="uploading_result")
+        final_url = f"/jobs/{job_id}/video"
 
         # The reference clip is what the voice was cloned FROM, and the dub is
         # what came out. Being able to hear both side by side is the only way a
         # user can judge clone quality, so keep them and expose them.
-        _set(job_id, status="done", step="complete", video_id=video_id,
+        _set(job_id, status="done", step="complete",
              url=final_url, output_path=output_video_path,
              video_stale=False,
              reference_path=reference["path"],
@@ -471,8 +410,6 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
     except Exception as e:
         traceback.print_exc()
         _set(job_id, status="failed", step="error", error=str(e))
-        if DB_INTEGRATION_AVAILABLE and video_id and mark_video_failed:
-            mark_video_failed(video_id, str(e))
 
     finally:
         if not KEEP_INTERMEDIATE:
@@ -620,7 +557,6 @@ async def get_job_status(job_id: str):
 
     if job["status"] == "done":
         response["url"] = job.get("url")
-        response["video_id"] = job.get("video_id")
         response["translated_script"] = job.get("translated_text")
         response["original_text"] = job.get("original_text")
         response["sync"] = job.get("sync")
@@ -642,6 +578,19 @@ async def get_job_status(job_id: str):
         response["error"] = job.get("error", "Unknown error")
 
     return JSONResponse(response)
+
+
+@app.get("/jobs/{job_id}/video")
+async def get_job_video(job_id: str):
+    """The finished render, served from where the pipeline wrote it."""
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    path = job.get("output_path")
+    if not path or not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="No render for this job")
+    from fastapi.responses import FileResponse
+    return FileResponse(path, media_type="video/mp4")
 
 
 @app.get("/jobs/{job_id}/audio/{which}")
@@ -1026,11 +975,7 @@ def rerender_task(job_id: str):
         check = av_sync.verify_sync(
             job["output_path"], tolerance=float(os.getenv("SYNC_TOLERANCE", 0.15)))
 
-        final_url = job.get("url")
-        if upload_file_to_r2:
-            _set(job_id, step="uploading_result")
-            final_url = upload_file_to_r2(
-                job["output_path"], f"generated/{job_id}_revised.mp4")
+        final_url = f"/jobs/{job_id}/video"
 
         jobs[job_id].update({"status": "done", "step": "complete",
                              "sync": check, "url": final_url,
@@ -1521,8 +1466,7 @@ async def get_languages():
 async def health():
     return JSONResponse({
         "status": "ok",
-        "db": DB_INTEGRATION_AVAILABLE,
-        "r2": upload_file_to_r2 is not None,
+        "projects": len([j for j in jobs.values() if j.get("status") == "done"]),
         "active_jobs": sum(1 for j in jobs.values() if j["status"] == "processing"),
         # Off unless a key is configured. It is the only stage that sends text
         # off this machine, so the client says so before using it.
@@ -1534,17 +1478,19 @@ async def health():
 
 @app.get("/videos/")
 async def get_videos(user_id: str = "anonymous"):
-    # Local projects are the source of truth. The database is an index of what
-    # was rendered, not of what exists: this app runs on the user's machine and
-    # must show their work whether or not the cloud is reachable.
-    local = []
+    """
+    Every project this user has on this machine.
+
+    The manifest is the only record. There is no remote index to fall out of
+    sync with, and no outage that can hide someone's work.
+    """
+    rows = []
     for job_id, job in jobs.items():
         if job.get("user_id") != user_id or job.get("status") != "done":
             continue
         created = job.get("saved_at")
-        local.append({
-            "id": job.get("video_id") or job_id,
-            "video_id": job.get("video_id"),
+        rows.append({
+            "id": job_id,
             "job_id": job_id,
             "openable": True,
             "title": job.get("filename") or job_id,
@@ -1556,34 +1502,40 @@ async def get_videos(user_id: str = "anonymous"):
             "created_at": (datetime.fromtimestamp(created, timezone.utc).isoformat()
                            if created else None),
         })
-
-    if not DB_INTEGRATION_AVAILABLE or not get_user_videos:
-        return JSONResponse(local)
-
-    seen_videos = {r["video_id"] for r in local if r.get("video_id")}
-    try:
-        for row in get_user_videos(user_id) or []:
-            vid = row.get("video_id") or row.get("id")
-            if vid in seen_videos:
-                continue
-            # Recorded in the database but with no working files left: still
-            # worth listing, but only the finished video can be offered.
-            row["job_id"] = None
-            row["openable"] = False
-            local.append(row)
-    except Exception as e:                                   # noqa: BLE001
-        # A cloud outage is not a reason to hide local work, but it does mean
-        # the list is incomplete and the client should be able to say so.
-        print(f"[APP] Listing local projects only: {e}")
-        return JSONResponse(local, headers={"X-Projects-Partial": "1"})
-
-    local.sort(key=lambda r: r.get("created_at") or "", reverse=True)
-    return JSONResponse(local)
+    rows.sort(key=lambda r: r.get("created_at") or "", reverse=True)
+    return JSONResponse(rows)
 
 
-@app.delete("/videos/{video_id}")
-async def delete_video(video_id: str):
-    if not DB_INTEGRATION_AVAILABLE or not delete_video_entry:
-        return JSONResponse({"status": "error", "message": "DB not enabled"})
-    delete_video_entry(video_id)
-    return JSONResponse({"status": "success"})
+@app.delete("/videos/{job_id}")
+async def delete_project(job_id: str):
+    """
+    Delete a project and everything it produced.
+
+    Removes the whole working folder: source, reference, phrase cache, dub,
+    render and manifest. Irreversible, which is why the studio asks twice.
+    """
+    job = jobs.pop(job_id, None)
+    if not job:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    uploads = os.path.abspath(UPLOAD_DIR) + os.sep
+
+    # Refuse to touch anything outside the uploads directory, so a corrupted
+    # manifest cannot aim this at somewhere else on the disk.
+    workdir = job.get("workdir")
+    if workdir and os.path.isdir(workdir) and os.path.abspath(workdir).startswith(uploads):
+        try:
+            shutil.rmtree(workdir)
+        except OSError as e:
+            raise HTTPException(status_code=500,
+                                detail=f"Could not delete the project files: {e}")
+
+    source = job.get("input_path")
+    if source and os.path.isfile(source) and os.path.abspath(source).startswith(uploads):
+        try:
+            os.remove(source)
+        except OSError:
+            pass
+
+    print(f"[APP] Deleted project {job_id}")
+    return JSONResponse({"status": "deleted", "job_id": job_id})
