@@ -132,7 +132,8 @@ class IndicF5Engine:
         self._ref_cache = {}
         self._spb_cache = {}
         self.device = None
-        self.nfe_step = int(nfe_step or os.getenv("INDICF5_NFE_STEP", 16))
+        import engines
+        self.nfe_step = int(nfe_step or engines.get("tts") or 16)
 
         # Flow matching starts from random noise, so the SAME inputs give
         # different audio on every run — and the difference is not cosmetic.
