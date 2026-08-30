@@ -282,6 +282,48 @@ export const chooseReference = (id: string, start: number, duration: number) =>
       body: JSON.stringify({ start, duration }),
     });
 
+/* --- script intelligence -------------------------------------------------- */
+
+export interface LlmProvider {
+  label: string;
+  needs_key: boolean;
+  default_model: string;
+  suggested: string[];
+  note: string;
+}
+
+export interface LlmStatus {
+  enabled: boolean;
+  provider: string;
+  model: string;
+  /** True when the model runs on this machine and nothing is sent anywhere. */
+  local: boolean;
+  has_key: boolean;
+  ollama_host: string;
+  providers: Record<string, LlmProvider>;
+  /** Models Ollama has actually pulled. Empty for hosted providers. */
+  installed: string[];
+}
+
+export const getLlmSettings = () => request<LlmStatus>("/api/settings/llm");
+
+export const saveLlmSettings = (body: {
+  provider: string;
+  model: string;
+  /** Omit to keep the stored key; send "" to delete it. */
+  api_key?: string;
+  ollama_host?: string;
+}) =>
+  request<LlmStatus>("/api/settings/llm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+export const testLlmSettings = () =>
+  request<LlmStatus & { ok: boolean; reply: string }>(
+    "/api/settings/llm/test", { method: "POST" });
+
 /** Ask a running job to stop. Cooperative: it lands at the next stage report. */
 export const cancelJob = (id: string) =>
   request<{ status: string; cancelled: boolean }>(
