@@ -75,6 +75,21 @@ PROVIDERS = {
         "suggested": ["gpt-4o-mini", "gpt-4o"],
         "note": "Sends one line of translated text per rewrite.",
     },
+    "grok": {
+        "label": "Grok (xAI)",
+        "needs_key": True,
+        "default_model": "grok-2-latest",
+        "suggested": ["grok-2-latest"],
+        "note": "Sends one line of translated text per rewrite.",
+    },
+    "custom": {
+        "label": "Other (OpenAI-compatible)",
+        "needs_key": True,
+        "default_model": "",
+        "suggested": [],
+        "needs_url": True,
+        "note": "Any endpoint that speaks the OpenAI chat API: vLLM, Together, OpenRouter, LM Studio.",
+    },
 }
 
 TIMEOUT = float(os.getenv("MULTIVA_LLM_TIMEOUT", "90"))
@@ -88,6 +103,8 @@ _DEFAULTS = {
     "model": PROVIDERS["ollama"]["default_model"],
     "keys": {},
     "ollama_host": "http://127.0.0.1:11434",
+    # Base URL for the OpenAI-compatible "custom" provider, without /chat/completions.
+    "custom_url": "",
 }
 
 
@@ -128,7 +145,7 @@ def load_settings() -> dict:
 
 
 def save_settings(provider: str, model: str, key: str = None,
-                  ollama_host: str = None) -> dict:
+                  ollama_host: str = None, custom_url: str = None) -> dict:
     """
     Persist the choice, and the key if one was given.
 
@@ -150,6 +167,8 @@ def save_settings(provider: str, model: str, key: str = None,
     stored["model"] = (model or "").strip() or PROVIDERS[provider]["default_model"]
     if ollama_host:
         stored["ollama_host"] = ollama_host.strip()
+    if custom_url is not None:
+        stored["custom_url"] = custom_url.strip()
 
     keys = dict(stored.get("keys") or {})
     if key is not None:
@@ -242,6 +261,7 @@ def status() -> dict:
         "local": not PROVIDERS[provider]["needs_key"],
         "has_key": bool(cfg["keys"].get(provider)),
         "ollama_host": cfg["ollama_host"],
+        "custom_url": cfg.get("custom_url", ""),
         "providers": {
             name: {k: v for k, v in spec.items()}
             for name, spec in PROVIDERS.items()
@@ -321,9 +341,23 @@ def _google(cfg, system, user, max_tokens):
         raise Unavailable("Gemini returned no text for that line.")
 
 
-def _openai(cfg, system, user, max_tokens):
-    url = "https://api.openai.com/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {cfg['keys']['openai']}",
+# OpenAI, xAI and most self-hosted servers speak the same chat API, so they
+# share one implementation and differ only in base URL.
+_OPENAI_COMPATIBLE = {
+    "openai": "https://api.openai.com/v1",
+    "grok": "https://api.x.ai/v1",
+}
+
+
+def _openai(cfg, system, user, max_tokens, provider="openai"):
+    base = (_OPENAI_COMPATIBLE.get(provider)
+            or (cfg.get("custom_url") or "").rstrip("/"))
+    if not base:
+        raise Unavailable(
+            "No base URL set for the custom provider. Give it the endpoint's "
+            "root, without /chat/completions.")
+    url = f"{base}/chat/completions"
+    headers = {"Authorization": f"Bearer {cfg['keys'][provider]}",
                "content-type": "application/json"}
     payload = {
         "model": cfg["model"],
@@ -348,8 +382,14 @@ def _openai(cfg, system, user, max_tokens):
         raise Unavailable("OpenAI returned no text for that line.")
 
 
-_CALL = {"ollama": _ollama, "anthropic": _anthropic,
-         "google": _google, "openai": _openai}
+_CALL = {
+    "ollama": _ollama,
+    "anthropic": _anthropic,
+    "google": _google,
+    "openai": lambda c, s, u, m: _openai(c, s, u, m, "openai"),
+    "grok": lambda c, s, u, m: _openai(c, s, u, m, "grok"),
+    "custom": lambda c, s, u, m: _openai(c, s, u, m, "custom"),
+}
 
 
 def complete(system: str, user: str, max_tokens: int = 300) -> str:
