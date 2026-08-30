@@ -1038,7 +1038,7 @@ export default function Studio() {
         <span className="ml-auto flex items-center gap-3">
           {view !== "idle" && <span className="tnum">elapsed {timecode(elapsed).slice(0, 8)}</span>}
           {health && <span className="tnum">jobs {health.active_jobs}</span>}
-          <span>{health?.db ? "db ok" : "db offline"}</span>
+          {health && <span className="tnum">{health.projects} saved</span>}
         </span>
       </StatusBar>
     </div>
