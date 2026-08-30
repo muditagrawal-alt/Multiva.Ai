@@ -32,7 +32,15 @@ import numpy as np
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 WAV2LIP_DIR = os.path.join(THIS_DIR, "Wav2Lip")
-CHECKPOINT = os.path.join(WAV2LIP_DIR, "checkpoints", "wav2lip_gan.pth")
+import engines
+
+# Only checkpoints actually present on disk are offered by the catalogue,
+# so a stored choice that has since been deleted falls back rather than
+# failing at render time.
+_CKPT = engines.get("lipsync") or "wav2lip_gan.pth"
+CHECKPOINT = os.path.join(WAV2LIP_DIR, "checkpoints", _CKPT)
+if not os.path.exists(CHECKPOINT):
+    CHECKPOINT = os.path.join(WAV2LIP_DIR, "checkpoints", "wav2lip_gan.pth")
 
 IMG_SIZE = 96
 MEL_STEP_SIZE = 16
