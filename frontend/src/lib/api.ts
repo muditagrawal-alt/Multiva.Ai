@@ -73,6 +73,8 @@ export interface JobStatus {
   video_stale?: boolean;
   /** Length of the clip this project was built from. */
   video_duration?: number | null;
+  /** Where the finished render was filed, if the copy succeeded. */
+  filed_at?: string | null;
   /** Playback URLs, present once the job finishes. */
   reference_audio?: string;
   dub_audio?: string;
@@ -312,6 +314,9 @@ export interface EngineStage {
 export interface EngineSettings {
   configured: boolean;
   stages: Record<string, EngineStage>;
+  /** Where finished videos are filed. */
+  output_dir: string;
+  default_output_dir: string;
 }
 
 export const getEngines = () => request<EngineSettings>("/api/settings/engines");
