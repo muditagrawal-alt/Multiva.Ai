@@ -26,6 +26,7 @@ export default function Setup() {
   const [data, setData] = useState<EngineSettings | null>(null);
   const [choice, setChoice] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [folder, setFolder] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,6 +36,7 @@ export default function Setup() {
       .then((d) => {
         if (!live) return;
         setData(d);
+        setFolder(d.output_dir);
         setChoice(
           Object.fromEntries(
             Object.entries(d.stages).map(([k, v]) => [k, v.current])
@@ -48,7 +50,7 @@ export default function Setup() {
   async function persist() {
     setBusy(true); setError("");
     try {
-      const d = await saveEngines(choice);
+      const d = await saveEngines({ ...choice, output_dir: folder });
       setData(d);
       setSaved(true);
     } catch (err) {
@@ -58,8 +60,9 @@ export default function Setup() {
     }
   }
 
-  const dirty = !!data && Object.entries(choice).some(
-    ([k, v]) => data.stages[k]?.current !== v
+  const dirty = !!data && (
+    Object.entries(choice).some(([k, v]) => data.stages[k]?.current !== v) ||
+    folder !== data.output_dir
   );
   const firstRun = data ? !data.configured : false;
 
@@ -166,6 +169,35 @@ export default function Setup() {
               </ul>
             </section>
           ))}
+
+          {data && (
+            <section className="mt-7">
+              <h2 className="text-[12px] text-c-text">Where finished videos go</h2>
+              <p className="mt-1 max-w-[70ch] text-[11px] leading-relaxed text-c-dim">
+                Every dub and voice-over is copied here when it finishes, named
+                after the clip and the language. The studio keeps its own working
+                copy, so moving or deleting these will not break a project.
+              </p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <input
+                  value={folder}
+                  onChange={(e) => setFolder(e.target.value)}
+                  spellCheck={false}
+                  placeholder={data.default_output_dir}
+                  className="recessed h-[28px] min-w-0 flex-1 rounded-[2px] border border-c-edge px-2 text-[11px] text-c-text placeholder:text-c-mute"
+                />
+                {folder !== data.default_output_dir && (
+                  <Tool onClick={() => setFolder(data.default_output_dir)}>
+                    Use the default
+                  </Tool>
+                )}
+              </div>
+              <p className="mt-1 text-[10px] text-c-mute">
+                Created on first render. If it cannot be written to, renders fall
+                back to {data.default_output_dir}.
+              </p>
+            </section>
+          )}
 
           {/* The script model has its own storage and its own key handling, so
               it stays its own component rather than being folded in here. */}
