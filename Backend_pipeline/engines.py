@@ -91,7 +91,23 @@ CATALOG = {
     },
 }
 
+def default_output_dir() -> str:
+    """
+    Where finished videos are filed.
+
+    Editors keep renders somewhere the user chose, not buried in a working
+    directory, so this defaults to the platform's own video folder and can be
+    pointed anywhere on first run.
+    """
+    home = os.path.expanduser("~")
+    movies = os.path.join(home, "Movies")          # macOS
+    videos = os.path.join(home, "Videos")          # Windows and most Linux
+    base = movies if os.path.isdir(movies) else (videos if os.path.isdir(videos) else home)
+    return os.path.join(base, "Multiva")
+
+
 _DEFAULTS = {stage: spec["default"] for stage, spec in CATALOG.items()}
+_DEFAULTS["output_dir"] = default_output_dir()
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -113,7 +129,30 @@ def load() -> dict:
     for stage, spec in CATALOG.items():
         if os.getenv(spec["env"]):
             data[stage] = os.environ[spec["env"]]
+    if os.getenv("MULTIVA_OUTPUT_DIR"):
+        data["output_dir"] = os.environ["MULTIVA_OUTPUT_DIR"]
     return data
+
+
+def output_dir(create: bool = True) -> str:
+    """
+    The folder finished videos are filed into, created on demand.
+
+    Falls back to the default if the configured path cannot be created, so a
+    stale setting pointing at a removed drive never fails a render that has
+    otherwise succeeded.
+    """
+    path = os.path.expanduser(load().get("output_dir") or default_output_dir())
+    if not create:
+        return path
+    try:
+        os.makedirs(path, exist_ok=True)
+        return path
+    except OSError as e:
+        fallback = default_output_dir()
+        print(f"[ENGINES] Cannot use {path} ({e}); filing renders in {fallback}")
+        os.makedirs(fallback, exist_ok=True)
+        return fallback
 
 
 def get(stage: str) -> str:
@@ -134,6 +173,10 @@ def save(choices: dict) -> dict:
     for stage, value in (choices or {}).items():
         if stage in CATALOG and isinstance(value, str) and value.strip():
             stored[stage] = value.strip()
+
+    folder = (choices or {}).get("output_dir")
+    if isinstance(folder, str) and folder.strip():
+        stored["output_dir"] = os.path.expanduser(folder.strip())
 
     os.makedirs(os.path.dirname(SETTINGS_PATH), exist_ok=True)
     tmp = f"{SETTINGS_PATH}.tmp"
