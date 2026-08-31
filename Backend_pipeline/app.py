@@ -369,12 +369,19 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         # The render stays where it was written; this is the URL that serves it.
         _set(job_id, step="uploading_result")
         final_url = f"/jobs/{job_id}/video"
+        # The original name, not the job-prefixed working one: this folder is
+        # browsed by a person, and "dfd8ae5d-529_clip_hi.mp4" tells them nothing.
+        filed_at = _file_render(
+            job_id, output_video_path,
+            os.path.splitext(os.path.basename(filename))[0].replace(f"{job_id}_", ""),
+            target_language)
 
         # The reference clip is what the voice was cloned FROM, and the dub is
         # what came out. Being able to hear both side by side is the only way a
         # user can judge clone quality, so keep them and expose them.
         _set(job_id, status="done", step="complete",
              url=final_url, output_path=output_video_path,
+             filed_at=filed_at,
              video_stale=False,
              reference_path=reference["path"],
              reference_text=reference.get("text", ""),
@@ -569,6 +576,7 @@ async def get_job_status(job_id: str):
         response["has_transcript"] = bool(job.get("segments"))
         response["editable"] = bool(job.get("plan"))
         response["video_duration"] = job.get("video_duration")
+        response["filed_at"] = job.get("filed_at")
         response["video_stale"] = bool(job.get("video_stale"))
         if job.get("reference_path"):
             response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
@@ -730,6 +738,32 @@ def _push_history(job: dict, unit: dict) -> None:
                 os.remove(stale["wav"])
             except OSError:
                 pass
+
+
+def _file_render(job_id: str, source_path: str, stem: str, language: str) -> str:
+    """
+    Copy a finished render into the user's output folder.
+
+    The working copy stays where it is, because the studio serves playback and
+    re-renders from there. This is the one a person goes looking for in Finder,
+    so it gets a name that says what it is and never overwrites an earlier take.
+    """
+    try:
+        folder = engines.output_dir()
+        base = f"{stem}_{language}"
+        target = os.path.join(folder, f"{base}.mp4")
+        n = 2
+        while os.path.exists(target):
+            target = os.path.join(folder, f"{base}_{n}.mp4")
+            n += 1
+        shutil.copyfile(source_path, target)
+        print(f"[APP] Filed {os.path.basename(target)} in {folder}")
+        return target
+    except Exception as e:                                   # noqa: BLE001
+        # Filing is a convenience. A render that succeeded must not be
+        # reported as failed because a folder was not writable.
+        print(f"[APP] Could not file the render: {e}")
+        return ""
 
 
 def _require_editable(job_id: str) -> dict:
@@ -977,8 +1011,12 @@ def rerender_task(job_id: str):
 
         final_url = f"/jobs/{job_id}/video"
 
+        stem = os.path.splitext(os.path.basename(job.get("filename") or job_id))[0]
+        filed_at = _file_render(job_id, job["output_path"], stem,
+                                job.get("target_language", "out"))
         jobs[job_id].update({"status": "done", "step": "complete",
                              "sync": check, "url": final_url,
+                             "filed_at": filed_at,
                              "video_stale": False})
         project.save(job_id, jobs[job_id])
         print(f"[APP] Job {job_id} re-rendered")
@@ -1377,6 +1415,8 @@ async def get_engine_settings():
     return JSONResponse({
         "configured": engines.configured(),
         "stages": engines.catalog(),
+        "output_dir": engines.output_dir(create=False),
+        "default_output_dir": engines.default_output_dir(),
     })
 
 
@@ -1396,8 +1436,12 @@ async def set_engine_settings(body: dict = Body(...)):
     return JSONResponse({
         "configured": True,
         "chosen": chosen,
-        "restart_required": True,
+        # Only the stage models need a restart; the output folder takes effect
+        # on the next render.
+        "restart_required": any(k in (body or {}) for k in engines.CATALOG),
         "stages": engines.catalog(),
+        "output_dir": engines.output_dir(create=False),
+        "default_output_dir": engines.default_output_dir(),
     })
 
 
