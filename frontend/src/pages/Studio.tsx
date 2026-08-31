@@ -784,6 +784,9 @@ export default function Studio() {
                     tone={job.voice_match.score >= 0.7 ? "good" : job.voice_match.score >= 0.45 ? "warn" : "bad"}
                   />
                 )}
+                {job.filed_at && (
+                  <Stat k="Saved to" v={job.filed_at.split("/").slice(-2).join("/")} tone="good" />
+                )}
                 {job.sync && (
                   <Stat
                     k="A/V drift"
