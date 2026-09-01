@@ -1,8 +1,10 @@
 import asyncio
 import os
+import re
 import shutil
 import sys
 import threading
+import time
 import traceback
 import uuid
 from contextlib import asynccontextmanager
@@ -62,15 +64,75 @@ KEEP_INTERMEDIATE = os.getenv("KEEP_INTERMEDIATE", "").lower() in ("1", "true", 
 # ---------------------------------------------------------------------------
 # Cleanup task
 # ---------------------------------------------------------------------------
+# How long an abandoned working directory survives. Saved projects are never
+# swept: they carry a manifest and the user deletes them from the studio.
+SWEEP_AFTER_HOURS = float(os.getenv("MULTIVA_SWEEP_HOURS", "48"))
+
+
+def sweep_workdirs() -> int:
+    """
+    Remove working directories left by runs that never became projects.
+
+    Removing the cloud integration also removed the only thing that pruned this
+    directory, so failed and cancelled runs accumulated with nothing to clear
+    them. A directory is only swept when it has no manifest, is not a live job,
+    and has not been touched recently.
+    """
+    if not os.path.isdir(UPLOAD_DIR):
+        return 0
+    cutoff = time.time() - SWEEP_AFTER_HOURS * 3600
+    live = {j.get("workdir") for j in jobs.values()}
+    freed = 0
+
+    for name in os.listdir(UPLOAD_DIR):
+        path = os.path.join(UPLOAD_DIR, name)
+        try:
+            if os.path.isdir(path):
+                if not name.startswith("job_"):
+                    continue
+                # A manifest means this is a project someone can still open.
+                if os.path.exists(os.path.join(path, project.MANIFEST)):
+                    continue
+                if path in live or os.path.getmtime(path) > cutoff:
+                    continue
+                shutil.rmtree(path)
+                freed += 1
+            elif os.path.isfile(path) and os.path.getmtime(path) < cutoff:
+                # An upload whose job directory is gone has nothing left to
+                # belong to.
+                job_id = name.split("_", 1)[0]
+                if job_id in jobs or os.path.isdir(os.path.join(UPLOAD_DIR, f"job_{job_id}")):
+                    continue
+                os.remove(path)
+                freed += 1
+        except OSError as e:
+            print(f"[SWEEP] Could not remove {name}: {e}")
+
+    if freed:
+        print(f"[SWEEP] Removed {freed} abandoned item(s) from {UPLOAD_DIR}")
+    return freed
+
+
+async def sweep_loop():
+    while True:
+        try:
+            sweep_workdirs()
+        except Exception as e:                               # noqa: BLE001
+            print(f"[SWEEP] Error: {e}")
+        await asyncio.sleep(6 * 3600)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     restored = project.scan(UPLOAD_DIR)
     if restored:
         jobs.update(restored)
         print(f"[APP] Reopened {len(restored)} saved project(s)")
+    sweeper = asyncio.create_task(sweep_loop())
     if os.getenv("WARMUP_ON_START", "1") not in ("0", "false", "no"):
         threading.Thread(target=_warmup, daemon=True).start()
     yield
+    sweeper.cancel()
 
 
 def _voice_match(ref_path: str, dub_path: str, source_path: str):
@@ -189,6 +251,23 @@ def format_duration(seconds: float) -> str:
 
 class JobCancelled(Exception):
     """Raised inside the pipeline when the user has asked it to stop."""
+
+
+def _safe_name(name: str) -> str:
+    """
+    Reduce an uploaded filename to something that cannot leave UPLOAD_DIR.
+
+    Only spaces were replaced before, so "../../../tmp/x.mp4" joined onto the
+    uploads directory walked straight out of it: the job-id prefix does not
+    help once a later component is "..". Take the basename, drop separators and
+    leading dots, and keep the result to a length every filesystem accepts.
+    """
+    base = os.path.basename(str(name or "")).replace("\\", "_")
+    base = re.sub(r"[/\x00]", "_", base)
+    base = base.lstrip(". ").strip() or "upload"
+    # Leave room for the job-id prefix and the suffixes the pipeline appends.
+    root, ext = os.path.splitext(base)
+    return (root[:80] or "upload") + ext[:12]
 
 
 def _set(job_id: str, **kw):
@@ -373,7 +452,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         # browsed by a person, and "dfd8ae5d-529_clip_hi.mp4" tells them nothing.
         filed_at = _file_render(
             job_id, output_video_path,
-            os.path.splitext(os.path.basename(filename))[0].replace(f"{job_id}_", ""),
+            os.path.splitext(_safe_name(filename))[0].replace(f"{job_id}_", ""),
             target_language)
 
         # The reference clip is what the voice was cloned FROM, and the dub is
@@ -512,7 +591,7 @@ async def process_video(
         raise HTTPException(status_code=400, detail="File too small or empty")
 
     job_id = str(uuid.uuid4())[:12]
-    safe_filename = f"{job_id}_{file.filename.replace(' ', '_')}"
+    safe_filename = f"{job_id}_{_safe_name(file.filename)}"
     input_path = os.path.join(UPLOAD_DIR, safe_filename)
     with open(input_path, "wb") as f:
         f.write(content)
@@ -533,8 +612,8 @@ async def process_video(
         music_bytes = await music.read()
         if len(music_bytes) > 50 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="Music file too large (max 50MB)")
-        music_path = os.path.join(UPLOAD_DIR, f"{job_id}_music_"
-                                  f"{music.filename.replace(' ', '_')}")
+        music_path = os.path.join(UPLOAD_DIR,
+                                  f"{job_id}_music_{_safe_name(music.filename)}")
         with open(music_path, "wb") as f:
             f.write(music_bytes)
 
@@ -787,11 +866,24 @@ def _rebuild_track(job: dict) -> float:
     the unit cache, so a one-word change costs one phrase and not a whole run.
     """
     plan = job["plan"]
-    waves = {}
+    waves, missing = {}, []
     for unit in plan:
         wave = dubbing.read_unit(job["units_dir"], unit["index"])
-        if wave is not None:
+        if wave is None:
+            missing.append(unit["index"])
+        else:
             waves[unit["index"]] = wave
+
+    if missing and len(missing) == len(plan):
+        raise HTTPException(
+            status_code=409,
+            detail="This project's phrase audio is gone, so the track cannot be "
+                   "rebuilt. Re-render it.")
+    if missing:
+        # Not fatal - the track is still mostly right - but the caller has to
+        # be able to say which lines fell silent instead of shipping them.
+        print(f"[APP] Rebuilt without phrases {missing}: their audio is missing")
+    job["missing_units"] = missing
 
     track = dubbing.assemble(plan, waves, job["video_duration"])
     import soundfile as sf
@@ -872,10 +964,13 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
                                       ref["duration"], job["target_language"],
                                       seed=unit.get("seed"))
     except Exception as e:                                   # noqa: BLE001
+        unit.update(previous)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Could not speak that phrase: {e}")
 
     if wave.size == 0 or float(np.max(np.abs(wave))) < 1e-4:
+        # Same reason as above: keep the words and the audio telling one story.
+        unit.update(previous)
         raise HTTPException(
             status_code=500,
             detail="That phrase came back silent. Try different wording or another seed.")
@@ -899,6 +994,7 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
         "overruns": spoken >= round(unit["duration"], 3) - 0.02,
         "track_seconds": duration,
         "video_stale": True,
+        "missing_units": job.get("missing_units") or [],
         "can_undo": len(job.get("history", [])),
     })
 
@@ -1175,9 +1271,10 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
     if not llm.configured():
         raise HTTPException(
             status_code=503,
-            detail="Script intelligence is off. Set ANTHROPIC_API_KEY to enable "
-                   "it. Unlike every other stage, it sends the script text off "
-                   "this machine.")
+            detail="Script intelligence is off. Turn it on in Settings: run a "
+                   "local model through Ollama, or add a key for a hosted "
+                   "provider - a hosted one sends the script text off this "
+                   "machine, unlike every other stage.")
 
     unit = next((u for u in job["plan"] if u["index"] == index), None)
     if unit is None:
@@ -1389,7 +1486,7 @@ async def create_voiceover(
         raise HTTPException(status_code=400, detail="Reference clip too small or empty")
 
     job_id = str(uuid.uuid4())[:12]
-    safe_filename = f"{job_id}_{file.filename.replace(' ', '_')}"
+    safe_filename = f"{job_id}_{_safe_name(file.filename)}"
     input_path = os.path.join(UPLOAD_DIR, safe_filename)
     with open(input_path, "wb") as f:
         f.write(content)
