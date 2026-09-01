@@ -465,6 +465,25 @@ def read_unit(cache_dir: str, index):
     return np.asarray(wave, dtype=np.float32).reshape(-1)
 
 
+def unit_seconds(cache_dir: str, index) -> float | None:
+    """
+    How long a phrase's cached audio actually is.
+
+    Reads the header rather than the samples: this is asked for every phrase
+    every time the timeline is listed, and the answer is in the first few
+    bytes. Reflects the current take, so it stays right after an edit.
+    """
+    import soundfile as sf
+    path = segment_path(cache_dir, index)
+    if not os.path.exists(path):
+        return None
+    try:
+        info = sf.info(path)
+        return round(info.frames / float(info.samplerate or SAMPLE_RATE), 3)
+    except Exception:                                        # noqa: BLE001
+        return None
+
+
 def synthesize_timeline(plan: list, ref_path: str, ref_text: str, ref_duration: float,
                         target_lang: str, video_duration: float,
                         progress=None, cache_dir: str = None) -> np.ndarray:

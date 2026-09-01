@@ -1004,6 +1004,10 @@ async def list_segments(job_id: str):
                 "source_text": _source_text_at(source, u["start"], u["duration"]),
                 "seed": u.get("seed"),
                 "cleared": bool(u.get("cleared")),
+                # What this phrase actually takes to say, against the slot it
+                # has. The single most useful thing to know about a dub, and
+                # it used to take a click per phrase to find out.
+                "spoken": dubbing.unit_seconds(job["units_dir"], u["index"]),
             }
             for u in job["plan"]
         ],
