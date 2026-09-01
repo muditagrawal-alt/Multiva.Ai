@@ -299,6 +299,16 @@ def _post(url: str, *, headers: dict = None, payload: dict) -> dict:
         raise Unavailable(f"The model timed out after {TIMEOUT:.0f}s.") from e
     except requests.RequestException as e:
         raise Unavailable(f"Could not reach the model: {e}") from e
+    if r.status_code == 429:
+        # Distinguishable from a bad key or a wrong model id, because the
+        # remedy is only to wait.
+        wait = (r.headers.get("retry-after")
+                or r.headers.get("x-ratelimit-reset-tokens") or "").strip()
+        left = r.headers.get("x-ratelimit-remaining-tokens")
+        detail = f" About {left} tokens left this minute." if left else ""
+        raise Unavailable(
+            f"The model's rate limit was reached"
+            f"{f', try again in {wait}' if wait else ''}.{detail}")
     if not r.ok:
         # The provider's own message is far more useful than a status code.
         raise Unavailable(f"{r.status_code} from the model: {r.text[:200]}")
@@ -384,18 +394,33 @@ def _openai(cfg, system, user, max_tokens, provider="openai"):
                      {"role": "user", "content": user}],
         "temperature": 0.35,
         "max_completion_tokens": max_tokens,
+        # Rewriting one line shorter does not need deliberation, and on a
+        # reasoning model the thinking is charged and capped alongside the
+        # answer. Measured on gpt-oss-120b for one Hindi line: the default
+        # effort spent its entire 600-token allowance thinking and returned an
+        # empty answer, while "low" answered in 138 tokens. Dropped below for
+        # any endpoint that does not know the parameter.
+        "reasoning_effort": "low",
     }
     budget_key = "max_completion_tokens"
     try:
         data = _post(url, headers=headers, payload=payload)
     except Unavailable as e:
-        # Older models take `max_tokens` and reject the newer name. Retrying is
-        # cheaper than maintaining a list of which model wants which.
-        if "max_completion_tokens" not in str(e):
+        # Older models take `max_tokens` and reject the newer name, and plenty
+        # of OpenAI-compatible servers have never heard of reasoning_effort.
+        # Dropping whatever was named is cheaper than maintaining a list of
+        # which endpoint accepts which.
+        message, dropped = str(e), False
+        if "reasoning_effort" in message and "reasoning_effort" in payload:
+            payload.pop("reasoning_effort")
+            dropped = True
+        if "max_completion_tokens" in message:
+            payload.pop("max_completion_tokens", None)
+            budget_key = "max_tokens"
+            payload[budget_key] = max_tokens
+            dropped = True
+        if not dropped:
             raise
-        payload.pop("max_completion_tokens")
-        budget_key = "max_tokens"
-        payload[budget_key] = max_tokens
         data = _post(url, headers=headers, payload=payload)
 
     text, why = _openai_text(data)
@@ -404,11 +429,14 @@ def _openai(cfg, system, user, max_tokens, provider="openai"):
     # for the answer, so a budget sized for one short line comes back with
     # finish_reason "length", the whole allowance in `reasoning`, and nothing
     # in `content`. Measured on gpt-oss-120b: 300 tokens produced 823
-    # characters of reasoning and an empty answer, 800 produced the line.
-    # Asking again with room is better than maintaining a list of which models
-    # reason, which changes every few weeks.
+    # characters of reasoning and an empty answer, 800 produced the line in
+    # 754 completion tokens. Asking again with room is better than maintaining
+    # a list of which models reason, which changes every few weeks - but the
+    # ask stays modest, because the budget is reserved against the provider's
+    # per-minute allowance whether the model uses it or not, and the fit loop
+    # has several more calls to make.
     if not text and why == "length":
-        payload[budget_key] = max(max_tokens * 6, 1500)
+        payload[budget_key] = max(max_tokens * 3, 1000)
         text, why = _openai_text(_post(url, headers=headers, payload=payload))
 
     return text
