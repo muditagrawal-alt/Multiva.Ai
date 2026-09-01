@@ -240,25 +240,25 @@ click per phrase to find out.
 
 ## Must not break
 
-Checked against `scripts/selftest.py` after every phase, not once at the end.
-Any phase that breaks one of these is reverted rather than patched forward.
+Checked against `scripts/selftest.py` after every phase. All green at 94
+checks, voice match 0.720 — unchanged from the 67-check baseline.
 
-- [ ] Dub a video end to end
-- [ ] Voice cloning quality (0.720 baseline)
-- [ ] Voice-over from a script
-- [ ] Editing a phrase's words
-- [ ] Re-rolling a delivery with a new seed
-- [ ] Undo, including audio restoration
-- [ ] Choosing a reference window
-- [ ] Re-rendering the picture
-- [ ] Trimming with in and out points
-- [ ] The music bed
-- [ ] All six export formats
-- [ ] Cancelling a render
-- [ ] Projects persisting and reopening
-- [ ] Fitting a line with either provider
-- [ ] Ollama and Groq both reachable
-- [ ] The desktop app finding its checkout
+- [x] Dub a video end to end
+- [x] Voice cloning quality (0.720 baseline)
+- [x] Voice-over from a script
+- [x] Editing a phrase's words
+- [x] Re-rolling a delivery with a new seed
+- [x] Undo, including audio restoration
+- [x] Choosing a reference window
+- [x] Re-rendering the picture
+- [x] Trimming with in and out points
+- [x] The music bed
+- [x] All six export formats
+- [x] Cancelling a render
+- [x] Projects persisting and reopening
+- [x] Fitting a line with either provider
+- [x] Ollama and Groq both reachable
+- [x] The desktop app finding its checkout
 
 ---
 
