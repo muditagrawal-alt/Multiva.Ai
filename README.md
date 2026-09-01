@@ -33,15 +33,24 @@ from, A2 is the result; both waveforms are decoded from the actual audio.*
 Python 3.10 and ffmpeg are the only prerequisites.
 
 ```bash
+# macOS:  brew install python@3.10 ffmpeg
+# Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg
+
 git clone https://github.com/muditagrawal-alt/Multiva.Ai
 cd Multiva.Ai
 
 python3.10 -m venv venv
 ./venv/bin/pip install -r requirements.txt
 
-# ~7 GB of model weights, resumable. --check reports without downloading.
+# ~7.5 GB of weights: the five Hub models plus the two Wav2Lip checkpoints,
+# which are too large for git. Resumable, and every file is checked against a
+# SHA-256 before it is installed. --check reports without downloading.
 ./venv/bin/python scripts/download_models.py
 ```
+
+Nothing else is required. There is no database to provision, no API key to
+obtain, and no account to create - the pipeline, the models and your projects
+are all local.
 
 ## Run it
 
@@ -67,8 +76,10 @@ cd Backend_pipeline
 ./venv/bin/python scripts/selftest.py path/to/clip.mp4
 ```
 
-42 checks: a real dub, the phrase editor, undo, every export, a voice-over, and
-a cancellation that actually stops.
+A real dub, the phrase editor, re-rolling a take, choosing a different
+reference window, a re-render, every export, a voice-over, and a cancellation
+that actually stops. Anything needing a model you have not configured is
+skipped rather than failed.
 
 ---
 
@@ -104,10 +115,31 @@ When a translation runs longer than the speaker's original phrasing, the only
 other option is time-stretching, and stretching is what makes a dub sound
 robotic.
 
-It defaults to Ollama on your own machine. You can point it at Claude, Gemini,
-OpenAI, Grok, or any OpenAI-compatible endpoint with your own key, in which case
-**one line of already-translated text** leaves the machine per rewrite - never
-video, audio, or the cloned voice.
+It defaults to Ollama on your own machine, and the studio's Script model panel
+will offer whatever you have pulled. You can instead point it at Groq, Claude,
+Gemini, OpenAI, Grok, or any OpenAI-compatible endpoint, in which case **one
+line of already-translated text** leaves the machine per rewrite - never video,
+audio, or the cloned voice.
+
+```bash
+ollama pull qwen2.5:7b            # the local default
+
+cp .env.example .env              # or set a key for a hosted model
+# GROQ_API_KEY=gsk_...
+```
+
+Measure any model against the job before trusting it:
+
+```bash
+./venv/bin/python scripts/fit_bench.py --provider ollama --model qwen2.5:7b
+./venv/bin/python scripts/fit_bench.py --provider groq --model llama-3.3-70b-versatile
+```
+
+On four lines that overran their slots, `qwen2.5:7b` shortened three, but only
+reached 78-83% of the original length on Hindi when asked for 70%, and returned
+one line completely unchanged. English it handled well (60%). It preserved
+every number. This is the measurement behind the "weak at Indic rewriting"
+limit below, and the reason the panel exists at all.
 
 It is not an agent. It proposes text into an editable box and cannot touch a
 render; nothing reaches your video without you pressing Re-speak. Numbers in the
