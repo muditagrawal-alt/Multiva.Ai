@@ -122,7 +122,7 @@ Built and tested before any UI depends on them.
       projects keep working
 - [x] `PATCH /jobs/{id}` to rename
 - [x] Set at import, editable afterwards
-- [ ] (phase 2) Shown in the Projects list and the studio title bar, in place of the job
+- [x] Shown in the studio title bar (Projects list still to do), in place of the job
       id that is now hidden
 
 *Touches:* `project.py`, `app.py`
@@ -153,25 +153,25 @@ outright, so this is a distinct operation rather than a loosened validation.
 
 ---
 
-## Phase 2 — Studio shell
+## Phase 2 — Studio shell  ·  done
 
 Rearranging panels that already exist. No panel is rewritten; each moves to the
 page it belongs on.
 
 ### 2.1 Page bar along the bottom — layout
 
-- [ ] Media · Edit · Deliver, always visible, in the existing console chrome
-- [ ] Pages that cannot apply yet are dimmed with a reason on hover — Edit
+- [x] Media · Edit · Deliver, always visible, in the existing console chrome
+- [x] Pages that cannot apply yet are dimmed with a reason on hover — Edit
       before a render, Deliver before a clip
-- [ ] Top tab strip keeps Projects and Studio only
+- [x] Top tab strip keeps Projects and Studio only
 
 *Touches:* `console.tsx`, `Studio.tsx`
 
 ### 2.2 Output presets on Deliver — replaces a control
 
-- [ ] Dub/Voice-over segmented control becomes five presets: Dub, Audio dub,
+- [x] Dub/Voice-over segmented control becomes five presets: Dub, Audio dub,
       Subtitles, Translated subtitles, Voice-over
-- [ ] Each states what it runs and roughly what it costs, so the cheap ones are
+- [x] Each states what it runs and roughly what it costs, so the cheap ones are
       visibly cheap
 
 *Touches:* `Studio.tsx`, `api.ts`, `pipeline.ts`
