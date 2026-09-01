@@ -133,7 +133,9 @@ function Ruler({
 }: { duration: number; onSeek: (s: number) => void }) {
   const step = tickStep(duration || 1);
   const ticks: number[] = [];
-  for (let t = 0; t <= duration; t += step) ticks.push(t);
+  // Nothing is measurable before a clip loads, and t / 0 would place the first
+  // tick at NaN%.
+  if (duration > 0) for (let t = 0; t <= duration; t += step) ticks.push(t);
 
   return (
     <div className="flex h-[19px] shrink-0 border-b border-c-edge">
