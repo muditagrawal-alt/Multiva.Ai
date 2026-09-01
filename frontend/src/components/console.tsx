@@ -230,6 +230,63 @@ export function TitleBar({
   );
 }
 
+export type StudioPage = "media" | "edit" | "deliver";
+
+/**
+ * The page bar, along the bottom, after Resolve.
+ *
+ * Each page is a whole workspace for the same project rather than a separate
+ * document: you are not switching what you have open, you are switching what
+ * you are doing to it. A page that cannot apply yet is dimmed with the reason
+ * rather than hidden, so the shape of the workflow stays visible from the
+ * first import.
+ */
+export function PageBar({
+  page, onPage, disabled,
+}: {
+  page: StudioPage;
+  onPage: (p: StudioPage) => void;
+  /** Page key to the reason it is unavailable. */
+  disabled?: Partial<Record<StudioPage, string>>;
+}) {
+  const pages: { key: StudioPage; label: string }[] = [
+    { key: "media", label: "Media" },
+    { key: "edit", label: "Edit" },
+    { key: "deliver", label: "Deliver" },
+  ];
+  return (
+    <nav
+      className="raised flex items-center justify-center gap-1 border-t border-c-edge"
+      aria-label="Studio pages"
+    >
+      {pages.map((p) => {
+        const why = disabled?.[p.key];
+        const active = page === p.key;
+        return (
+          <button
+            key={p.key}
+            type="button"
+            onClick={() => !why && onPage(p.key)}
+            disabled={!!why}
+            aria-current={active ? "page" : undefined}
+            title={why}
+            className={cx(
+              "rounded-[2px] px-4 py-[5px] text-[10px] uppercase tracking-[0.14em] transition-colors",
+              active
+                ? "bg-c-accent-dim text-c-accent"
+                : why
+                  ? "cursor-default text-c-mute/40"
+                  : "text-c-mute hover:bg-c-hover hover:text-c-text"
+            )}
+          >
+            {p.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 /** The window's bottom strip. */
 export function StatusBar({ children }: { children: ReactNode }) {
   return (
