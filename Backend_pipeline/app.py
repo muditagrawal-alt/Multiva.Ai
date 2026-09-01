@@ -295,7 +295,8 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                        target_language: str, filename: str,
                        user_id: str = "anonymous",
                        trim_start: float = None, trim_end: float = None,
-                       music_path: str = None, music_gain: float = -18.0):
+                       music_path: str = None, music_gain: float = -18.0,
+                       kind: str = "dub"):
     """
     Segment-level dubbing pipeline.
 
@@ -376,6 +377,22 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         print(f"[APP] Source language: {source_language} "
               f"(detected {result.get('language')}, requested {original_language})")
 
+        seg_rows = [{"start": float(sg.get("start", 0.0)),
+                     "end": float(sg.get("end", 0.0)),
+                     "text": (sg.get("text") or "").strip()}
+                    for sg in segments]
+        common = dict(workdir=workdir, input_path=input_path,
+                      video_duration=video_dur, source_language=source_language,
+                      target_language=target_language, segment_count=len(segments),
+                      segments=seg_rows, word_segments=segments,
+                      video_stale=False)
+
+        if kind == "subtitles":
+            _set(job_id, status="done", step="complete", **common)
+            project.save(job_id, jobs[job_id])
+            print(f"[APP] Job {job_id} transcribed ({len(segments)} segments)")
+            return
+
         # ── 3. Reference clip for cloning ──
         _set(job_id, step="selecting_reference")
         reference = reference_audio.build_reference(
@@ -392,6 +409,13 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         if not any(t.strip() for t in translated):
             raise RuntimeError("Translation produced no text")
 
+        if kind == "subtitles_translated":
+            _set(job_id, status="done", step="complete",
+                 translated_segments=list(translated), **common)
+            project.save(job_id, jobs[job_id])
+            print(f"[APP] Job {job_id} translated ({len(segments)} segments)")
+            return
+
         with _HEAVY:
             # ── 5. Build the dubbed track (exact length by construction) ──
             _set(job_id, step="synthesizing_voice")
@@ -406,6 +430,35 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                 dub_path,
                 source_lang=source_language, progress=tts_progress,
                 source_audio=stt_audio, cache_dir=units_dir)
+
+            if kind == "audio":
+                # The bed belongs in the delivered file when there is no
+                # picture to mux it into later.
+                delivered = dub_path
+                if music_path:
+                    delivered = os.path.join(workdir, f"{stem}_mixed.wav")
+                    av_sync.mix_music(dub_path, music_path, delivered,
+                                      gain_db=music_gain)
+                    print(f"[APP] Mixed a music bed at {music_gain:.0f} dB")
+                filed = _file_render(
+                    job_id, delivered,
+                    os.path.splitext(_safe_name(filename))[0].replace(f"{job_id}_", ""),
+                    target_language)
+                _set(job_id, status="done", step="complete",
+                     dub_path=delivered, filed_at=filed,
+                     plan=plan, units_dir=units_dir,
+                     reference_path=reference["path"],
+                     reference_text=reference.get("text", ""),
+                     reference_seconds=round(reference.get("duration", 0.0), 2),
+                     reference={"path": reference["path"],
+                                "text": reference.get("text", ""),
+                                "duration": reference.get("duration", 0.0),
+                                "start": reference.get("start")},
+                     music_path=music_path, music_gain=music_gain,
+                     translated_segments=list(translated), **common)
+                project.save(job_id, jobs[job_id])
+                print(f"[APP] Job {job_id} dubbed to audio")
+                return
 
             # ── 6. Lip sync (single encode, audio muxed in the same pass) ──
             _set(job_id, step="lip_syncing")
@@ -583,6 +636,9 @@ async def process_video(
     original_language: str = Query(..., description="Source language code"),
     target_language: str = Query(..., description="Target language code"),
     user_id: str = Query("anonymous", description="Owner of this job"),
+    name: str = Query(None, description="What to call this project"),
+    kind: str = Query("dub", description="dub, audio, subtitles, "
+                                         "or subtitles_translated"),
     trim_start: float = Query(None, description="In point in seconds"),
     trim_end: float = Query(None, description="Out point in seconds"),
     music_gain: float = Query(-18.0, description="Music bed level in dB"),
@@ -596,6 +652,9 @@ async def process_video(
         L.engine_for(target_language)
     except L.UnsupportedLanguage as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    if kind not in ("dub", "audio", "subtitles", "subtitles_translated"):
+        raise HTTPException(status_code=400, detail=f"Unknown output: {kind}")
 
     # The range still has to be checked against the real duration once the file
     # has been probed, but an out point at or before the in point is wrong on
@@ -625,8 +684,9 @@ async def process_video(
     jobs[job_id] = {
         "status": "queued",
         "step": "uploaded",
-        "kind": "dub",
+        "kind": kind,
         "filename": file.filename,
+        "title": (name or "").strip() or None,
         "original_language": original_language,
         "target_language": target_language,
         "user_id": user_id,
@@ -645,7 +705,8 @@ async def process_video(
 
     background_tasks.add_task(process_video_task, job_id, input_path,
                              original_language, target_language, safe_filename,
-                             user_id, trim_start, trim_end, music_path, music_gain)
+                             user_id, trim_start, trim_end, music_path,
+                             music_gain, kind)
 
     return JSONResponse({
         "status": "accepted",
@@ -662,7 +723,8 @@ async def get_job_status(job_id: str):
 
     response = {"job_id": job_id, "status": job["status"],
                 "step": job.get("step", "unknown"),
-                "kind": job.get("kind", "dub")}
+                "kind": job.get("kind", "dub"),
+                "name": _project_name(job, job_id)}
 
     if job["status"] == "cancelled":
         response["error"] = job.get("error", "Cancelled.")
@@ -834,7 +896,8 @@ def _push_history(job: dict, unit: dict) -> None:
 
     history = job.setdefault("history", [])
     history.append({"index": index, "text": unit["text"],
-                    "seed": unit.get("seed"), "wav": backup})
+                    "seed": unit.get("seed"), "wav": backup,
+                    "cleared": bool(unit.get("cleared"))})
 
     while len(history) > HISTORY_DEPTH:
         stale = history.pop(0)
@@ -940,6 +1003,7 @@ async def list_segments(job_id: str):
                 # source line a phrase was spoken over.
                 "source_text": _source_text_at(source, u["start"], u["duration"]),
                 "seed": u.get("seed"),
+                "cleared": bool(u.get("cleared")),
             }
             for u in job["plan"]
         ],
@@ -1002,6 +1066,7 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
             detail="That phrase came back silent. Try different wording or another seed.")
 
     _push_history(job, {"index": index, **previous})
+    unit.pop("cleared", None)
     dubbing.write_unit(job["units_dir"], index, wave)
     duration = _rebuild_track(job)
     project.save(job_id, job)
@@ -1021,6 +1086,47 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
         "track_seconds": duration,
         "video_stale": True,
         "missing_units": job.get("missing_units") or [],
+        "can_undo": len(job.get("history", [])),
+    })
+
+
+@app.delete("/jobs/{job_id}/segments/{index}")
+async def clear_segment(job_id: str, index: int):
+    """
+    Silence a phrase, keeping its slot and its words.
+
+    This is where Cut puts the audio. The text is kept rather than emptied:
+    an empty phrase is rejected everywhere else, and seeing what used to be
+    said is what makes the cut reversible by eye as well as by undo.
+    """
+    job = _require_editable(job_id)
+    if job["status"] == "processing":
+        raise HTTPException(status_code=409, detail="This job is still rendering.")
+
+    unit = next((u for u in job["plan"] if u["index"] == index), None)
+    if unit is None:
+        raise HTTPException(status_code=404, detail=f"No phrase {index} in this timeline")
+    if unit.get("cleared"):
+        raise HTTPException(status_code=409, detail="That phrase is already silent")
+
+    _push_history(job, unit)
+    silence = np.zeros(int(float(unit["duration"]) * dubbing.SAMPLE_RATE),
+                       dtype=np.float32)
+    dubbing.write_unit(job["units_dir"], index, silence)
+    unit["cleared"] = True
+
+    duration = _rebuild_track(job)
+    project.save(job_id, job)
+    print(f"[APP] Job {job_id} phrase {index} cleared "
+          f"({unit['duration']:.2f}s of silence)")
+
+    return JSONResponse({
+        "index": index,
+        "text": unit["text"],
+        "cleared": True,
+        "slot_seconds": round(unit["duration"], 3),
+        "track_seconds": duration,
+        "video_stale": True,
         "can_undo": len(job.get("history", [])),
     })
 
@@ -1053,6 +1159,10 @@ async def undo_phrase(job_id: str):
         unit.pop("seed", None)
     else:
         unit["seed"] = entry["seed"]
+    if entry.get("cleared"):
+        unit["cleared"] = True
+    else:
+        unit.pop("cleared", None)
 
     restored_audio = False
     if entry.get("wav") and os.path.exists(entry["wav"]):
@@ -1505,6 +1615,7 @@ async def create_voiceover(
     script: str = Form(..., description="What the voice should say"),
     language: str = Query(..., description="Language of the script"),
     user_id: str = Query("anonymous"),
+    name: str = Query(None, description="What to call this project"),
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No reference clip provided")
@@ -1535,6 +1646,7 @@ async def create_voiceover(
     jobs[job_id] = {
         "status": "queued", "step": "uploaded", "kind": "voiceover",
         "filename": file.filename, "target_language": language,
+        "title": (name or "").strip() or None,
         "user_id": user_id,
         "created_at": asyncio.get_event_loop().time(),
     }
@@ -1658,6 +1770,31 @@ async def health():
     })
 
 
+def _project_name(job: dict, job_id: str) -> str:
+    """What to call this project: what the user named it, else its source
+    file, else the id. The id is the last resort, not the label."""
+    name = (job.get("title") or "").strip()
+    if name:
+        return name
+    return job.get("filename") or job_id
+
+
+@app.patch("/jobs/{job_id}")
+async def rename_project(job_id: str, body: dict = Body(...)):
+    """Rename a project."""
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="No such job")
+    name = str(body.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="A project needs a name")
+    if len(name) > 120:
+        raise HTTPException(status_code=400, detail="That name is too long")
+    job["title"] = name
+    project.save(job_id, job)
+    return JSONResponse({"job_id": job_id, "name": name})
+
+
 @app.get("/videos/")
 async def get_videos(user_id: str = "anonymous"):
     """
@@ -1675,7 +1812,8 @@ async def get_videos(user_id: str = "anonymous"):
             "id": job_id,
             "job_id": job_id,
             "openable": True,
-            "title": job.get("filename") or job_id,
+            "title": _project_name(job, job_id),
+            "name": _project_name(job, job_id),
             "original_language": job.get("source_language"),
             "target_language": job.get("target_language"),
             "duration": job.get("duration"),
