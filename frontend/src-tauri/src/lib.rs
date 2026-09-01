@@ -77,8 +77,12 @@ fn find_project_root() -> Option<PathBuf> {
 
     for start in starts {
         let mut dir = start.as_path();
-        // Bounded walk so a misconfigured install cannot scan the whole disk.
-        for _ in 0..8 {
+        // Bounded so a misconfigured install cannot scan the whole disk, but
+        // deep enough to climb out of a macOS bundle: the executable sits at
+        // target/release/bundle/macos/Multiva Studio.app/Contents/MacOS/, which
+        // is ten hops below the checkout. At eight the bundled app never found
+        // the project and silently started no engine.
+        for _ in 0..16 {
             if looks_like_checkout(dir) {
                 return Some(dir.to_path_buf());
             }
