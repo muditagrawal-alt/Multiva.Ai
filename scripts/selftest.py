@@ -333,6 +333,90 @@ def main() -> int:
     code, _ = call("GET", f"/jobs/{job}/export/nope.xyz", raw=True)
     check("unknown export rejected", code == 404, f"got {code}")
 
+    # ---- naming a project --------------------------------------------------
+    print("\n  Project name")
+    code, named = call("PATCH", f"/jobs/{job}", {"name": "Selftest rename"})
+    check("project renamed", code == 200 and named.get("name") == "Selftest rename",
+          f"{code} {str(named)[:60]}")
+    _, st = call("GET", f"/jobs/{job}/status")
+    check("name comes back on status", st.get("name") == "Selftest rename",
+          f"got {st.get('name')!r}")
+    code, _ = call("PATCH", f"/jobs/{job}", {"name": "   "})
+    check("an empty name is rejected", code == 400, f"got {code}")
+    code, _ = call("PATCH", "/jobs/nosuchjob", {"name": "x"})
+    check("renaming an unknown job is rejected", code == 404, f"got {code}")
+
+    # ---- clearing a phrase -------------------------------------------------
+    # Where Cut puts the audio: the slot and the words stay, the sound goes.
+    print("\n  Clear a phrase")
+    _, had = call("GET", f"/jobs/{job}/segments/1/audio", raw=True)
+    code, cleared = call("DELETE", f"/jobs/{job}/segments/1")
+    check("phrase cleared", code == 200 and cleared.get("cleared"),
+          f"{code} {str(cleared)[:60]}")
+    check("clearing keeps the words", bool(cleared.get("text")),
+          "the text is what makes the cut readable")
+    _, tlc = call("GET", f"/jobs/{job}/segments")
+    check("timeline reports it silent",
+          tlc["segments"][1].get("cleared") is True)
+    code, _ = call("DELETE", f"/jobs/{job}/segments/1")
+    check("clearing twice is refused", code == 409, f"got {code}")
+    code, _ = call("DELETE", f"/jobs/{job}/segments/9999")
+    check("clearing an unknown phrase is refused", code == 404, f"got {code}")
+
+    code, un2 = call("POST", f"/jobs/{job}/undo")
+    check("undo brings the phrase back", code == 200 and un2.get("audio_restored"))
+    _, tlu = call("GET", f"/jobs/{job}/segments")
+    check("undo clears the silent flag too",
+          not tlu["segments"][1].get("cleared"),
+          "the timeline would say silent while the audio is not")
+    _, back = call("GET", f"/jobs/{job}/segments/1/audio", raw=True)
+    check("the restored take is the original", had == back)
+
+    # ---- standalone outputs ------------------------------------------------
+    # Each stops where its work is done instead of paying for the whole
+    # pipeline. Subtitles in particular used to cost a full dub.
+    print("\n  Standalone outputs")
+    for kind, label, wants_translation in (
+        ("subtitles", "Subtitles", False),
+        ("subtitles_translated", "Translated subtitles", True),
+        ("audio", "Audio dub", True),
+    ):
+        began = time.time()
+        code, started = call(
+            "POST",
+            f"/process_video/?original_language=en&target_language=hi"
+            f"&user_id=selftest&kind={kind}&name={label.replace(' ', '%20')}",
+            files={"file": (name, clip)})
+        sub_job = started.get("job_id")
+        if not check(f"{label} accepted", code == 200 and sub_job, f"{code}"):
+            continue
+        state, d = wait_for(sub_job)
+        took = time.time() - began
+        check(f"{label} finished", state == "done", f"{state} {d.get('error')}")
+        print(f"        {took:.0f}s")
+        check(f"{label} kept its name", d.get("name") == label,
+              f"got {d.get('name')!r}")
+
+        code, body = call("GET", f"/jobs/{sub_job}/export/source.srt", raw=True)
+        check(f"{label} exports source subtitles", code == 200 and len(body) > 20,
+              f"{code}, {len(body)}b")
+        code, body = call("GET", f"/jobs/{sub_job}/export/dub.srt", raw=True)
+        if wants_translation:
+            check(f"{label} exports translated subtitles",
+                  code == 200 and len(body) > 20, f"{code}, {len(body)}b")
+        else:
+            check("a subtitle-only job refuses a translated export",
+                  code == 409, f"got {code}")
+        if kind == "audio":
+            check("the audio dub is playable", bool(d.get("dub_audio")),
+                  "no audio was exposed")
+        call("DELETE", f"/videos/{sub_job}")
+
+    code, _ = call("POST",
+                   "/process_video/?original_language=en&target_language=hi&kind=nonsense",
+                   files={"file": (name, clip)})
+    check("an unknown output is rejected", code == 400, f"got {code}")
+
     # ---- trim and the music bed -------------------------------------------
     # Both are set at upload time, so they need a job of their own. Trimming
     # also keeps this one short, which is most of why it is affordable.
