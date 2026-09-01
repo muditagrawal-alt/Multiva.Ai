@@ -18,6 +18,11 @@ for _p in (str(_CURRENT_DIR), str(_PROJECT_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+# Before anything reads an environment variable: a key in .env is worthless
+# if it is loaded after the module that wanted it.
+import localenv
+_ENV_KEYS = localenv.load(str(_PROJECT_ROOT / ".env"))
+
 from fastapi import (BackgroundTasks, Body, FastAPI, File, Form, HTTPException,
                      Query, UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
