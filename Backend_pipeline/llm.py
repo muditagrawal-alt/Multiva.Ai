@@ -82,6 +82,15 @@ PROVIDERS = {
         "suggested": ["grok-2-latest"],
         "note": "Sends one line of translated text per rewrite.",
     },
+    "groq": {
+        "label": "Groq Cloud",
+        "needs_key": True,
+        "default_model": "llama-3.3-70b-versatile",
+        "suggested": ["llama-3.3-70b-versatile", "moonshotai/kimi-k2-instruct",
+                      "qwen/qwen3-32b", "llama-3.1-8b-instant"],
+        "note": "Sends one line of translated text per rewrite. Fast enough "
+                "that fitting a phrase feels instant.",
+    },
     "custom": {
         "label": "Other (OpenAI-compatible)",
         "needs_key": True,
@@ -124,7 +133,13 @@ def load_settings() -> dict:
     # The environment wins, so a deployment can pin configuration without a
     # settings file and without the UI being able to override it.
     if os.getenv("MULTIVA_LLM_PROVIDER"):
-        data["provider"] = os.environ["MULTIVA_LLM_PROVIDER"]
+        chosen = os.environ["MULTIVA_LLM_PROVIDER"]
+        # Naming a provider but no model would otherwise carry the previous
+        # provider's model across, and send "qwen2.5:7b" to Groq. The explicit
+        # model override below still wins when one is given.
+        if chosen != data["provider"] and chosen in PROVIDERS:
+            data["model"] = PROVIDERS[chosen]["default_model"]
+        data["provider"] = chosen
     if os.getenv("MULTIVA_LLM_MODEL"):
         data["model"] = os.environ["MULTIVA_LLM_MODEL"]
     if os.getenv("MULTIVA_LLM_URL") or os.getenv("OLLAMA_HOST"):
@@ -134,7 +149,9 @@ def load_settings() -> dict:
     keys = dict(data.get("keys") or {})
     for provider, var in (("anthropic", "ANTHROPIC_API_KEY"),
                           ("google", "GEMINI_API_KEY"),
-                          ("openai", "OPENAI_API_KEY")):
+                          ("openai", "OPENAI_API_KEY"),
+                          ("groq", "GROQ_API_KEY"),
+                          ("grok", "XAI_API_KEY")):
         if os.getenv(var):
             keys[provider] = os.environ[var]
     data["keys"] = keys
@@ -346,6 +363,7 @@ def _google(cfg, system, user, max_tokens):
 _OPENAI_COMPATIBLE = {
     "openai": "https://api.openai.com/v1",
     "grok": "https://api.x.ai/v1",
+    "groq": "https://api.groq.com/openai/v1",
 }
 
 
@@ -388,6 +406,7 @@ _CALL = {
     "google": _google,
     "openai": lambda c, s, u, m: _openai(c, s, u, m, "openai"),
     "grok": lambda c, s, u, m: _openai(c, s, u, m, "grok"),
+    "groq": lambda c, s, u, m: _openai(c, s, u, m, "groq"),
     "custom": lambda c, s, u, m: _openai(c, s, u, m, "custom"),
 }
 
