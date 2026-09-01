@@ -5,7 +5,7 @@ semantics, timeline editing, and three standalone outputs that no longer
 require running the whole pipeline.
 
 Baseline before any of this starts: **67 checks green, voice match 0.720**.
-After phase 1: **93 checks green**, same voice match. Branch is now `main`.
+After phase 4: **94 checks green**, same voice match. Branch is now `main`.
 
 ---
 
@@ -178,7 +178,7 @@ page it belongs on.
 
 ---
 
-## Phase 3 — Render semantics
+## Phase 3 — Render semantics  ·  done
 
 The change requested first, and the one most likely to break something, so it
 lands after the shell is stable.
@@ -187,10 +187,10 @@ lands after the shell is stable.
 
 The button reads the project's state instead of always submitting a new job.
 
-- [ ] Nothing rendered yet → **Render**, full pipeline
-- [ ] Rendered, audio edited since → **Re-render picture**, lip sync only
-- [ ] Rendered and current → **disabled**, labelled up to date
-- [ ] Starting from scratch moves to an explicit **Render from source** behind a
+- [x] Nothing rendered yet → **Render**, full pipeline
+- [x] Rendered, audio edited since → **Re-render picture**, lip sync only
+- [x] Rendered and current → **disabled**, labelled up to date
+- [x] Starting from scratch moves to an explicit **Render from source** behind a
       confirm, because it discards every phrase edit
 
 That is exactly what the button does today without saying so.
@@ -199,10 +199,10 @@ That is exactly what the button does today without saying so.
 
 ### 3.2 The finished output, in the window — additive
 
-- [ ] Deliver shows the result rather than a path
-- [ ] Video playing inline for a dub; audio player for a voice-over or audio
+- [x] Deliver shows the result rather than a path
+- [x] Video playing inline for a dub; audio player for a voice-over or audio
       dub; subtitle text for a subtitle job
-- [ ] File location and reveal-in-folder beneath it
+- [x] File location shown (reveal-in-folder not added)
 
 The player exists already; it has never had a page of its own to sit on.
 
@@ -210,26 +210,26 @@ The player exists already; it has never had a page of its own to sit on.
 
 ---
 
-## Phase 4 — Timeline editing
+## Phase 4 — Timeline editing  ·  done
 
 Built last: depends on 1.3 for cut, and on the Edit page existing.
 
 ### 4.1 Cut, copy and paste on phrases — additive
 
-- [ ] **Copy** takes a phrase's words and seed
-- [ ] **Paste** puts them on the selected phrase and re-speaks it in that slot,
+- [x] **Copy** takes a phrase's words and seed
+- [x] **Paste** puts them on the selected phrase and re-speaks it in that slot,
       through the existing revise endpoint — so the length check, the number
       guard and undo all apply unchanged
-- [ ] **Cut** copies and then clears, using 1.3
-- [ ] Bound to ⌘X, ⌘C, ⌘V, Delete and ⌘Z onto the existing undo stack
-- [ ] Never captured while a text field has focus
+- [x] **Cut** copies and then clears, using 1.3
+- [x] Bound to ⌘X, ⌘C, ⌘V, Delete and ⌘Z onto the existing undo stack
+- [x] Never captured while a text field has focus
 
 *Touches:* `timeline.tsx`, `Studio.tsx`
 
 ### 4.2 Phrases show whether they fit — additive
 
-- [ ] Colour each block by spoken length against its slot: fits, tight, overruns
-- [ ] Expose spoken seconds in the segments response
+- [x] Colour each block by spoken length against its slot: fits, tight, overruns
+- [x] Expose spoken seconds in the segments response
 
 The single most useful thing the app knows about a dub, and it currently takes a
 click per phrase to find out.
