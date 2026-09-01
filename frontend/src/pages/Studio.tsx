@@ -785,7 +785,12 @@ export default function Studio() {
                   />
                 )}
                 {job.filed_at && (
-                  <Stat k="Saved to" v={job.filed_at.split("/").slice(-2).join("/")} tone="good" />
+                  <Stat
+                    k="Saved to"
+                    v={job.filed_at.split("/").slice(-2).join("/") +
+                       (stale ? "  (previous take)" : "")}
+                    tone={stale ? "warn" : "good"}
+                  />
                 )}
                 {job.sync && (
                   <Stat
