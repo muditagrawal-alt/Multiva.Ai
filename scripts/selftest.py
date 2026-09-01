@@ -86,6 +86,24 @@ def call(method, path, body=None, files=None, raw=False):
         return 0, {"detail": str(e)}
 
 
+def tone_wav(seconds=6, rate=22050, freq=220.0):
+    """A quiet sine tone, so the music-bed path has something real to mix."""
+    import math
+    import struct
+    import wave
+    from io import BytesIO
+
+    buf = BytesIO()
+    with wave.open(buf, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(rate)
+        w.writeframes(b"".join(
+            struct.pack("<h", int(8000 * math.sin(2 * math.pi * freq * i / rate)))
+            for i in range(int(rate * seconds))))
+    return buf.getvalue()
+
+
 def wait_for(job, timeout=900):
     """Block until a job leaves the processing state."""
     end = time.time() + timeout
@@ -314,6 +332,40 @@ def main() -> int:
         check(f"{kind}", code == 200 and len(body) > 10, f"{code}, {len(body)}b")
     code, _ = call("GET", f"/jobs/{job}/export/nope.xyz", raw=True)
     check("unknown export rejected", code == 404, f"got {code}")
+
+    # ---- trim and the music bed -------------------------------------------
+    # Both are set at upload time, so they need a job of their own. Trimming
+    # also keeps this one short, which is most of why it is affordable.
+    print("\n  Trim and music bed")
+    music = tone_wav(seconds=6)
+    code, started = call(
+        "POST",
+        f"/process_video/?original_language=en&target_language=hi"
+        f"&user_id=selftest&trim_start=2.0&trim_end=9.0&music_gain=-20",
+        files={"file": (name, clip), "music": ("bed.wav", music)})
+    trimmed = started.get("job_id")
+    check("trimmed job with a music bed accepted", code == 200 and trimmed,
+          f"{code} {str(started)[:70]}")
+
+    if trimmed:
+        state, d = wait_for(trimmed)
+        check("trimmed render completed", state == "done",
+              f"{state} {d.get('error')}")
+        # 2.0 to 9.0 is seven seconds, whatever the source was.
+        got = d.get("video_duration") or 0
+        check("trim applied to the render", 6.0 <= got <= 8.0,
+              f"video_duration {got}, expected about 7")
+        code, body = call("GET", f"/jobs/{trimmed}/video", raw=True)
+        check("trimmed render downloads", code == 200 and len(body) > 1000,
+              f"{code}, {len(body)}b")
+        call("DELETE", f"/videos/{trimmed}")
+
+    # A trim that selects nothing is a mistake worth catching at the door.
+    code, _ = call("POST",
+                   f"/process_video/?original_language=en&target_language=hi"
+                   f"&trim_start=9.0&trim_end=2.0",
+                   files={"file": (name, clip)})
+    check("an inverted trim is rejected", code == 400, f"got {code}")
 
     # ---- projects --------------------------------------------------------
     print("\n  Projects")
