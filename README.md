@@ -135,14 +135,25 @@ Measure any model against the job before trusting it:
 
 ```bash
 ./venv/bin/python scripts/fit_bench.py --provider ollama --model qwen2.5:7b
-./venv/bin/python scripts/fit_bench.py --provider groq --model llama-3.3-70b-versatile
+./venv/bin/python scripts/fit_bench.py --provider groq --model openai/gpt-oss-120b
 ```
 
-On four lines that overran their slots, `qwen2.5:7b` shortened three, but only
-reached 78-83% of the original length on Hindi when asked for 70%, and returned
-one line completely unchanged. English it handled well (60%). It preserved
-every number. This is the measurement behind the "weak at Indic rewriting"
-limit below, and the reason the panel exists at all.
+Measured on four lines that really overran their slots, asking for 70%:
+
+| | shortened | numbers kept | per line |
+|---|---|---|---|
+| `qwen2.5:7b` on Ollama | 3 of 4 | 4 of 4 | 7.7s |
+| `openai/gpt-oss-120b` on Groq | 4 of 4 | 4 of 4 | 1.4s |
+
+The local model reached only 78-83% on Hindi when asked for 70% and returned
+one line unchanged; English it handled well. On the one phrase in the test
+clip that genuinely overruns - a 5.69s slot holding 7.40s of speech - Groq got
+it to 4.91s, which fits. Ollama got it to 7.01s, which does not. Both preserve
+every number, which is the one thing enforced rather than advised.
+
+That is the "weak at Indic rewriting" limit below, measured, and the reason the
+panel exists at all. It is still off by default and still optional: a dub with
+no script model just compresses the audio instead.
 
 It is not an agent. It proposes text into an editable box and cannot touch a
 render; nothing reaches your video without you pressing Re-speak. Numbers in the
