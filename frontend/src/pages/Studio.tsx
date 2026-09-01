@@ -20,7 +20,8 @@ import {
 } from "@phosphor-icons/react";
 import {
   getLanguages, getHealth, submitVideo, submitVoiceover, cancelJob, getJob,
-  getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase,
+  getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase, clearPhrase,
+  undoPhrase, fitOf,
   getReferenceWindows, chooseReference,
   EXPORTS, exportUrl, langName,
   type Language, type JobStatus, type Health, type Phrase,
@@ -111,6 +112,11 @@ export default function Studio() {
   // Which Resolve-style page the studio is showing. Media is where you arrive:
   // there is nothing to edit or deliver before a clip exists.
   const [page, setPage] = useState<StudioPage>("media");
+  // Guards the one action that throws work away.
+  const [restarting, setRestarting] = useState(false);
+  // A phrase lifted off the timeline. Words and delivery travel together:
+  // pasting the words without the seed would speak them in a different draw.
+  const [clip, setClip] = useState<{ text: string; seed: number | null } | null>(null);
   const [script, setScript] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const jobId = useRef<string>("");
@@ -194,6 +200,26 @@ export default function Studio() {
   }, []);
 
   useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) {
+        return;
+      }
+      if (!phrases?.length || view === "working") return;
+      const meta = e.metaKey || e.ctrlKey;
+
+      if (meta && e.key.toLowerCase() === "z") { e.preventDefault(); undoEdit(); return; }
+      if (selected == null) return;
+      if (meta && e.key.toLowerCase() === "c") { e.preventDefault(); copyPhrase(); return; }
+      if (meta && e.key.toLowerCase() === "x") { e.preventDefault(); cutPhrase(); return; }
+      if (meta && e.key.toLowerCase() === "v") { e.preventDefault(); pastePhrase(); return; }
+      if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); cutPhrase(); }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  useEffect(() => {
     if (page === "edit" && !phrases?.length) setPage("media");
     if (page === "deliver" && !file && !opened) setPage("media");
   }, [page, phrases, file, opened]);
@@ -259,7 +285,7 @@ export default function Studio() {
     setPhrases(null); setSelected(null); setWindows(null); setStale(false);
     setOpened(null);
     setTrimIn(null); setTrimOut(null); setMusic(null); setPhraseNote("");
-    setPage("media");
+    setPage("media"); setRestarting(false);
     setPreview((old) => { if (old) URL.revokeObjectURL(old); return ""; });
   }
 
@@ -285,7 +311,7 @@ export default function Studio() {
           clearInterval(poll.current!);
           clearInterval(clock.current!);
           setView("done");
-          setTab("dub");
+          setTab(s.url || s.dub_audio ? "dub" : "source");
           setPage("deliver");
           setStale(Boolean(s.video_stale));
           if (s.editable) {
@@ -335,6 +361,69 @@ export default function Studio() {
     void audio.play().catch(() => setPhraseNote("That phrase has no audio yet."));
   }
 
+  async function refreshPhrases() {
+    if (!jobId.current) return;
+    try {
+      const t = await getPhrases(jobId.current);
+      setPhrases(t.segments);
+    } catch { /* the timeline is still usable without the refresh */ }
+  }
+
+  async function undoEdit() {
+    if (!jobId.current) return;
+    setPhraseBusy(true);
+    setPhraseNote("");
+    try {
+      const result = await undoPhrase(jobId.current);
+      await refreshPhrases();
+      setSelected(result.index);
+      setDraft(result.text);
+      setStale(true);
+      setPhraseNote(result.audio_restored
+        ? "Undone — the previous take is back."
+        : "Undone.");
+      setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
+    } catch (err) {
+      setPhraseNote((err as Error).message);
+    } finally {
+      setPhraseBusy(false);
+    }
+  }
+
+  function copyPhrase() {
+    const phrase = phrases?.find((ph) => ph.index === selected);
+    if (!phrase) return;
+    setClip({ text: phrase.text, seed: phrase.seed ?? null });
+    setPhraseNote(`Copied "${phrase.text.slice(0, 40)}".`);
+  }
+
+  async function cutPhrase() {
+    const phrase = phrases?.find((ph) => ph.index === selected);
+    if (!phrase || !jobId.current || phrase.cleared) return;
+    setClip({ text: phrase.text, seed: phrase.seed ?? null });
+    setPhraseBusy(true);
+    setPhraseNote("");
+    try {
+      await clearPhrase(jobId.current, phrase.index);
+      await refreshPhrases();
+      setStale(true);
+      setPhraseNote(`Cut. The slot holds ${phrase.duration.toFixed(2)}s of silence.`);
+      setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
+    } catch (err) {
+      setPhraseNote((err as Error).message);
+    } finally {
+      setPhraseBusy(false);
+    }
+  }
+
+  async function pastePhrase() {
+    if (!clip || selected == null) return;
+    // Speaking the pasted words in this slot is a revise, so the length
+    // check, the number guard and undo all apply exactly as they do to a
+    // typed edit.
+    await applyPhrase({ text: clip.text, ...(clip.seed != null ? { seed: clip.seed } : {}) });
+  }
+
   async function applyPhrase(body: { text?: string; seed?: number }) {
     if (selected == null || !jobId.current) return;
     setPhraseBusy(true);
@@ -357,6 +446,8 @@ export default function Studio() {
       );
       // The rebuilt track has the same URL, so the waveform needs a nudge.
       setJob((j) => (j ? { ...j, dub_audio: `${j.dub_audio}?v=${Date.now()}` } : j));
+      // Spoken length and the silent flag decide the timeline colours.
+      refreshPhrases();
     } catch (err) {
       setPhraseNote((err as Error).message);
     } finally {
@@ -461,6 +552,21 @@ export default function Studio() {
   const kind: JobKind = job?.kind ?? mode;
   const projectName =
     job?.name ?? opened?.name ?? file?.name ?? "Untitled project";
+
+  // What pressing the primary button should actually do. Rendering is not one
+  // action: producing a first result, redoing the picture after an edit, and
+  // throwing the whole thing away to start again all used to be the same
+  // button, which is why editing a phrase and pressing Render re-ran the
+  // entire pipeline.
+  const rendered = view === "done" && !!job;
+  const wantsOther = rendered && job?.kind !== undefined && mode !== job.kind;
+  const outputLabel = (OUTPUTS.find((o) => o.kind === mode)?.label ?? "output")
+    .toLowerCase();
+  const action: "render" | "rerender" | "switch" | "current" =
+    !rendered ? "render"
+      : wantsOther ? "switch"
+        : stale ? "rerender"
+          : "current";
   const stages = stagesFor(kind);
   const progress = readProgress(job?.step, view === "done" ? "done" : undefined, kind);
   const stageIndex = progress.index;
@@ -836,6 +942,26 @@ export default function Studio() {
               ))}
             </div>
 
+            {view === "done" && job && (
+              <>
+                <Sub>Result</Sub>
+                <Stat k="Produced" v={OUTPUTS.find((o) => o.kind === kind)?.label ?? kind} />
+                {job.url ? (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
+                    Playing in the viewer above.
+                  </p>
+                ) : job.dub_audio ? (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
+                    Audio only — play it from the viewer above.
+                  </p>
+                ) : (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
+                    Text only. Download it below, or read it under Pipeline.
+                  </p>
+                )}
+              </>
+            )}
+
             <Sub>Run</Sub>
             {view !== "idle" && (
               <CloneProgress
@@ -895,6 +1021,45 @@ export default function Studio() {
             {phrases && selectedPhrase && (
               <>
                 <Sub>Phrase {selectedPhrase.index + 1} of {phrases.length}</Sub>
+
+                {/* The shortcuts work anywhere on the timeline; these are here
+                    so the operations are findable without knowing them. */}
+                <div className="grid grid-cols-4 gap-1 px-2.5 py-1">
+                  <Tool onClick={cutPhrase}
+                        disabled={phraseBusy || selectedPhrase.cleared}
+                        title="Cut — silences the phrase and takes a copy (⌘X)">
+                    Cut
+                  </Tool>
+                  <Tool onClick={copyPhrase} disabled={phraseBusy}
+                        title="Copy the words and the delivery (⌘C)">
+                    Copy
+                  </Tool>
+                  <Tool onClick={pastePhrase} disabled={phraseBusy || !clip}
+                        title={clip
+                          ? `Speak "${clip.text.slice(0, 30)}" in this slot (⌘V)`
+                          : "Nothing copied yet"}>
+                    Paste
+                  </Tool>
+                  <Tool onClick={undoEdit} disabled={phraseBusy}
+                        title="Undo the last phrase edit (⌘Z)">
+                    Undo
+                  </Tool>
+                </div>
+
+                {selectedPhrase.cleared && (
+                  <p className="px-2.5 pb-1 text-[10px] leading-relaxed text-c-warn">
+                    Silent. Its words are kept; Paste or Re-speak brings it back.
+                  </p>
+                )}
+                {selectedPhrase.spoken != null && !selectedPhrase.cleared && (
+                  <Stat
+                    k="Spoken"
+                    v={`${selectedPhrase.spoken.toFixed(2)}s in ${selectedPhrase.duration.toFixed(2)}s`}
+                    tone={fitOf(selectedPhrase) === "overruns" ? "bad"
+                      : fitOf(selectedPhrase) === "tight" ? "warn" : "good"}
+                  />
+                )}
+
                 {selectedPhrase.source_text && (
                   <p className="console-text px-2.5 pb-1 pt-1 text-[10px] leading-relaxed text-c-mute">
                     {selectedPhrase.source_text}
@@ -1060,15 +1225,68 @@ export default function Studio() {
 
           {/* Actions stay pinned; they must not scroll out of reach. */}
           <div className="raised shrink-0 space-y-1.5 border-t border-c-edge p-2">
-            <Tool
-              primary
-              onClick={render}
-              disabled={!file || view === "working" || badRange}
-              title={!file && opened ? "Import a clip to render something new" : undefined}
-              className="h-[26px] w-full"
-            >
-              {view === "working" ? "Rendering…" : mode === "voiceover" ? "Render voice-over" : "Render dub"}
-            </Tool>
+            {view === "working" ? (
+              <Tool primary disabled className="h-[26px] w-full">Rendering…</Tool>
+            ) : action === "current" ? (
+              <Tool
+                primary
+                disabled
+                title="The render matches the current audio. Edit a phrase to make it stale."
+                className="h-[26px] w-full"
+              >
+                Up to date
+              </Tool>
+            ) : action === "rerender" ? (
+              <Tool
+                primary
+                onClick={rerender}
+                className="h-[26px] w-full"
+                title="Re-runs lip sync against the edited audio. Minutes, not the whole pipeline."
+              >
+                Re-render picture
+              </Tool>
+            ) : (
+              <Tool
+                primary
+                onClick={render}
+                disabled={!file || badRange}
+                title={!file && opened
+                  ? "Import a clip to render something new"
+                  : undefined}
+                className="h-[26px] w-full"
+              >
+                Render {outputLabel}
+              </Tool>
+            )}
+
+            {/* Starting again is a separate, spelled-out action: it discards
+                every phrase edit, which is what the single Render button
+                silently did before. */}
+            {rendered && action !== "switch" && (
+              restarting ? (
+                <div className="rounded-[2px] border border-[#7a4410] bg-[#2a1d10] p-1.5">
+                  <p className="mb-1.5 text-[10px] leading-relaxed text-c-accent">
+                    Rendering from source discards every phrase edit and starts
+                    the whole pipeline again.
+                  </p>
+                  <div className="grid grid-cols-2 gap-1">
+                    <Tool onClick={() => { setRestarting(false); render(); }}>
+                      Start again
+                    </Tool>
+                    <Tool onClick={() => setRestarting(false)}>Keep this</Tool>
+                  </div>
+                </div>
+              ) : (
+                <Tool
+                  onClick={() => setRestarting(true)}
+                  disabled={!file}
+                  className="w-full"
+                  title={!file ? "The source clip is not loaded in this session" : undefined}
+                >
+                  Render from source
+                </Tool>
+              )
+            )}
             {job?.url && (
               <a
                 href={job.url}
