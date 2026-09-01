@@ -85,11 +85,12 @@ PROVIDERS = {
     "groq": {
         "label": "Groq Cloud",
         "needs_key": True,
-        "default_model": "llama-3.3-70b-versatile",
-        "suggested": ["llama-3.3-70b-versatile", "moonshotai/kimi-k2-instruct",
-                      "qwen/qwen3-32b", "llama-3.1-8b-instant"],
-        "note": "Sends one line of translated text per rewrite. Fast enough "
-                "that fitting a phrase feels instant.",
+        "default_model": "openai/gpt-oss-120b",
+        "suggested": ["openai/gpt-oss-120b", "openai/gpt-oss-20b",
+                      "moonshotai/kimi-k2-instruct", "llama-3.3-70b-versatile"],
+        "note": "Sends one line of translated text per rewrite. Groq retires "
+                "model ids often, so a 400 or 404 here usually means the id "
+                "moved, not that the key is wrong.",
     },
     "custom": {
         "label": "Other (OpenAI-compatible)",
@@ -384,6 +385,7 @@ def _openai(cfg, system, user, max_tokens, provider="openai"):
         "temperature": 0.35,
         "max_completion_tokens": max_tokens,
     }
+    budget_key = "max_completion_tokens"
     try:
         data = _post(url, headers=headers, payload=payload)
     except Unavailable as e:
@@ -392,12 +394,34 @@ def _openai(cfg, system, user, max_tokens, provider="openai"):
         if "max_completion_tokens" not in str(e):
             raise
         payload.pop("max_completion_tokens")
-        payload["max_tokens"] = max_tokens
+        budget_key = "max_tokens"
+        payload[budget_key] = max_tokens
         data = _post(url, headers=headers, payload=payload)
+
+    text, why = _openai_text(data)
+
+    # A reasoning model spends the same allowance on thinking that it needs
+    # for the answer, so a budget sized for one short line comes back with
+    # finish_reason "length", the whole allowance in `reasoning`, and nothing
+    # in `content`. Measured on gpt-oss-120b: 300 tokens produced 823
+    # characters of reasoning and an empty answer, 800 produced the line.
+    # Asking again with room is better than maintaining a list of which models
+    # reason, which changes every few weeks.
+    if not text and why == "length":
+        payload[budget_key] = max(max_tokens * 6, 1500)
+        text, why = _openai_text(_post(url, headers=headers, payload=payload))
+
+    return text
+
+
+def _openai_text(data) -> tuple:
+    """(content, finish_reason) from an OpenAI-shaped response."""
     try:
-        return data["choices"][0]["message"]["content"] or ""
+        choice = data["choices"][0]
     except (KeyError, IndexError, TypeError):
-        raise Unavailable("OpenAI returned no text for that line.")
+        raise Unavailable("The model returned no choices for that line.")
+    message = choice.get("message") or {}
+    return (message.get("content") or "").strip(), choice.get("finish_reason")
 
 
 _CALL = {
@@ -542,7 +566,9 @@ def shorten(text: str, language: str, ratio: float, source_text: str = "") -> st
 
     out = clean_line(complete(SHORTEN_SYSTEM, "\n".join(parts)))
     if not out:
-        raise Unavailable("The local model returned nothing usable.")
+        raise Unavailable(
+            f"{PROVIDERS[load_settings()['provider']]['label']} returned "
+            f"nothing usable for that line.")
 
     lost = missing_numbers(text, out)
     if lost:
