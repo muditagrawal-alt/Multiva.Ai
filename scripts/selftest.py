@@ -199,6 +199,113 @@ def main() -> int:
     code, refs = call("GET", f"/jobs/{job}/reference/candidates")
     check("reference windows offered", code == 200 and "candidates" in refs)
 
+    # ---- script intelligence ---------------------------------------------
+    # The only stage that calls a language model, and the only one that can be
+    # pointed off this machine. Skipped rather than failed when no model is
+    # configured: a fresh clone with no Ollama is a supported way to run.
+    print("\n  Script intelligence")
+    code, mind = call("GET", "/api/settings/llm")
+    if code != 200 or not mind.get("enabled"):
+        print("        No script model configured; skipping the fit checks.")
+    else:
+        where = "on this machine" if mind.get("local") else "hosted"
+        print(f"        {mind['provider']} / {mind['model']} ({where})")
+
+        code, probe = call("POST", "/api/settings/llm/test", {})
+        check("script model answers", code == 200 and probe.get("ok"),
+              str(probe.get("error") or probe)[:70])
+
+        # The longest line is the one most likely to overrun its slot, which is
+        # the case the fitter exists for.
+        longest = max(phrases, key=lambda p: len(p["text"]))
+        idx = longest["index"]
+        code, fit = call("POST", f"/jobs/{job}/segments/{idx}/fit", {})
+        ok = code == 200 and {"slot_seconds", "spoken_seconds", "attempts"} <= set(fit)
+        check("fit measured against the slot", ok, f"{code} {str(fit)[:70]}")
+
+        if ok:
+            print(f"        slot {fit['slot_seconds']}s, "
+                  f"spoken {fit['spoken_seconds']}s, "
+                  f"{len(fit['attempts'])} attempt(s)")
+            if fit.get("changed"):
+                check("rewrite is shorter than the original",
+                      fit["spoken_seconds"] < fit["was_seconds"],
+                      f"{fit['spoken_seconds']} vs {fit['was_seconds']}")
+                check("rewrite changed the words",
+                      fit["text"] != longest["text"])
+                # The plan and the audio must agree afterwards, which is the
+                # thing that silently broke when a synth failed mid-edit.
+                _, tl2 = call("GET", f"/jobs/{job}/segments")
+                now = next(p["text"] for p in tl2["segments"] if p["index"] == idx)
+                check("timeline shows the fitted line", now == fit["text"],
+                      f"{now!r} != {fit['text']!r}")
+                check("picture marked stale by the fit",
+                      bool(fit.get("video_stale")))
+                call("POST", f"/jobs/{job}/undo")
+            else:
+                check("unchanged fit explains itself", bool(fit.get("detail")),
+                      str(fit)[:70])
+                print(f"        {fit.get('detail')}")
+
+        code, _ = call("POST", f"/jobs/{job}/segments/9999/fit", {})
+        check("fit rejects an unknown phrase", code == 404, f"got {code}")
+
+    # ---- re-rolling a delivery -------------------------------------------
+    # Same words, different draw. Synthesis is seeded for reproducibility, so
+    # this is the only way to get a second take of a line you are happy with.
+    print("\n  Delivery")
+    _, take1 = call("GET", f"/jobs/{job}/segments/0/audio", raw=True)
+    code, roll = call("POST", f"/jobs/{job}/segments/0", {"seed": 4242})
+    check("delivery re-rolled", code == 200 and roll.get("seed") == 4242,
+          str(roll)[:70])
+    check("re-roll left the words alone", roll.get("text") == original,
+          f"got {roll.get('text')!r}")
+    _, take2 = call("GET", f"/jobs/{job}/segments/0/audio", raw=True)
+    check("a new seed gives a different take", take1 != take2,
+          "identical audio means the seed was ignored")
+    call("POST", f"/jobs/{job}/undo")
+
+    # ---- choosing the reference window ------------------------------------
+    # Re-clones from a different few seconds of the speaker and re-speaks
+    # every phrase, because the cached units were all said in the old voice.
+    print("\n  Reference window")
+    code, _ = call("POST", f"/jobs/{job}/reference", {"start": 0.0, "duration": 0.5})
+    check("a too-short reference is rejected", code == 400, f"got {code}")
+    code, _ = call("POST", f"/jobs/{job}/reference", {"start": "x", "duration": 3})
+    check("a non-numeric window is rejected", code == 400, f"got {code}")
+
+    windows = refs.get("candidates") or []
+    if windows:
+        w = windows[-1]
+        code, _ = call("POST", f"/jobs/{job}/reference",
+                       {"start": w["start"], "duration": w["duration"]})
+        check("reference change accepted", code == 200, f"got {code}")
+        state, d = wait_for(job)
+        check("re-cloned from the new window", state == "done",
+              f"{state} {d.get('error')}")
+        _, tl3 = call("GET", f"/jobs/{job}/segments")
+        check("timeline survived the re-clone",
+              len(tl3.get("segments", [])) == len(phrases),
+              f"{len(tl3.get('segments', []))} vs {len(phrases)}")
+    else:
+        print("        No candidate windows offered; skipping the re-clone.")
+
+    # ---- re-rendering the picture ------------------------------------------
+    # Edits rewrite the audio immediately; the video is only redone on
+    # request. Until it is, the render on disk is a previous take.
+    print("\n  Re-render")
+    _, before_state = call("GET", f"/jobs/{job}/status")
+    check("picture reported stale after edits",
+          bool(before_state.get("video_stale")), str(before_state)[:70])
+    code, _ = call("POST", f"/jobs/{job}/rerender")
+    check("re-render accepted", code == 200, f"got {code}")
+    state, d = wait_for(job)
+    check("re-render finished", state == "done", f"{state} {d.get('error')}")
+    check("picture no longer stale", not d.get("video_stale"),
+          "an edit after this would be invisible in the file")
+    code, _ = call("GET", f"/jobs/{job}/video", raw=True)
+    check("re-rendered file downloads", code == 200, f"got {code}")
+
     # ---- exports ---------------------------------------------------------
     print("\n  Exports")
     for kind in ("transcript.txt", "translation.txt", "source.srt",
