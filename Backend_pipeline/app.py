@@ -564,6 +564,14 @@ if os.path.isdir(_WEB_DIR):
             return FileResponse(candidate)
         return FileResponse(os.path.join(_WEB_DIR, "index.html"))
 
+else:
+    # The interface is a build artefact and is not in the repository, so a
+    # fresh clone reaches /app/ before it exists. Saying so at startup beats
+    # a 404 with nothing behind it.
+    print("[APP] No web/ directory: the studio interface has not been built.")
+    print("[APP] Build it with:  cd frontend && npm install && npm run build")
+    print("[APP] The API itself is fine; only the browser interface is missing.")
+
 
 # ---------------------------------------------------------------------------
 # API
@@ -588,6 +596,19 @@ async def process_video(
         L.engine_for(target_language)
     except L.UnsupportedLanguage as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    # The range still has to be checked against the real duration once the file
+    # has been probed, but an out point at or before the in point is wrong on
+    # its own terms. Catching it here fails in a second instead of accepting a
+    # job that dies partway through transcription.
+    if trim_start is not None and trim_start < 0:
+        raise HTTPException(status_code=400, detail="The in point cannot be negative")
+    if (trim_start is not None and trim_end is not None
+            and trim_end - trim_start < 1.0):
+        raise HTTPException(
+            status_code=400,
+            detail=f"The trimmed range is {trim_end - trim_start:.2f}s; "
+                   f"at least a second is needed.")
 
     content = await file.read()
     if len(content) > 200 * 1024 * 1024:
