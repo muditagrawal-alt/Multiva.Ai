@@ -225,6 +225,24 @@ export interface Phrase {
   text: string;
   source_text: string;
   seed?: number | null;
+  /** Silenced by a cut. The words are kept so the cut stays readable. */
+  cleared?: boolean;
+  /** What the current take actually takes to say, in seconds. */
+  spoken?: number | null;
+}
+
+/** How a phrase sits in its slot. */
+export type Fit = "fits" | "tight" | "overruns" | "silent" | "unknown";
+
+export function fitOf(p: Phrase): Fit {
+  if (p.cleared) return "silent";
+  if (!p.spoken || !p.duration) return "unknown";
+  const ratio = p.spoken / p.duration;
+  // Under the slot is fine. A little over is absorbed by the pause that
+  // follows. Well over is what makes the pipeline compress, and compression
+  // is what reads as robotic.
+  if (ratio <= 1.0) return "fits";
+  return ratio <= 1.1 ? "tight" : "overruns";
 }
 
 export interface PhraseTimeline {
@@ -257,6 +275,24 @@ export const revisePhrase = (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  });
+
+/** Walk back the last phrase edit, restoring the take that was there. */
+export const undoPhrase = (id: string) =>
+  request<PhraseResult & { audio_restored: boolean }>(
+    `/jobs/${encodeURIComponent(id)}/undo`, { method: "POST" });
+
+/** Silence a phrase, keeping its slot and its words. Where Cut puts it. */
+export const clearPhrase = (id: string, index: number) =>
+  request<PhraseResult & { cleared: true }>(
+    `/jobs/${encodeURIComponent(id)}/segments/${index}`, { method: "DELETE" });
+
+/** Rename a project. */
+export const renameProject = (id: string, name: string) =>
+  request<{ job_id: string; name: string }>(`/jobs/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
   });
 
 /** Rewrite a phrase until it fits its slot when spoken. */

@@ -13,7 +13,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadPeaks } from "@/lib/peaks";
-import type { Phrase } from "@/lib/api";
+import { fitOf, type Fit, type Phrase } from "@/lib/api";
 import { cx } from "@/lib/cx";
 import { timecode } from "./console";
 
@@ -199,6 +199,22 @@ export interface TimelineProps {
   trimEnd?: number | null;
 }
 
+const FIT_TONE: Record<Fit, string> = {
+  fits:     "border-b-2 border-b-c-good/70",
+  tight:    "border-b-2 border-b-c-warn/80",
+  overruns: "border-b-2 border-b-c-bad",
+  silent:   "border-b-2 border-b-c-mute/50 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(255,255,255,0.05)_3px,rgba(255,255,255,0.05)_6px)]",
+  unknown:  "",
+};
+
+const FIT_LABEL: Record<Fit, string> = {
+  fits: "fits its slot",
+  tight: "slightly over its slot",
+  overruns: "overruns its slot",
+  silent: "silent",
+  unknown: "length unknown",
+};
+
 export function Timeline({
   duration, current, onSeek, sourceName, referenceUrl, referenceSeconds,
   dubUrl, segments, stageIndex, stages, finished,
@@ -285,14 +301,25 @@ export function Timeline({
                   selects the phrase actually under the cursor rather than an
                   evenly divided guess. */}
               {phrases && duration > 0
-                ? phrases.map((ph) => (
+                ? phrases.map((ph) => {
+                    const fit = fitOf(ph);
+                    return (
                     <button
                       key={ph.index}
                       type="button"
-                      title={ph.text}
+                      title={
+                        fit === "silent" ? `Silent — ${ph.text}`
+                          : ph.spoken
+                            ? `${ph.spoken.toFixed(2)}s in a ${ph.duration.toFixed(2)}s slot — ${ph.text}`
+                            : ph.text
+                      }
                       onClick={(e) => { e.stopPropagation(); onSelectPhrase?.(ph.index); }}
                       className={cx(
                         "absolute inset-y-0 border-l border-[#0e0f11]/70 transition-colors",
+                        // A stripe along the bottom says whether the line fits
+                        // the gap it has to land in. Knowing that used to take
+                        // a click per phrase.
+                        FIT_TONE[fit],
                         selected === ph.index
                           ? "bg-c-accent/25 ring-1 ring-inset ring-c-accent"
                           : "hover:bg-white/[0.07]"
@@ -302,9 +329,12 @@ export function Timeline({
                         width: `${Math.max(0.4, (ph.duration / duration) * 100)}%`,
                       }}
                     >
-                      <span className="sr-only">{`Phrase ${ph.index + 1}: ${ph.text}`}</span>
+                      <span className="sr-only">
+                        {`Phrase ${ph.index + 1}, ${FIT_LABEL[fit]}: ${ph.text}`}
+                      </span>
                     </button>
-                  ))
+                    );
+                  })
                 : segments && segments > 1
                 ? Array.from({ length: segments - 1 }, (_, i) => (
                     <div
