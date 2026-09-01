@@ -27,7 +27,8 @@ import {
   type ReferenceWindow,
 } from "@/lib/api";
 import {
-  Panel, Tool, Row, Sel, Sub, Stat, Lamp, TitleBar, StatusBar, timecode, bytes,
+  Panel, Tool, Row, Sel, Sub, Stat, Lamp, TitleBar, StatusBar, PageBar,
+  timecode, bytes, type StudioPage,
 } from "@/components/console";
 import { Timeline } from "@/components/timeline";
 import { CloneProgress } from "@/components/progress";
@@ -74,6 +75,24 @@ function Thumb({ src }: { src: string }) {
   );
 }
 
+/**
+ * What a run can produce. Everything but the voice-over is the same pipeline
+ * stopped at a different stage, so the cost differences below are real: a
+ * subtitle pass is Whisper alone.
+ */
+const OUTPUTS: { kind: JobKind; label: string; runs: string }[] = [
+  { kind: "dub", label: "Dub video",
+    runs: "Transcribe, translate, clone the voice, re-sync the lips" },
+  { kind: "audio", label: "Dub audio only",
+    runs: "The same, without lip sync — for a speaker off camera" },
+  { kind: "subtitles_translated", label: "Translated subtitles",
+    runs: "Transcribe and translate. No voice, seconds not minutes" },
+  { kind: "subtitles", label: "Subtitles",
+    runs: "Transcribe only. The fastest thing here" },
+  { kind: "voiceover", label: "Voice-over",
+    runs: "Speak your own script in the cloned voice" },
+];
+
 export default function Studio() {
   const [langs, setLangs] = useState<Language[] | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
@@ -89,6 +108,9 @@ export default function Studio() {
   // Two jobs share this workspace: dub a video, or speak a typed script in the
   // same cloned voice. They differ only in what the inspector asks for.
   const [mode, setMode] = useState<JobKind>("dub");
+  // Which Resolve-style page the studio is showing. Media is where you arrive:
+  // there is nothing to edit or deliver before a clip exists.
+  const [page, setPage] = useState<StudioPage>("media");
   const [script, setScript] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const jobId = useRef<string>("");
@@ -154,6 +176,7 @@ export default function Studio() {
         setStale(Boolean(s.video_stale));
         setView(s.status === "done" ? "done" : "idle");
         setTab(s.url || s.dub_audio ? "dub" : "source");
+        if (s.status === "done") setPage("deliver");
         if (s.editable) {
           getPhrases(id).then((t) => live && setPhrases(t.segments)).catch(() => {});
           getReferenceWindows(id).then((r) => live && setWindows(r.candidates)).catch(() => {});
@@ -169,6 +192,11 @@ export default function Studio() {
     if (poll.current) clearInterval(poll.current);
     if (clock.current) clearInterval(clock.current);
   }, []);
+
+  useEffect(() => {
+    if (page === "edit" && !phrases?.length) setPage("media");
+    if (page === "deliver" && !file && !opened) setPage("media");
+  }, [page, phrases, file, opened]);
 
   // Object URLs leak one blob per pick unless the previous one is revoked.
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
@@ -231,6 +259,7 @@ export default function Studio() {
     setPhrases(null); setSelected(null); setWindows(null); setStale(false);
     setOpened(null);
     setTrimIn(null); setTrimOut(null); setMusic(null); setPhraseNote("");
+    setPage("media");
     setPreview((old) => { if (old) URL.revokeObjectURL(old); return ""; });
   }
 
@@ -257,6 +286,7 @@ export default function Studio() {
           clearInterval(clock.current!);
           setView("done");
           setTab("dub");
+          setPage("deliver");
           setStale(Boolean(s.video_stale));
           if (s.editable) {
             getPhrases(job_id).then((t) => setPhrases(t.segments)).catch(() => setPhrases(null));
@@ -291,6 +321,7 @@ export default function Studio() {
     setSelected(index);
     setDraft(phrase.text);
     setPhraseNote("");
+    setPage("edit");
     seek(phrase.start);
   }
 
@@ -414,6 +445,7 @@ export default function Studio() {
             trimEnd: trimOut,
             music,
             musicGain,
+            kind: mode,
           });
       jobId.current = job_id;
       watch(job_id);
@@ -427,6 +459,8 @@ export default function Studio() {
   /* --- derived ------------------------------------------------------------ */
 
   const kind: JobKind = job?.kind ?? mode;
+  const projectName =
+    job?.name ?? opened?.name ?? file?.name ?? "Untitled project";
   const stages = stagesFor(kind);
   const progress = readProgress(job?.step, view === "done" ? "done" : undefined, kind);
   const stageIndex = progress.index;
@@ -454,27 +488,14 @@ export default function Studio() {
   return (
     <div
       className="console grid"
-      style={{ gridTemplateRows: "30px minmax(0,1fr) 170px 22px" }}
+      style={{ gridTemplateRows: "30px minmax(0,1fr) 170px 26px 22px" }}
     >
       <TitleBar
         active="dub"
         right={
-          <div className="flex items-center gap-0.5" role="group" aria-label="Job type">
-            <Tool
-              active={mode === "dub"}
-              onClick={() => setMode("dub")}
-              disabled={view === "working"}
-            >
-              Dub video
-            </Tool>
-            <Tool
-              active={mode === "voiceover"}
-              onClick={() => setMode("voiceover")}
-              disabled={view === "working"}
-            >
-              Voice-over
-            </Tool>
-          </div>
+          <span className="truncate text-[11px] text-c-dim" title={projectName}>
+            {projectName}
+          </span>
         }
       />
 
@@ -674,6 +695,7 @@ export default function Studio() {
         {/* ---- inspector ---- */}
         <Panel title="Inspector" bodyClassName="flex flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto py-1">
+            {page === "media" && (<>
             <Sub>Input</Sub>
             {mode === "dub" ? (
               <Row label="Spoken" hint="Override only when detection gets it wrong">
@@ -785,6 +807,34 @@ export default function Studio() {
                 )}
               </>
             )}
+            </>)}
+
+            {page === "deliver" && (<>
+            <Sub>Output</Sub>
+            <div className="grid gap-px bg-c-edge">
+              {OUTPUTS.map((o) => (
+                <button
+                  key={o.kind}
+                  type="button"
+                  disabled={view === "working"}
+                  onClick={() => setMode(o.kind)}
+                  className={cx(
+                    "px-2.5 py-1.5 text-left transition-colors disabled:opacity-50",
+                    mode === o.kind ? "bg-c-accent-dim/40" : "bg-c-panel hover:bg-c-hover"
+                  )}
+                >
+                  <span className={cx(
+                    "block text-[11px]",
+                    mode === o.kind ? "text-c-accent" : "text-c-text"
+                  )}>
+                    {o.label}
+                  </span>
+                  <span className="block text-[9.5px] leading-snug text-c-mute">
+                    {o.runs}
+                  </span>
+                </button>
+              ))}
+            </div>
 
             <Sub>Run</Sub>
             {view !== "idle" && (
@@ -839,7 +889,9 @@ export default function Studio() {
                 </Tool>
               </div>
             )}
+            </>)}
 
+            {page === "edit" && (<>
             {phrases && selectedPhrase && (
               <>
                 <Sub>Phrase {selectedPhrase.index + 1} of {phrases.length}</Sub>
@@ -944,7 +996,9 @@ export default function Studio() {
                 </ul>
               </>
             )}
+            </>)}
 
+            {page === "deliver" && (<>
             {view === "done" && job && (
               <>
                 <Sub>Export</Sub>
@@ -1001,6 +1055,7 @@ export default function Studio() {
                 </p>
               </>
             )}
+            </>)}
           </div>
 
           {/* Actions stay pinned; they must not scroll out of reach. */}
@@ -1052,6 +1107,20 @@ export default function Studio() {
           trimEnd={tab === "source" ? trimOut : null}
         />
       </div>
+
+      {/* ---------------- pages ---------------- */}
+      <PageBar
+        page={page}
+        onPage={setPage}
+        disabled={{
+          edit: !phrases?.length
+            ? "Render something first — there are no phrases to edit yet"
+            : undefined,
+          deliver: !file && !opened
+            ? "Import a clip first"
+            : undefined,
+        }}
+      />
 
       {/* ---------------- status bar ---------------- */}
       <StatusBar>
