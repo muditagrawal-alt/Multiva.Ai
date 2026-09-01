@@ -64,15 +64,15 @@ than disappearing — the same way Fusion dims on an audio project.
 
 ---
 
-## Phase 0 — Repository
+## Phase 0 — Repository  ·  done
 
 Independent of the code, and the only irreversible work. Done first and
 separately so a mistake here cannot be confused with a mistake in the app.
 
 ### 0.1 Make `studio-rebuild` the default branch, retire `main` — irreversible
 
-- [ ] Rename on GitHub, move the default, then delete the old ref
-- [ ] Delete last, so there is a rollback target until the switch is confirmed
+- [x] Rename on GitHub, move the default, then delete the old ref
+- [x] Delete last, so there is a rollback target until the switch is confirmed
 
 Verified safe: `main` is an ancestor of `studio-rebuild`, so the new default
 contains every commit the old one had.
@@ -96,14 +96,14 @@ The `Co-Authored-By: Claude` trailers are separate — 188 of them, my
 attribution rather than a person's. Stop adding the trailer now; strip the
 existing ones under B or C.
 
-- [ ] Decision recorded: ______
-- [ ] Carried out
+- [x] Decision recorded: **B — re-rooted at the first rebuild commit**
+- [x] Carried out
 
 *Touches:* git history on origin. Force-push required for B and C.
 
 ### 0.3 Delete the stray `frEnd` file — safe
 
-- [ ] `git rm frEnd`
+- [x] `git rm frEnd`
 
 One byte, committed by accident in April, referenced by nothing. The only
 genuinely dead thing at the repository root. **`Frontend/` is not dead** — it is
