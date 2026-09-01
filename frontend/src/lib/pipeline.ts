@@ -53,10 +53,34 @@ export const VOICEOVER_STAGES: Stage[] = [
   { key: "synthesizing_voice", label: "Speaking the script",      block: "TTS",   weight: 0.75 },
 ];
 
-export type JobKind = "dub" | "voiceover";
+export type JobKind =
+  | "dub"
+  | "voiceover"
+  | "audio"
+  | "subtitles"
+  | "subtitles_translated";
+
+/**
+ * The dub pipeline stopped at a stage, with the weights renormalised so the
+ * bar still fills to one. These outputs run exactly the dub's stages and then
+ * stop, so describing them as a slice is the truth rather than a convenience.
+ */
+function upTo(key: string): Stage[] {
+  const cut = DUB_STAGES.slice(0, DUB_STAGES.findIndex((s) => s.key === key) + 1);
+  const total = cut.reduce((n, s) => n + s.weight, 0) || 1;
+  return cut.map((s) => ({ ...s, weight: s.weight / total }));
+}
+
+export const SUBTITLE_STAGES = upTo("transcribing");
+export const TRANSLATED_SUBTITLE_STAGES = upTo("translating");
+export const AUDIO_DUB_STAGES = upTo("synthesizing_voice");
 
 export const stagesFor = (kind: JobKind): Stage[] =>
-  kind === "voiceover" ? VOICEOVER_STAGES : DUB_STAGES;
+  kind === "voiceover" ? VOICEOVER_STAGES
+    : kind === "subtitles" ? SUBTITLE_STAGES
+      : kind === "subtitles_translated" ? TRANSLATED_SUBTITLE_STAGES
+        : kind === "audio" ? AUDIO_DUB_STAGES
+          : DUB_STAGES;
 
 export interface Progress {
   /** Index into STAGES, or -1 before the first report. */
