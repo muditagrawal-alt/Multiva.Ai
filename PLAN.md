@@ -4,8 +4,8 @@ Fourteen items across five phases: page-based navigation, honest render
 semantics, timeline editing, and three standalone outputs that no longer
 require running the whole pipeline.
 
-Baseline before any of this starts: **67 checks green, voice match 0.720**, on
-branch `studio-rebuild`.
+Baseline before any of this starts: **67 checks green, voice match 0.720**.
+After phase 1: **93 checks green**, same voice match. Branch is now `main`.
 
 ---
 
@@ -111,18 +111,18 @@ the live app under a different capitalisation.
 
 ---
 
-## Phase 1 — Backend
+## Phase 1 — Backend  ·  done
 
 The tabs and the render changes both need capabilities that do not exist yet.
 Built and tested before any UI depends on them.
 
 ### 1.1 Projects have names — additive
 
-- [ ] `name` field in the manifest, defaulting to the file name so existing
+- [x] `name` field in the manifest, defaulting to the file name so existing
       projects keep working
-- [ ] `PATCH /jobs/{id}` to rename
-- [ ] Set at import, editable afterwards
-- [ ] Shown in the Projects list and the studio title bar, in place of the job
+- [x] `PATCH /jobs/{id}` to rename
+- [x] Set at import, editable afterwards
+- [ ] (phase 2) Shown in the Projects list and the studio title bar, in place of the job
       id that is now hidden
 
 *Touches:* `project.py`, `app.py`
@@ -132,9 +132,9 @@ Built and tested before any UI depends on them.
 Each is a subset of the pipeline that already runs, stopping early rather than
 doing anything new.
 
-- [ ] **Subtitles** — stops after Whisper
-- [ ] **Translated subtitles** — stops after NLLB
-- [ ] **Audio dub** — stops before Wav2Lip, for a speaker not on camera
+- [x] **Subtitles** — stops after Whisper · 32s
+- [x] **Translated subtitles** — stops after NLLB · 36s
+- [x] **Audio dub** — stops before Wav2Lip · 136s, for a speaker not on camera
 
 Implemented as a `kind` on the job, the way `voiceover` already is, so status,
 cancellation, projects and exports keep working unchanged.
@@ -143,8 +143,8 @@ cancellation, projects and exports keep working unchanged.
 
 ### 1.3 Clearing a phrase — additive
 
-- [ ] `DELETE /jobs/{id}/segments/{i}` — holds silence for the slot
-- [ ] Undoable like any other edit; marks the picture stale
+- [x] `DELETE /jobs/{id}/segments/{i}` — holds silence for the slot
+- [x] Undoable like any other edit; marks the picture stale
 
 Cut needs somewhere for the audio to go. Empty text is currently rejected
 outright, so this is a distinct operation rather than a loosened validation.
