@@ -55,11 +55,14 @@ are all local.
 ## Run it
 
 **One command.** Checks what is needed, builds the interface the first time,
-starts Ollama if it is installed, and opens the studio when the engine is ready.
+starts Ollama if it is installed, and opens the studio window once the engine
+is ready. It opens the desktop app when one has been built and falls back to a
+browser when it has not.
 
 ```bash
-./run.sh                    # local model through Ollama
-./run.sh --provider groq    # a hosted model instead
+./run.sh                    # desktop window, local model through Ollama
+./run.sh --web              # in a browser instead
+./run.sh --provider groq    # a hosted script model
 ```
 
 **As a desktop app.** Starts the engine itself, shows what is loading, and opens

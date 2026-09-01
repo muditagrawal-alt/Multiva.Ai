@@ -2,8 +2,9 @@
 #
 # Start Multiva: check what it needs, start what is missing, open the studio.
 #
-#   ./run.sh                  local model through Ollama (the default)
-#   ./run.sh --provider groq  a hosted model instead
+#   ./run.sh                  desktop app, local model through Ollama
+#   ./run.sh --web            in a browser instead of the desktop window
+#   ./run.sh --provider groq  a hosted script model
 #   ./run.sh --port 8123      somewhere other than 8000
 #
 # Ctrl-C stops the engine. Nothing is installed without saying so first.
@@ -15,12 +16,15 @@ cd "$(dirname "$0")"
 PORT=8000
 PROVIDER=ollama
 MODEL=""
+MODE=desktop
 while [ $# -gt 0 ]; do
     case "$1" in
         --provider) PROVIDER="${2:-}"; shift 2 ;;
         --model)    MODEL="${2:-}";    shift 2 ;;
         --port)     PORT="${2:-}";     shift 2 ;;
-        -h|--help)  sed -n '3,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        --web)      MODE=web;          shift ;;
+        --desktop)  MODE=desktop;      shift ;;
+        -h|--help)  sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Unknown option: $1"; exit 2 ;;
     esac
 done
@@ -77,12 +81,32 @@ else
     say "Script model: ${PROVIDER}${MODEL:+ / $MODEL} (hosted)."
 fi
 
+# --- the desktop window, unless a browser was asked for --------------------
+APP_BUNDLE="frontend/src-tauri/target/release/bundle/macos/Multiva Studio.app"
+APP_LINUX="frontend/src-tauri/target/release/multiva-studio"
+DESKTOP=""
+if [ "$MODE" = "desktop" ]; then
+    if [ -d "$APP_BUNDLE" ]; then
+        DESKTOP="$APP_BUNDLE"
+    elif [ -x "$APP_LINUX" ]; then
+        DESKTOP="$APP_LINUX"
+    else
+        say "No desktop build found, opening in a browser instead."
+        say "Build the desktop app with:  cd frontend/src-tauri && cargo build --release"
+        MODE=web
+    fi
+fi
+
 # --- do not fight something already on the port ----------------------------
 if lsof -ti:"$PORT" >/dev/null 2>&1; then
     say "Something is already serving port ${PORT}; opening that instead."
-    open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-        || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-        || say "Open http://127.0.0.1:${PORT}/app/"
+    if [ -n "$DESKTOP" ]; then
+        open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
+    else
+        open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+            || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+            || say "Open http://127.0.0.1:${PORT}/app/"
+    fi
     exit 0
 fi
 
@@ -91,9 +115,14 @@ fi
     for _ in $(seq 1 300); do
         if curl -sf --max-time 2 "http://127.0.0.1:${PORT}/api/boot" 2>/dev/null \
              | grep -q '"ready": *true'; then
-            printf '\n  Studio ready at http://127.0.0.1:%s/app/\n\n' "$PORT"
-            open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-                || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null
+            if [ -n "$DESKTOP" ]; then
+                printf '\n  Engine ready. Opening the studio window.\n\n'
+                open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
+            else
+                printf '\n  Studio ready at http://127.0.0.1:%s/app/\n\n' "$PORT"
+                open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+                    || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null
+            fi
             exit 0
         fi
         sleep 1
