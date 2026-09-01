@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+#
+# Start Multiva: check what it needs, start what is missing, open the studio.
+#
+#   ./run.sh                  local model through Ollama (the default)
+#   ./run.sh --provider groq  a hosted model instead
+#   ./run.sh --port 8123      somewhere other than 8000
+#
+# Ctrl-C stops the engine. Nothing is installed without saying so first.
+
+set -u
+
+cd "$(dirname "$0")"
+
+PORT=8000
+PROVIDER=ollama
+MODEL=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --provider) PROVIDER="${2:-}"; shift 2 ;;
+        --model)    MODEL="${2:-}";    shift 2 ;;
+        --port)     PORT="${2:-}";     shift 2 ;;
+        -h|--help)  sed -n '3,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "Unknown option: $1"; exit 2 ;;
+    esac
+done
+
+say()  { printf '  %s\n' "$*"; }
+fail() { printf '\n  %s\n\n' "$*" >&2; exit 1; }
+
+printf '\n  Multiva\n  %s\n' "------------------------------------------------"
+
+# --- what it cannot start without -----------------------------------------
+PY=./venv/bin/python
+[ -x "$PY" ] || PY=./.venv/bin/python
+[ -x "$PY" ] || fail "No Python environment. Run:
+    python3.10 -m venv venv && ./venv/bin/pip install -r requirements.txt"
+
+command -v ffmpeg >/dev/null 2>&1 || fail "ffmpeg is not installed. Run:
+    brew install ffmpeg        (macOS)
+    sudo apt install ffmpeg    (Ubuntu)"
+
+# --- the interface is a build artefact, not in the repository ---------------
+if [ ! -d web ]; then
+    say "Building the studio interface (first run only)..."
+    command -v npm >/dev/null 2>&1 || fail "npm is not installed, and web/ has not been built."
+    ( cd frontend && npm install --silent && npm run build >/dev/null ) \
+        || fail "The interface failed to build. Run it by hand:
+    cd frontend && npm install && npm run build"
+    say "Interface built."
+fi
+
+# --- the script model, which is optional but usually wanted -----------------
+if [ "$PROVIDER" = "ollama" ]; then
+    WANT="${MODEL:-qwen2.5:7b}"
+    if ! curl -sf --max-time 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+        if command -v ollama >/dev/null 2>&1; then
+            say "Starting Ollama..."
+            ( ollama serve >/dev/null 2>&1 & )
+            for _ in $(seq 1 20); do
+                curl -sf --max-time 2 http://127.0.0.1:11434/api/tags >/dev/null 2>&1 && break
+                sleep 1
+            done
+        fi
+    fi
+    if curl -sf --max-time 3 http://127.0.0.1:11434/api/tags 2>/dev/null | grep -q "\"${WANT}\""; then
+        say "Script model: ${WANT} on this machine."
+    elif curl -sf --max-time 3 http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+        say "Ollama is running but ${WANT} is not pulled."
+        say "Pull it with:  ollama pull ${WANT}"
+        say "Dubbing works without it; only fitting a long line needs it."
+    else
+        say "Ollama is not running. Dubbing works without it;"
+        say "only fitting a long line needs it. Start it with:  ollama serve"
+    fi
+else
+    say "Script model: ${PROVIDER}${MODEL:+ / $MODEL} (hosted)."
+fi
+
+# --- do not fight something already on the port ----------------------------
+if lsof -ti:"$PORT" >/dev/null 2>&1; then
+    say "Something is already serving port ${PORT}; opening that instead."
+    open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+        || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+        || say "Open http://127.0.0.1:${PORT}/app/"
+    exit 0
+fi
+
+# --- open the studio once the engine says it is ready ----------------------
+(
+    for _ in $(seq 1 300); do
+        if curl -sf --max-time 2 "http://127.0.0.1:${PORT}/api/boot" 2>/dev/null \
+             | grep -q '"ready": *true'; then
+            printf '\n  Studio ready at http://127.0.0.1:%s/app/\n\n' "$PORT"
+            open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
+                || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null
+            exit 0
+        fi
+        sleep 1
+    done
+) &
+
+say "Starting the engine on port ${PORT}. Models load on first use."
+say "Ctrl-C stops it."
+printf '  %s\n\n' "------------------------------------------------"
+
+cd Backend_pipeline
+export MULTIVA_LLM_PROVIDER="$PROVIDER"
+[ -n "$MODEL" ] && export MULTIVA_LLM_MODEL="$MODEL"
+export PYTORCH_ENABLE_MPS_FALLBACK=1
+export TOKENIZERS_PARALLELISM=false
+exec "../${PY#./}" -m uvicorn app:app --port "$PORT"
