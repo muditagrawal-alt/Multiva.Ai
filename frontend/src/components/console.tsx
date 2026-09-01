@@ -176,8 +176,15 @@ const PAGES = [
 
 /** The window's top strip: identity, page tabs, and an optional right slot. */
 export function TitleBar({
-  active, right,
-}: { active: "projects" | "dub"; right?: ReactNode }) {
+  active, right, canOpenStudio = true,
+}: {
+  active: "projects" | "dub";
+  right?: ReactNode;
+  /** The studio is a workspace for one project, so it is only reachable by
+      creating or opening one. Switching to it from the tab strip would open
+      an empty one with nothing to work on. */
+  canOpenStudio?: boolean;
+}) {
   return (
     <header className="raised flex items-center gap-3 border-b border-c-edge px-2.5">
       <span className="flex items-center gap-2 text-c-text">
@@ -194,6 +201,15 @@ export function TitleBar({
               key={p.key}
               aria-current="page"
               className="rounded-[2px] bg-c-accent-dim px-2 py-[3px] text-[10px] font-medium uppercase tracking-[0.12em] text-c-accent"
+            >
+              {p.label}
+            </span>
+          ) : p.key === "dub" && !canOpenStudio ? (
+            <span
+              key={p.key}
+              title="Create or open a project to work in the studio"
+              aria-disabled="true"
+              className="cursor-default rounded-[2px] px-2 py-[3px] text-[10px] uppercase tracking-[0.12em] text-c-mute/40"
             >
               {p.label}
             </span>

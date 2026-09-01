@@ -97,6 +97,7 @@ export default function Home() {
     <div className="console grid" style={{ gridTemplateRows: "30px minmax(0,1fr) 22px" }}>
       <TitleBar
         active="projects"
+        canOpenStudio={false}
         right={
           <Link
             to="/setup"
