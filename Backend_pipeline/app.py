@@ -1340,13 +1340,21 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
     # compounds drift: in testing, the third link in the chain had invented a
     # clause that was never in the source. Asking harder each round instead
     # keeps every candidate one step from the truth.
+    failures = []
     for attempt in range(int(body.get("tries", 3))):
         try:
             candidate = llm.shorten(
                 original, L.display_name(job["target_language"]),
                 (target / natural) * (0.9 ** attempt), source_text=source_text)
         except llm.Unavailable as e:
-            raise HTTPException(status_code=503, detail=str(e))
+            # One bad draw is not a broken model. Asking for an aggressive
+            # ratio makes an empty or unusable reply likely enough that
+            # treating the first one as fatal threw away rewrites that had
+            # already succeeded on an earlier, gentler attempt.
+            failures.append(str(e))
+            attempts.append({"text": None, "seconds": None,
+                             "source": "failed", "detail": str(e)[:160]})
+            continue
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -1359,11 +1367,18 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
             break
 
     if best_text == original:
+        # Nothing usable came back at all, as opposed to rewrites that came
+        # back but were no shorter. The difference decides whether the user
+        # should look at their model or at their line.
+        if len(failures) == len(attempts) - 1:
+            raise HTTPException(status_code=503, detail=failures[-1])
         return JSONResponse({
             "index": index, "changed": False, "text": original,
             "slot_seconds": round(slot, 3), "spoken_seconds": round(natural, 3),
             "attempts": attempts,
-            "detail": "No rewrite came out shorter than the original.",
+            "detail": "No rewrite came out shorter than the original."
+                      + (f" {len(failures)} attempt(s) returned nothing usable."
+                         if failures else ""),
         })
 
     unit["text"] = best_text
