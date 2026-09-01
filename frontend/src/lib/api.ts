@@ -5,6 +5,8 @@
    by vite.config.ts. Nothing here needs a base URL or a CORS shim.
    =========================================================================== */
 
+import type { JobKind } from "@/lib/pipeline";
+
 export type ProcessingStatus =
   | "uploaded"
   | "processing"
@@ -45,11 +47,13 @@ export interface SyncReport {
 }
 
 export interface JobStatus {
+  /** What the project is called. Falls back to the source file name. */
+  name?: string;
   job_id: string;
   status: "queued" | "processing" | "done" | "failed" | "cancelled";
   step: string;
   /** Which pipeline produced this job. */
-  kind?: "dub" | "voiceover";
+  kind?: JobKind;
   /** Length of a rendered voice-over, in seconds. */
   voiceover_seconds?: number | null;
   url?: string | null;
@@ -179,6 +183,10 @@ export interface RenderOptions {
   /** A bed laid under the finished dub. */
   music?: File | null;
   musicGain?: number;
+  /** What this run should produce. Omitted means a full dub. */
+  kind?: JobKind;
+  /** What to call the project. Defaults to the file name. */
+  name?: string;
 }
 
 export async function submitVideo(
@@ -195,6 +203,8 @@ export async function submitVideo(
   if (options.trimStart != null) params.set("trim_start", String(options.trimStart));
   if (options.trimEnd != null) params.set("trim_end", String(options.trimEnd));
   if (options.music) params.set("music_gain", String(options.musicGain ?? -18));
+  if (options.kind && options.kind !== "dub") params.set("kind", options.kind);
+  if (options.name) params.set("name", options.name);
 
   const body = new FormData();
   body.append("file", file);
