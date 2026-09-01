@@ -47,6 +47,33 @@ const FALLBACK: Language[] = [
 
 type View = "idle" | "working" | "done" | "failed" | "cancelled";
 
+/**
+ * A still from a clip, for the media list.
+ *
+ * A <video> element paints black until it has decoded a frame, and metadata
+ * alone does not decode one, so every clip in the list showed as an empty
+ * box. Seeking just past the start forces a frame out; the first moment of a
+ * cut is often black anyway, so this lands on something with picture in it.
+ */
+function Thumb({ src }: { src: string }) {
+  return (
+    <video
+      src={src}
+      muted
+      playsInline
+      preload="metadata"
+      className="h-full w-full object-cover"
+      onLoadedMetadata={(e) => {
+        const v = e.currentTarget;
+        const at = Number.isFinite(v.duration) && v.duration > 0
+          ? Math.min(0.6, v.duration / 2)
+          : 0.1;
+        try { v.currentTime = at; } catch { /* seeking is best effort */ }
+      }}
+    />
+  );
+}
+
 export default function Studio() {
   const [langs, setLangs] = useState<Language[] | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
@@ -505,9 +532,9 @@ export default function Studio() {
               >
                 <div className="h-[26px] w-[46px] shrink-0 overflow-hidden rounded-[2px] bg-black">
                   {preview ? (
-                    <video src={preview} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                    <Thumb src={preview} />
                   ) : job?.url ? (
-                    <video src={job.url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
+                    <Thumb src={job.url} />
                   ) : null}
                 </div>
                 <span className="console-text min-w-0 flex-1 truncate text-[11px] text-c-text">
@@ -773,10 +800,6 @@ export default function Studio() {
             )}
             {job ? (
               <>
-                <Stat k="Job" v={job.job_id.slice(0, 8)} />
-                <Stat k="Detected" v={job.source_language ?? "—"} />
-                <Stat k="Segments" v={job.segment_count ?? "—"} />
-                <Stat k="Reference" v={job.reference_seconds ? `${job.reference_seconds}s` : "—"} />
                 {job.voice_match && (
                   <Stat
                     k="Voice match"
