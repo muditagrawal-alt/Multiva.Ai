@@ -193,6 +193,16 @@ def main() -> int:
     check("no one-word phrases", not thin, f"{[p['text'] for p in thin]}")
     print(f"        {len(phrases)} phrases")
 
+    # What the timeline colours phrases by: the current take's length against
+    # the slot it has to land in.
+    spoken = [p.get("spoken") for p in phrases]
+    check("phrases report their spoken length",
+          all(isinstance(v, (int, float)) and v > 0 for v in spoken),
+          f"got {spoken}")
+    over = [f"{p['spoken']:.2f}/{p['duration']:.2f}" for p in phrases
+            if p.get("spoken") and p["spoken"] > p["duration"]]
+    print(f"        {len(phrases) - len(over)} of {len(phrases)} fit their slot")
+
     original = phrases[0]["text"]
     code, before = call("GET", f"/jobs/{job}/segments/0/audio", raw=True)
     check("phrase audio plays", code == 200)
