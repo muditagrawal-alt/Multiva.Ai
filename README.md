@@ -62,9 +62,12 @@ cd frontend && npm install && npm run build
 cd src-tauri && cargo run          # cargo tauri build for an installer
 ```
 
-**Or as a local service**, if you would rather use a browser.
+**Or as a local service**, if you would rather use a browser. The interface is
+a build artefact and is not in the repository, so build it once first.
 
 ```bash
+cd frontend && npm install && npm run build && cd ..
+
 cd Backend_pipeline
 ../venv/bin/python -m uvicorn app:app --port 8000
 # then open http://127.0.0.1:8000/app/
