@@ -70,7 +70,7 @@ who prefer it, but it stops being the only way.
 
 ---
 
-## Phase 6 — The first run
+## Phase 6 — The first run  ·  done
 
 ### 6.1 The sequence — behaviour
 
@@ -83,34 +83,34 @@ First launch:
 
 Every launch after: splash → Projects.
 
-- [ ] Setup gains a **Finish setup** action that marks setup done and moves to
+- [x] Setup gains a **Finish setup** action that marks setup done and moves to
       Projects, so it is a step with an end rather than a page you escape
-- [ ] Setup is skipped on later launches but always reachable
-- [ ] Nothing is required: keeping every default and pressing through is a
+- [x] Setup is skipped on later launches but always reachable
+- [x] Nothing is required: keeping every default and pressing through is a
       supported first run
 
 *Touches:* `Setup.tsx`, `Home.tsx`, `engines.py`
 
 ### 6.2 Projects are named when they are made — behaviour
 
-- [ ] **New project** opens a dialog asking for a name, with the language pair
-- [ ] The name reaches the studio and is sent with the render, so it is set
+- [x] **New project** opens a dialog asking for a name, with the language pair
+- [x] The name reaches the studio and is sent with the render, so it is set
       from the beginning rather than after the fact
-- [ ] Rename from the Projects list and from the studio title bar
-- [ ] An empty name falls back to the clip's file name rather than blocking
+- [x] Rename from the Projects list and from the studio title bar
+- [x] An empty name falls back to the clip's file name rather than blocking
 
 *Touches:* `Home.tsx`, `Studio.tsx`, `api.ts`
 
 ---
 
-## Phase 7 — Settings
+## Phase 7 — Settings  ·  done
 
 ### 7.1 The gear — additive
 
-- [ ] Gear in the top-right of both Projects and the studio
-- [ ] Opens a floating panel over the current page, not a route: settings are
+- [x] Gear in the top-right of both Projects and the studio
+- [x] Opens a floating panel over the current page, not a route: settings are
       something you adjust while looking at your work, not somewhere you go
-- [ ] Escape and click-outside close it; focus returns to the gear
+- [x] Escape and click-outside close it; focus returns to the gear
 
 *Touches:* `console.tsx`, new `components/Settings.tsx`, `Home.tsx`, `Studio.tsx`
 
@@ -118,23 +118,23 @@ Every launch after: splash → Projects.
 
 Sections, in the order someone would look for them:
 
-- [ ] **Models** — the four stages, each with its options, present/missing, and
+- [x] **Models** — the four stages, each with its options, present/missing, and
       a download button. The same component the setup page uses
-- [ ] **Script model** — Ollama or a hosted key. The existing panel, moved in
-- [ ] **Locations** — where finished projects are saved, and where working
+- [x] **Script model** — Ollama or a hosted key. The existing panel, moved in
+- [x] **Locations** — where finished projects are saved, and where working
       files live
-- [ ] **Storage** — how much the working directory is holding, how long
+- [x] **Storage** — how much the working directory is holding, how long
       abandoned runs survive before they are swept, and a sweep-now button
-- [ ] **Output** — encode quality (CRF) and encoder preset
-- [ ] **Performance** — Wav2Lip batch sizes and compute device
-- [ ] **About** — versions, model licences, and the non-commercial warning on
+- [x] **Output** — encode quality (CRF) and encoder preset
+- [x] **Performance** — Wav2Lip batch sizes (compute device left alone)
+- [x] **About** — versions, model licences, and the non-commercial warning on
       XTTS
 
 Everything above is a knob that already exists as an environment variable or a
 stored setting. Nothing here invents a capability; it exposes what the pipeline
 is already reading.
 
-- [ ] A restart notice where one is genuinely needed, because engine choices
+- [x] A restart notice where one is genuinely needed, because engine choices
       are read at import
 
 *Touches:* `Settings.tsx`, `app.py` for the storage and output settings
@@ -143,15 +143,15 @@ is already reading.
 
 ## Must not break
 
-- [ ] All 94 existing checks
-- [ ] Voice cloning quality (0.720)
-- [ ] The five outputs, including the three standalone ones
-- [ ] Cut, copy, paste, undo and the fit colours
-- [ ] Render / re-render / up-to-date states
-- [ ] The Media · Edit · Deliver pages
-- [ ] Ollama and Groq both reachable
-- [ ] A fresh clone still setting up from the command line
-- [ ] The desktop app finding its checkout
+- [x] All existing checks — now 105
+- [x] Voice cloning quality (0.720)
+- [x] The five outputs, including the three standalone ones
+- [x] Cut, copy, paste, undo and the fit colours
+- [x] Render / re-render / up-to-date states
+- [x] The Media · Edit · Deliver pages
+- [x] Ollama and Groq both reachable
+- [x] A fresh clone still setting up from the command line
+- [x] The desktop app finding its checkout
 
 ---
 
