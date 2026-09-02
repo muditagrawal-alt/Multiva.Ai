@@ -277,6 +277,52 @@ export const revisePhrase = (
     body: JSON.stringify(body),
   });
 
+/* --- models on this machine ------------------------------------------------ */
+
+export interface ModelRow {
+  id: string;
+  label: string;
+  why: string;
+  size: string;
+  required: boolean;
+  kind: "hub" | "file";
+  present: boolean;
+}
+
+export interface ModelProgress {
+  running: boolean;
+  label: string;
+  index: number;
+  total: number;
+  bytes: number;
+  of: number;
+  error: string | null;
+  finished: boolean;
+}
+
+export interface ModelInventory {
+  models: ModelRow[];
+  missing: number;
+  cache: string;
+  free_gb: number;
+  progress: ModelProgress;
+}
+
+export const getModels = () => request<ModelInventory>("/api/models");
+
+/** Start fetching. Omit ids for everything missing. */
+export const downloadModels = (ids?: string[]) =>
+  request<ModelProgress>("/api/models/download", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(ids ? { ids } : {}),
+  });
+
+export const modelProgress = () => request<ModelProgress>("/api/models/progress");
+
+export const cancelModels = () =>
+  request<ModelProgress>("/api/models/cancel", { method: "POST" });
+
 /** Walk back the last phrase edit, restoring the take that was there. */
 export const undoPhrase = (id: string) =>
   request<PhraseResult & { audio_restored: boolean }>(
