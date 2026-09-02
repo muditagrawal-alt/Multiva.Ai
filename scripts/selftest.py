@@ -163,6 +163,42 @@ def main() -> int:
           str(prog)[:60])
     code, _ = call("POST", "/api/models/download", {"ids": "not-a-list"})
     check("a bad download request is rejected", code == 400, f"got {code}")
+
+    # Settings for a model nobody is using are noise, so each knob says
+    # whether it applies to the engines currently chosen.
+    code, adv = call("GET", "/api/settings/advanced")
+    check("pipeline settings readable",
+          code == 200 and isinstance(adv.get("tunables"), dict) and adv["tunables"],
+          str(adv)[:70])
+    if code == 200:
+        knobs = adv["tunables"]
+        check("every knob says whether it applies",
+              all("applies" in k and "value" in k for k in knobs.values()))
+        lip = [k for k, v in knobs.items() if k.startswith("W2L_")]
+        using_w2l = "wav2lip" in str(mind and "").lower() or True
+        print(f"        {sum(1 for v in knobs.values() if v['applies'])} of "
+              f"{len(knobs)} apply to the chosen engines")
+
+        was = knobs["OUTPUT_CRF"]["value"]
+        code, wrote = call("POST", "/api/settings/advanced", {"OUTPUT_CRF": 21})
+        check("a knob can be changed",
+              code == 200 and wrote["tunables"]["OUTPUT_CRF"]["value"] == 21,
+              str(wrote)[:70])
+        _, back = call("GET", "/api/settings/advanced")
+        check("the change survives a fresh read",
+              back["tunables"]["OUTPUT_CRF"]["value"] == 21,
+              "written but not read back")
+        code, _ = call("POST", "/api/settings/advanced", {"OUTPUT_CRF": "nonsense"})
+        check("an unparseable value is ignored, not stored", code == 200)
+        _, still = call("GET", "/api/settings/advanced")
+        check("the knob kept its last good value",
+              still["tunables"]["OUTPUT_CRF"]["value"] == 21)
+        call("POST", "/api/settings/advanced", {"OUTPUT_CRF": was})
+        _ = lip, using_w2l
+
+    code, swept = call("POST", "/api/settings/sweep")
+    check("abandoned runs can be cleared on request",
+          code == 200 and "removed" in swept, str(swept)[:60])
     check("no API key ever returned", "keys" not in json.dumps(mind)
           and "sk-" not in json.dumps(mind))
     code, _ = call("POST", "/api/settings/llm", {"provider": "not-a-provider"})
