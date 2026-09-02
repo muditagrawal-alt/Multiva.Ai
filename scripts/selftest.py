@@ -544,11 +544,23 @@ def main() -> int:
             if st.get("step", "").startswith(("transcribing", "synthesizing")):
                 break
             time.sleep(2)
+        # Deleting a job that is still rendering used to report success,
+        # leave the pipeline running, file a finished video into the output
+        # folder for a project the user had deleted, and crash on the save.
+        code, why = call("DELETE", f"/videos/{cjob}")
+        check("a rendering project cannot be deleted", code == 409, f"got {code}")
+        check("and it says to cancel first",
+              "cancel" in str(why.get("detail", "")).lower(), str(why)[:70])
+
         code, res = call("POST", f"/jobs/{cjob}/cancel")
         check("cancel accepted", code == 200 and res.get("cancelled"))
         status, _ = wait_for(cjob, timeout=180)
         check("job stopped", status == "cancelled", f"ended as {status}")
-        call("DELETE", f"/videos/{cjob}")
+
+        code, _ = call("DELETE", f"/videos/{cjob}")
+        check("a cancelled project deletes cleanly", code == 200, f"got {code}")
+        code, _ = call("GET", f"/jobs/{cjob}/status")
+        check("and is gone afterwards", code == 404, f"got {code}")
 
     # ---- cleanup ---------------------------------------------------------
     print("\n  Cleanup")
