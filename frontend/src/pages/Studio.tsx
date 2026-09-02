@@ -34,6 +34,7 @@ import {
 import { Timeline } from "@/components/timeline";
 import { CloneProgress } from "@/components/progress";
 import { stagesFor, readProgress, percent, type JobKind } from "@/lib/pipeline";
+import { Settings } from "@/components/Settings";
 import { cx } from "@/lib/cx";
 
 const MAX_MB = 200;
@@ -113,7 +114,9 @@ export default function Studio() {
   // there is nothing to edit or deliver before a clip exists.
   const [page, setPage] = useState<StudioPage>("media");
   // Guards the one action that throws work away.
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [restarting, setRestarting] = useState(false);
+  const [name, setName] = useState("");
   // A phrase lifted off the timeline. Words and delivery travel together:
   // pasting the words without the seed would speak them in a different draw.
   const [clip, setClip] = useState<{ text: string; seed: number | null } | null>(null);
@@ -142,6 +145,12 @@ export default function Studio() {
   // only what the manifest recorded.
   const [opened, setOpened] = useState<{ name: string } | null>(null);
   const [params] = useSearchParams();
+
+  // Named on the way in from Projects, before there is anything to render.
+  useEffect(() => {
+    const given = params.get("name");
+    if (given) setName(given);
+  }, [params]);
 
   const [tab, setTab] = useState<"source" | "dub">("source");
   const [current, setCurrent] = useState(0);
@@ -530,13 +539,14 @@ export default function Studio() {
 
     try {
       const { job_id } = mode === "voiceover"
-        ? await submitVoiceover(file, script, target)
+        ? await submitVoiceover(file, script, target, name || undefined)
         : await submitVideo(file, source, target, {
             trimStart: trimIn,
             trimEnd: trimOut,
             music,
             musicGain,
             kind: mode,
+            name: name || undefined,
           });
       jobId.current = job_id;
       watch(job_id);
@@ -550,8 +560,10 @@ export default function Studio() {
   /* --- derived ------------------------------------------------------------ */
 
   const kind: JobKind = job?.kind ?? mode;
+  // `||` rather than `??`: an empty name is no name, and should fall through
+  // to the clip rather than showing a blank title bar.
   const projectName =
-    job?.name ?? opened?.name ?? file?.name ?? "Untitled project";
+    job?.name || name || opened?.name || file?.name || "Untitled project";
 
   // What pressing the primary button should actually do. Rendering is not one
   // action: producing a first result, redoing the picture after an edit, and
@@ -598,6 +610,7 @@ export default function Studio() {
     >
       <TitleBar
         active="dub"
+        onSettings={() => setSettingsOpen(true)}
         right={
           <span className="truncate text-[11px] text-c-dim" title={projectName}>
             {projectName}
@@ -1359,6 +1372,8 @@ export default function Studio() {
           {health && <span className="tnum">{health.projects} saved</span>}
         </span>
       </StatusBar>
+
+      {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

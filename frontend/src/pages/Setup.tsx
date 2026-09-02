@@ -98,6 +98,18 @@ export default function Setup() {
     }
   }
 
+  async function finish() {
+    try {
+      if (!data?.configured || dirty) {
+        await saveEngines({ ...choice, output_dir: folder });
+      }
+    } catch (err) {
+      setError((err as Error).message);
+      return;
+    }
+    navigate("/");
+  }
+
   const dirty = !!data && (
     Object.entries(choice).some(([k, v]) => data.stages[k]?.current !== v) ||
     folder !== data.output_dir
@@ -350,10 +362,11 @@ export default function Setup() {
               </Tool>
               <button
                 type="button"
-                onClick={() => navigate("/")}
-                className="raised inline-flex h-[26px] items-center gap-1.5 rounded-[2px] border border-c-rule px-3 text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text active:translate-y-px"
+                onClick={finish}
+                disabled={busy}
+                className="raised inline-flex h-[26px] items-center gap-1.5 rounded-[2px] border border-c-rule px-3 text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text active:translate-y-px disabled:opacity-50"
               >
-                {firstRun && !saved ? "Skip, use the defaults" : "Go to projects"}
+                {firstRun ? "Finish setup" : "Go to projects"}
                 <ArrowRight size={11} weight="bold" />
               </button>
 
