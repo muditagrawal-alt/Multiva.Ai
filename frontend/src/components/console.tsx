@@ -11,6 +11,7 @@
 
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { GearSix } from "@phosphor-icons/react";
 import { cx } from "@/lib/cx";
 
 /* --- panels --------------------------------------------------------------- */
@@ -176,10 +177,12 @@ const PAGES = [
 
 /** The window's top strip: identity, page tabs, and an optional right slot. */
 export function TitleBar({
-  active, right, canOpenStudio = true,
+  active, right, canOpenStudio = true, onSettings,
 }: {
   active: "projects" | "dub";
   right?: ReactNode;
+  /** Opens the settings panel. The gear is only rendered when given. */
+  onSettings?: () => void;
   /** The studio is a workspace for one project, so it is only reachable by
       creating or opening one. Switching to it from the tab strip would open
       an empty one with nothing to work on. */
@@ -225,7 +228,20 @@ export function TitleBar({
         )}
       </nav>
 
-      {right && <div className="ml-auto flex items-center gap-3">{right}</div>}
+      <div className="ml-auto flex items-center gap-3">
+        {right}
+        {onSettings && (
+          <button
+            type="button"
+            onClick={onSettings}
+            aria-label="Settings"
+            title="Settings"
+            className="rounded-[2px] p-1 text-c-mute transition-colors hover:bg-c-hover hover:text-c-text"
+          >
+            <GearSix size={13} />
+          </button>
+        )}
+      </div>
     </header>
   );
 }
