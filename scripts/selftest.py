@@ -146,6 +146,23 @@ def main() -> int:
     check("engine catalogue", code == 200 and "stages" in eng)
     code, mind = call("GET", "/api/settings/llm")
     check("script model settings", code == 200 and "provider" in mind)
+
+    # Getting the models has to work from inside the app, not only from a
+    # terminal, so the endpoints behind that are part of the contract.
+    code, inv = call("GET", "/api/models")
+    check("model inventory", code == 200 and isinstance(inv.get("models"), list)
+          and len(inv["models"]) >= 5, str(inv)[:70])
+    if code == 200:
+        shape = all({"id", "label", "size", "present", "required"} <= set(m)
+                    for m in inv["models"])
+        check("every model reports size and presence", shape)
+        print(f"        {len(inv['models'])} models, {inv.get('missing')} missing, "
+              f"{inv.get('free_gb')} GB free")
+    code, prog = call("GET", "/api/models/progress")
+    check("download progress readable", code == 200 and "running" in prog,
+          str(prog)[:60])
+    code, _ = call("POST", "/api/models/download", {"ids": "not-a-list"})
+    check("a bad download request is rejected", code == 400, f"got {code}")
     check("no API key ever returned", "keys" not in json.dumps(mind)
           and "sk-" not in json.dumps(mind))
     code, _ = call("POST", "/api/settings/llm", {"provider": "not-a-provider"})
