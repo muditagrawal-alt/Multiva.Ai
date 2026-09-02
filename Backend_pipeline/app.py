@@ -43,6 +43,7 @@ import numpy as np
 import av_sync
 import dubbing
 import engines
+import models
 import llm
 import project
 import subtitles
@@ -1657,6 +1658,55 @@ async def create_voiceover(
     background_tasks.add_task(voiceover_task, job_id, input_path, script,
                              language, safe_filename, user_id)
     return JSONResponse({"job_id": job_id, "status": "queued"})
+
+
+@app.get("/api/models")
+async def list_models():
+    """
+    Every model, its size, and whether it is already on this machine.
+
+    Downloading several gigabytes should not require opening a terminal, so
+    the studio drives the same downloader the command line does.
+    """
+    rows = models.inventory()
+    return JSONResponse({
+        "models": rows,
+        "missing": sum(1 for r in rows if not r["present"]),
+        "cache": models.cache_root(),
+        "free_gb": round(models.free_space_gb(), 1),
+        "progress": models.status(),
+    })
+
+
+@app.post("/api/models/download")
+async def download_models(body: dict = Body(default={})):
+    """
+    Fetch the named models, or everything missing.
+
+    Returns immediately; watch /api/models/progress. Refused while a run is
+    already going, because two downloads writing one .part file would corrupt
+    each other.
+    """
+    ids = body.get("ids") or None
+    if ids is not None and not isinstance(ids, list):
+        raise HTTPException(status_code=400, detail="ids must be a list")
+    if not models.run(ids):
+        raise HTTPException(status_code=409,
+                            detail="A download is already running.")
+    return JSONResponse(models.status())
+
+
+@app.get("/api/models/progress")
+async def model_progress():
+    """Which file, how far through, and whether anything went wrong."""
+    return JSONResponse(models.status())
+
+
+@app.post("/api/models/cancel")
+async def cancel_models():
+    """Stop after the file in flight. Partial files resume on the next run."""
+    models.cancel()
+    return JSONResponse(models.status())
 
 
 @app.get("/api/settings/engines")

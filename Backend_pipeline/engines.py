@@ -204,6 +204,17 @@ def _hf_cached(repo: str) -> bool:
     return os.path.isdir(folder) and bool(os.listdir(folder))
 
 
+def _downloadable(local: str) -> bool:
+    """Whether models.py has a mirror for this checkpoint."""
+    try:
+        import models
+    except ImportError:
+        return False
+    tail = local.replace("\\", "/").split("/")[-1]
+    return any(rel.replace("\\", "/").split("/")[-1] == tail
+               for _, rel, *_ in models.WEIGHTS)
+
+
 def catalog() -> dict:
     """
     The catalogue annotated with what is already downloaded.
@@ -222,10 +233,11 @@ def catalog() -> dict:
                 source = "download"
             elif opt.get("local"):
                 ready = os.path.isfile(os.path.join(THIS_DIR, opt["local"]))
-                # Wav2Lip checkpoints are not on the Hub. Telling someone a
-                # missing one "will be fetched" would be a lie they only
-                # discover mid-render.
-                source = "manual"
+                # Not on the Hub, but there are checked mirrors and a SHA-256
+                # for these now, so the studio can fetch them like anything
+                # else. Anything without a mirror still says so rather than
+                # promising a download that will not happen.
+                source = "download" if _downloadable(opt["local"]) else "manual"
             options.append({**opt, "ready": ready, "source": source})
         out[stage] = {
             "label": spec["label"], "why": spec["why"],
