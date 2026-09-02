@@ -10,7 +10,7 @@
    =========================================================================== */
 
 import { useCallback, useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   Plus, ArrowClockwise, Trash, DownloadSimple, PencilSimple, Warning,
 } from "@phosphor-icons/react";
@@ -19,6 +19,7 @@ import {
   type VideoRecord,
 } from "@/lib/api";
 import { Tool, Lamp, TitleBar, StatusBar } from "@/components/console";
+import { Settings } from "@/components/Settings";
 import { cx } from "@/lib/cx";
 
 type View = "loading" | "list" | "empty" | "offline";
@@ -37,6 +38,10 @@ export default function Home() {
   // null until known: a launch should not flash the projects grid before
   // deciding whether this is a first run.
   const [configured, setConfigured] = useState<boolean | null>(null);
+  const navigate = useNavigate();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [naming, setNaming] = useState(false);
+  const [newName, setNewName] = useState("");
 
   const load = useCallback(async () => {
     setView("loading");
@@ -79,8 +84,9 @@ export default function Home() {
   }
 
   const newProject = (size: "header" | "empty") => (
-    <Link
-      to="/studio"
+    <button
+      type="button"
+      onClick={() => { setNaming(true); setNewName(""); }}
       className={cx(
         "inline-flex items-center gap-1.5 rounded-[2px] bg-c-accent font-medium text-[#17120b]",
         "transition-colors hover:bg-[#ffa040] active:translate-y-px",
@@ -88,16 +94,69 @@ export default function Home() {
       )}
     >
       <Plus size={size === "header" ? 11 : 12} weight="bold" /> New project
-    </Link>
+    </button>
   );
 
+  // A project is named when it is made. It used to get the clip's file name
+  // and only after a render had finished.
+  function startProject() {
+    const name = newName.trim();
+    navigate(name ? `/studio?name=${encodeURIComponent(name)}` : "/studio");
+  }
+
   if (configured === false) return <Navigate to="/setup" replace />;
+
+  const nameDialog = naming && (
+    <div
+      className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4"
+      onClick={() => setNaming(false)}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-[380px] rounded-[2px] border border-c-rule bg-c-panel p-4 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="New project"
+      >
+        <h2 className="text-[13px] text-c-text">New project</h2>
+        <p className="mt-1 text-[11px] leading-relaxed text-c-mute">
+          Give it a name you will recognise later. You can change it whenever
+          you like.
+        </p>
+        <label htmlFor="project-name" className="sr-only">Project name</label>
+        <input
+          id="project-name"
+          autoFocus
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") startProject();
+            if (e.key === "Escape") setNaming(false);
+          }}
+          placeholder="Republic Day address"
+          maxLength={120}
+          className="mt-3 h-[28px] w-full rounded-[2px] border border-c-rule bg-c-well px-2 text-[12px] text-c-text outline-none focus:border-c-accent"
+        />
+        <div className="mt-3 flex items-center gap-2">
+          <Tool primary onClick={startProject} className="h-[26px]">
+            Create and open
+          </Tool>
+          <Tool onClick={() => setNaming(false)} className="h-[26px]">Cancel</Tool>
+          <span className="ml-auto text-[10px] text-c-mute">
+            Leave it blank to use the clip's name
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="console grid" style={{ gridTemplateRows: "30px minmax(0,1fr) 22px" }}>
       <TitleBar
         active="projects"
         canOpenStudio={false}
+        onSettings={() => setSettingsOpen(true)}
         right={
           <Link
             to="/setup"
@@ -275,6 +334,10 @@ export default function Home() {
             : `${rows.length} project${rows.length === 1 ? "" : "s"}`}
         </span>
       </StatusBar>
+
+      {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+
+      {nameDialog}
     </div>
   );
 }

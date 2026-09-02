@@ -277,6 +277,40 @@ export const revisePhrase = (
     body: JSON.stringify(body),
   });
 
+/* --- the pipeline's knobs --------------------------------------------------- */
+
+export interface Tunable {
+  value: number | string;
+  default: number | string;
+  kind: "int" | "float" | "str";
+  label: string;
+  why: string;
+  /** False when it belongs to a model this project is not using. */
+  applies: boolean;
+  /** Fixed by an environment variable; the studio cannot change it. */
+  pinned: boolean;
+}
+
+export interface AdvancedSettings {
+  tunables: Record<string, Tunable>;
+  workdir: string;
+  workdir_bytes: number;
+  output_dir: string;
+}
+
+export const getAdvanced = () => request<AdvancedSettings>("/api/settings/advanced");
+
+export const saveAdvanced = (values: Record<string, number | string>) =>
+  request<{ tunables: Record<string, Tunable> }>("/api/settings/advanced", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  });
+
+export const sweepNow = () =>
+  request<{ removed: number; workdir_bytes: number }>("/api/settings/sweep",
+    { method: "POST" });
+
 /* --- models on this machine ------------------------------------------------ */
 
 export interface ModelRow {
@@ -476,12 +510,14 @@ export const cancelJob = (id: string) =>
 export async function submitVoiceover(
   file: File,
   script: string,
-  language: string
+  language: string,
+  name?: string
 ): Promise<{ job_id: string }> {
   const params = new URLSearchParams({
     language,
     user_id: userId(),
   });
+  if (name) params.set("name", name);
   const body = new FormData();
   body.append("file", file);
   body.append("script", script);
