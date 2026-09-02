@@ -98,7 +98,13 @@ def sweep_workdirs() -> int:
                 # A manifest means this is a project someone can still open.
                 if os.path.exists(os.path.join(path, project.MANIFEST)):
                     continue
-                if path in live or os.path.getmtime(path) > cutoff:
+                if path in live:
+                    continue
+                # An empty directory holds nothing and belongs to no project,
+                # so it goes now rather than in two days. A task cancelled
+                # while its files were being deleted can recreate one, and a
+                # deleted project should not leave a trace behind it.
+                if os.path.getmtime(path) > cutoff and os.listdir(path):
                     continue
                 shutil.rmtree(path)
                 freed += 1
@@ -275,6 +281,14 @@ def _safe_name(name: str) -> str:
     return (root[:80] or "upload") + ext[:12]
 
 
+def _save(job_id: str) -> None:
+    """Persist a job if it is still there. A project deleted mid-render is a
+    reason to stop writing, not to raise."""
+    job = jobs.get(job_id)
+    if job is not None:
+        project.save(job_id, job)
+
+
 def _set(job_id: str, **kw):
     job = jobs.get(job_id)
     if job is None:
@@ -389,7 +403,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
 
         if kind == "subtitles":
             _set(job_id, status="done", step="complete", **common)
-            project.save(job_id, jobs[job_id])
+            _save(job_id)
             print(f"[APP] Job {job_id} transcribed ({len(segments)} segments)")
             return
 
@@ -412,7 +426,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         if kind == "subtitles_translated":
             _set(job_id, status="done", step="complete",
                  translated_segments=list(translated), **common)
-            project.save(job_id, jobs[job_id])
+            _save(job_id)
             print(f"[APP] Job {job_id} translated ({len(segments)} segments)")
             return
 
@@ -456,7 +470,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                                 "start": reference.get("start")},
                      music_path=music_path, music_gain=music_gain,
                      translated_segments=list(translated), **common)
-                project.save(job_id, jobs[job_id])
+                _save(job_id)
                 print(f"[APP] Job {job_id} dubbed to audio")
                 return
 
@@ -543,7 +557,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                         "text": (sg.get("text") or "").strip()}
                        for sg in segments],
              translated_segments=list(translated))
-        project.save(job_id, jobs[job_id])
+        _save(job_id)
         print(f"[APP] Job {job_id} completed")
 
     except JobCancelled:
@@ -744,6 +758,7 @@ async def get_job_status(job_id: str):
         response["editable"] = bool(job.get("plan"))
         response["video_duration"] = job.get("video_duration")
         response["filed_at"] = job.get("filed_at")
+        response["filed_error"] = job.get("filed_error")
         response["video_stale"] = bool(job.get("video_stale"))
         if job.get("reference_path"):
             response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
@@ -844,7 +859,7 @@ def voiceover_task(job_id: str, input_path: str, script: str,
             "source_language": language,
             "translated_text": script,
         })
-        project.save(job_id, jobs[job_id])
+        _save(job_id)
         print(f"[APP] Voice-over {job_id} completed "
               f"({result_info['duration']}s, {result_info['chunks']} chunks)")
 
@@ -926,11 +941,21 @@ def _file_render(job_id: str, source_path: str, stem: str, language: str) -> str
             n += 1
         shutil.copyfile(source_path, target)
         print(f"[APP] Filed {os.path.basename(target)} in {folder}")
+        job = jobs.get(job_id)
+        if job is not None:
+            job.pop("filed_error", None)
         return target
     except Exception as e:                                   # noqa: BLE001
         # Filing is a convenience. A render that succeeded must not be
-        # reported as failed because a folder was not writable.
+        # reported as failed because a folder was not writable - but it must
+        # not be reported as filed either. Saying nothing sent people to an
+        # output folder that never got the video.
         print(f"[APP] Could not file the render: {e}")
+        job = jobs.get(job_id)
+        if job is not None:
+            job["filed_error"] = (
+                f"The render is finished, but it could not be copied to "
+                f"{engines.output_dir(create=False)}: {e}")
         return ""
 
 
@@ -1254,7 +1279,7 @@ def rerender_task(job_id: str):
                              "sync": check, "url": final_url,
                              "filed_at": filed_at,
                              "video_stale": False})
-        project.save(job_id, jobs[job_id])
+        _save(job_id)
         print(f"[APP] Job {job_id} re-rendered")
     except JobCancelled:
         jobs.get(job_id, {}).update(
@@ -1379,7 +1404,7 @@ def reclone_task(job_id: str, start: float, duration: float):
             "reference_seconds": round(reference["duration"], 2),
             "video_stale": True,
         })
-        project.save(job_id, jobs[job_id])
+        _save(job_id)
         print(f"[APP] Job {job_id} re-cloned from {start:.2f}s "
               f"(+{reference['duration']:.2f}s)")
     except JobCancelled:
@@ -1933,9 +1958,15 @@ async def delete_project(job_id: str):
     Removes the whole working folder: source, reference, phrase cache, dub,
     render and manifest. Irreversible, which is why the studio asks twice.
     """
-    job = jobs.pop(job_id, None)
+    job = jobs.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Project not found")
+    if job.get("status") == "processing":
+        raise HTTPException(
+            status_code=409,
+            detail="This project is still rendering. Cancel it first, then "
+                   "delete it.")
+    jobs.pop(job_id, None)
 
     uploads = os.path.abspath(UPLOAD_DIR) + os.sep
 

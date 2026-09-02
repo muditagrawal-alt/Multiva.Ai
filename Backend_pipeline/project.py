@@ -32,7 +32,7 @@ PERSISTED = (
     "plan", "segments", "word_segments", "translated_segments",
     "translated_text", "original_text",
     "reference", "sync", "voice_match", "video_stale", "history",
-    "filed_at",
+    "filed_at", "filed_error",
     "music_path", "music_gain", "voiceover_seconds",
 )
 
