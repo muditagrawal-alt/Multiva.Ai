@@ -187,6 +187,120 @@ def save(choices: dict) -> dict:
     return load()
 
 
+# ---------------------------------------------------------------------------
+# Tunables
+# ---------------------------------------------------------------------------
+# Knobs the pipeline already read from the environment. Storing them lets the
+# studio change them without asking anyone to export a variable, while an
+# environment variable still wins so a scripted run stays predictable.
+#
+# key: (default, kind, label, help, which engine it only applies to)
+TUNABLES = {
+    "OUTPUT_CRF": (18, "int", "Encode quality",
+                   "Lower is better and larger. 18 is visually lossless.", None),
+    "OUTPUT_PRESET": ("medium", "str", "Encoder preset",
+                      "Slower presets buy a smaller file at the same quality.", None),
+    "SYNC_TOLERANCE": (0.15, "float", "Sync tolerance",
+                       "How far audio and picture may drift before the check "
+                       "complains, in seconds.", None),
+    "NLLB_NUM_BEAMS": (2, "int", "Translation beams",
+                       "More beams translate better and slower.", "mt"),
+    "W2L_BATCH": (64, "int", "Lip sync batch",
+                  "Frames per pass. Larger is faster and needs more memory.",
+                  "lipsync:wav2lip"),
+    "W2L_DET_BATCH": (16, "int", "Face detection batch",
+                      "Frames per detection pass.", "lipsync:wav2lip"),
+    "MULTIVA_SWEEP_HOURS": (48, "float", "Keep unfinished runs for",
+                            "Hours before an abandoned working folder is "
+                            "swept. Saved projects are never swept.", None),
+}
+
+
+def _stored_tunables() -> dict:
+    """
+    Read the tunables straight from the file.
+
+    `load()` keeps only the keys it knows about, which is right for stage
+    choices and wrong here: it silently dropped every stored knob, so values
+    were written and never read back.
+    """
+    try:
+        with open(SETTINGS_PATH, encoding="utf-8") as f:
+            stored = json.load(f)
+    except Exception:                                        # noqa: BLE001
+        return {}
+    bucket = stored.get("tunables") if isinstance(stored, dict) else None
+    return bucket if isinstance(bucket, dict) else {}
+
+
+def tunable(key: str):
+    """The environment, then what the studio stored, then the default."""
+    default = TUNABLES[key][0]
+    raw = os.getenv(key)
+    if raw is None:
+        raw = _stored_tunables().get(key)
+    if raw is None:
+        return default
+    kind = TUNABLES[key][1]
+    try:
+        return {"int": int, "float": float, "str": str}[kind](raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def tunables_state() -> dict:
+    """
+    Every knob, its value, and whether it applies to the chosen engines.
+
+    A setting for a model nobody is using is noise, so the studio is told
+    which ones are relevant rather than deciding for itself.
+    """
+    current = load()
+    rows = {}
+    for key, (default, kind, label, why, applies) in TUNABLES.items():
+        relevant = True
+        if applies and ":" in applies:
+            stage, needle = applies.split(":", 1)
+            relevant = needle in str(current.get(stage, "")).lower()
+        elif applies:
+            relevant = applies in CATALOG
+        rows[key] = {
+            "value": tunable(key), "default": default, "kind": kind,
+            "label": label, "why": why, "applies": relevant,
+            "pinned": os.getenv(key) is not None,
+        }
+    return rows
+
+
+def save_tunables(values: dict) -> dict:
+    """Store knob values. Unknown keys and unparseable values are ignored."""
+    try:
+        with open(SETTINGS_PATH, encoding="utf-8") as f:
+            stored = json.load(f)
+    except Exception:                                        # noqa: BLE001
+        stored = {}
+    if not isinstance(stored, dict):
+        stored = {}
+    bucket = dict(stored.get("tunables") or {})
+
+    for key, value in (values or {}).items():
+        if key not in TUNABLES:
+            continue
+        kind = TUNABLES[key][1]
+        try:
+            bucket[key] = {"int": int, "float": float, "str": str}[kind](value)
+        except (TypeError, ValueError):
+            continue
+    stored["tunables"] = bucket
+
+    os.makedirs(os.path.dirname(SETTINGS_PATH), exist_ok=True)
+    tmp = f"{SETTINGS_PATH}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(stored, f, indent=2)
+    os.replace(tmp, SETTINGS_PATH)
+    return tunables_state()
+
+
 def configured() -> bool:
     """Whether the user has been through setup at least once."""
     return os.path.exists(SETTINGS_PATH)

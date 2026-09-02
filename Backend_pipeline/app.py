@@ -72,7 +72,6 @@ KEEP_INTERMEDIATE = os.getenv("KEEP_INTERMEDIATE", "").lower() in ("1", "true", 
 # ---------------------------------------------------------------------------
 # How long an abandoned working directory survives. Saved projects are never
 # swept: they carry a manifest and the user deletes them from the studio.
-SWEEP_AFTER_HOURS = float(os.getenv("MULTIVA_SWEEP_HOURS", "48"))
 
 
 def sweep_workdirs() -> int:
@@ -86,7 +85,7 @@ def sweep_workdirs() -> int:
     """
     if not os.path.isdir(UPLOAD_DIR):
         return 0
-    cutoff = time.time() - SWEEP_AFTER_HOURS * 3600
+    cutoff = time.time() - engines.tunable("MULTIVA_SWEEP_HOURS") * 3600
     live = {j.get("workdir") for j in jobs.values()}
     freed = 0
 
@@ -480,10 +479,10 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
 
             generate_lip_synced_video(
                 input_path, audio_for_video, output_video_path,
-                wav2lip_batch_size=int(os.getenv("W2L_BATCH", 64)),
-                face_det_batch_size=int(os.getenv("W2L_DET_BATCH", 16)),
-                crf=int(os.getenv("OUTPUT_CRF", 18)),
-                preset=os.getenv("OUTPUT_PRESET", "medium"),
+                wav2lip_batch_size=engines.tunable("W2L_BATCH"),
+                face_det_batch_size=engines.tunable("W2L_DET_BATCH"),
+                crf=engines.tunable("OUTPUT_CRF"),
+                preset=engines.tunable("OUTPUT_PRESET"),
                 progress=w2l_progress)
 
         if not os.path.exists(output_video_path):
@@ -492,7 +491,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         # ── 7. Verify audio and video actually agree ──
         _set(job_id, step="verifying")
         check = av_sync.verify_sync(output_video_path,
-                                    tolerance=float(os.getenv("SYNC_TOLERANCE", 0.15)))
+                                    tolerance=engines.tunable("SYNC_TOLERANCE"))
         print(f"[APP] Sync check: {check['reason']}")
         _set(job_id, sync=check)
         if not check["ok"]:
@@ -1236,15 +1235,15 @@ def rerender_task(job_id: str):
         with _HEAVY:
             generate_lip_synced_video(
                 job["input_path"], job["dub_path"], job["output_path"],
-                wav2lip_batch_size=int(os.getenv("W2L_BATCH", 64)),
-                face_det_batch_size=int(os.getenv("W2L_DET_BATCH", 16)),
-                crf=int(os.getenv("OUTPUT_CRF", 18)),
-                preset=os.getenv("OUTPUT_PRESET", "medium"),
+                wav2lip_batch_size=engines.tunable("W2L_BATCH"),
+                face_det_batch_size=engines.tunable("W2L_DET_BATCH"),
+                crf=engines.tunable("OUTPUT_CRF"),
+                preset=engines.tunable("OUTPUT_PRESET"),
                 progress=w2l_progress)
 
         _set(job_id, step="verifying")
         check = av_sync.verify_sync(
-            job["output_path"], tolerance=float(os.getenv("SYNC_TOLERANCE", 0.15)))
+            job["output_path"], tolerance=engines.tunable("SYNC_TOLERANCE"))
 
         final_url = f"/jobs/{job_id}/video"
 
@@ -1658,6 +1657,52 @@ async def create_voiceover(
     background_tasks.add_task(voiceover_task, job_id, input_path, script,
                              language, safe_filename, user_id)
     return JSONResponse({"job_id": job_id, "status": "queued"})
+
+
+@app.get("/api/settings/advanced")
+async def get_advanced_settings():
+    """
+    The pipeline's knobs, and which of them apply to the chosen engines.
+
+    A setting for a model nobody is using is noise, so each one says whether
+    it is relevant rather than leaving the studio to guess.
+    """
+    return JSONResponse({
+        "tunables": engines.tunables_state(),
+        "workdir": UPLOAD_DIR,
+        "workdir_bytes": _dir_bytes(UPLOAD_DIR),
+        "output_dir": engines.output_dir(create=False),
+    })
+
+
+@app.post("/api/settings/advanced")
+async def set_advanced_settings(body: dict = Body(...)):
+    """Store knob values. An environment variable still wins over these."""
+    try:
+        state = engines.save_tunables(body or {})
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Could not save: {e}")
+    return JSONResponse({"tunables": state})
+
+
+@app.post("/api/settings/sweep")
+async def sweep_now():
+    """Clear abandoned working folders on request rather than on the timer."""
+    freed = sweep_workdirs()
+    return JSONResponse({"removed": freed, "workdir_bytes": _dir_bytes(UPLOAD_DIR)})
+
+
+def _dir_bytes(path: str) -> int:
+    """How much a directory is holding. Best effort: a file that vanishes
+    mid-walk is not worth failing a settings page over."""
+    total = 0
+    for root, _dirs, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(root, name))
+            except OSError:
+                pass
+    return total
 
 
 @app.get("/api/models")
