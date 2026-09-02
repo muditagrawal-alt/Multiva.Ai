@@ -17,6 +17,10 @@ import { ArrowRight, Check, DownloadSimple, Warning } from "@phosphor-icons/reac
 import {
   getEngines, saveEngines, type EngineSettings,
 } from "@/lib/api";
+import {
+  getModels, downloadModels, modelProgress, cancelModels,
+  type ModelInventory, type ModelProgress,
+} from "@/lib/api";
 import { ScriptModel } from "@/components/ScriptModel";
 import { Tool, Lamp, TitleBar, StatusBar } from "@/components/console";
 import { cx } from "@/lib/cx";
@@ -29,6 +33,8 @@ export default function Setup() {
   const [folder, setFolder] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [inv, setInv] = useState<ModelInventory | null>(null);
+  const [prog, setProg] = useState<ModelProgress | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -46,6 +52,38 @@ export default function Setup() {
       .catch((err) => live && setError((err as Error).message));
     return () => { live = false; };
   }, []);
+
+  // Poll only while something is downloading. A finished run refreshes the
+  // inventory once so the list stops saying a model is missing.
+  useEffect(() => {
+    let live = true;
+    getModels()
+      .then((d) => { if (live) { setInv(d); setProg(d.progress); } })
+      .catch(() => {});
+    return () => { live = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!prog?.running) return;
+    const id = window.setInterval(async () => {
+      try {
+        const p = await modelProgress();
+        setProg(p);
+        if (!p.running) {
+          setInv(await getModels());
+        }
+      } catch { /* the next tick will try again */ }
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [prog?.running]);
+
+  async function startDownload(ids?: string[]) {
+    try {
+      setProg(await downloadModels(ids));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
 
   async function persist() {
     setBusy(true); setError("");
@@ -169,6 +207,108 @@ export default function Setup() {
               </ul>
             </section>
           ))}
+
+          {/* Getting the models should not mean opening a terminal. This is
+              the same downloader the command line uses. */}
+          {inv && (
+            <section className="mt-7">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <h2 className="text-[12px] text-c-text">Models on this machine</h2>
+                <span className="text-[10px] text-c-mute">
+                  {inv.missing === 0
+                    ? "everything is here"
+                    : `${inv.missing} still to download`}
+                  {" · "}{inv.free_gb} GB free
+                </span>
+                {inv.missing > 0 && !prog?.running && (
+                  <button
+                    type="button"
+                    onClick={() => startDownload()}
+                    className="ml-auto rounded-[2px] bg-c-accent px-2.5 py-[3px] text-[11px] font-medium text-[#17120b] transition-colors hover:bg-[#ffa040]"
+                  >
+                    Download everything missing
+                  </button>
+                )}
+                {prog?.running && (
+                  <button
+                    type="button"
+                    onClick={() => cancelModels().then(setProg).catch(() => {})}
+                    className="ml-auto rounded-[2px] border border-c-rule px-2.5 py-[3px] text-[11px] text-c-dim transition-colors hover:bg-c-hover"
+                  >
+                    Stop
+                  </button>
+                )}
+              </div>
+
+              {prog?.running && (
+                <div className="mt-2.5 rounded-[2px] border border-c-rule bg-c-well p-2.5">
+                  <div className="flex items-baseline gap-2 text-[11px]">
+                    <span className="text-c-text">{prog.label || "Starting…"}</span>
+                    <span className="tnum ml-auto text-[10px] text-c-mute">
+                      {prog.of > 0
+                        ? `${Math.round(prog.bytes / 1e6)} / ${Math.round(prog.of / 1e6)} MB`
+                        : "working"}
+                      {prog.total > 1 && ` · ${prog.index} of ${prog.total}`}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-[3px] overflow-hidden rounded-[2px] bg-c-edge">
+                    <div
+                      className="h-full bg-c-accent transition-[width] duration-300"
+                      style={{
+                        width: prog.of > 0
+                          ? `${Math.min(100, (prog.bytes / prog.of) * 100)}%`
+                          : "100%",
+                        opacity: prog.of > 0 ? 1 : 0.4,
+                      }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[10px] leading-relaxed text-c-mute">
+                    Resumable. Closing the window does not lose what has arrived.
+                  </p>
+                </div>
+              )}
+
+              {prog?.error && !prog.running && (
+                <p className="mt-2 text-[11px] leading-relaxed text-c-bad">
+                  {prog.error}
+                </p>
+              )}
+
+              <ul className="mt-2.5 grid gap-1">
+                {inv.models.map((m) => (
+                  <li
+                    key={m.id}
+                    className="flex items-center gap-2 rounded-[2px] border border-c-rule bg-c-panel px-2.5 py-1.5"
+                  >
+                    {m.present
+                      ? <Check size={11} className="shrink-0 text-c-good" />
+                      : <DownloadSimple size={11} className="shrink-0 text-c-warn" />}
+                    <span className="min-w-0">
+                      <span className="block truncate text-[11px] text-c-text">
+                        {m.label}
+                        {!m.required && (
+                          <span className="ml-1.5 text-[9px] uppercase tracking-[0.12em] text-c-mute">
+                            optional
+                          </span>
+                        )}
+                      </span>
+                      <span className="block truncate text-[10px] text-c-mute">{m.why}</span>
+                    </span>
+                    <span className="tnum ml-auto shrink-0 text-[10px] text-c-mute">{m.size}</span>
+                    {!m.present && !prog?.running && (
+                      <button
+                        type="button"
+                        onClick={() => startDownload([m.id])}
+                        className="shrink-0 rounded-[2px] border border-c-rule px-2 py-[2px] text-[10px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text"
+                      >
+                        Get it
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {data && (
             <section className="mt-7">
