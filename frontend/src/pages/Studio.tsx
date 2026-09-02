@@ -996,6 +996,11 @@ export default function Studio() {
                     tone={job.voice_match.score >= 0.7 ? "good" : job.voice_match.score >= 0.45 ? "warn" : "bad"}
                   />
                 )}
+                {job.filed_error && (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-warn">
+                    {job.filed_error} It is still here and still playable.
+                  </p>
+                )}
                 {job.filed_at && (
                   <Stat
                     k="Saved to"

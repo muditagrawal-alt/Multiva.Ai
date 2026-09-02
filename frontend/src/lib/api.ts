@@ -49,6 +49,9 @@ export interface SyncReport {
 export interface JobStatus {
   /** What the project is called. Falls back to the source file name. */
   name?: string;
+  /** Set when the render finished but could not be copied to the output
+      folder — an unmounted drive, a permissions change. */
+  filed_error?: string | null;
   job_id: string;
   status: "queued" | "processing" | "done" | "failed" | "cancelled";
   step: string;
