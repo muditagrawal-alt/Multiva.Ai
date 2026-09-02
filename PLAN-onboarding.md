@@ -25,7 +25,7 @@ Baseline: **94 checks green, voice match 0.720**, all of PLAN.md done.
 
 ---
 
-## Phase 5 — Getting the models
+## Phase 5 — Getting the models  ·  done
 
 The answer to "how does a user download models without opening a terminal":
 the app does it, on the setup page, with progress. The script stays for people
@@ -33,37 +33,37 @@ who prefer it, but it stops being the only way.
 
 ### 5.1 One downloader, two front ends — refactor
 
-- [ ] Move the fetch-and-verify logic out of `scripts/download_models.py` into
+- [x] Move the fetch-and-verify logic out of `scripts/download_models.py` into
       `Backend_pipeline/models.py`: the Hub snapshots, the mirrored `.pth`
       files, the SHA-256 check, the resume and per-mirror retry
-- [ ] `scripts/download_models.py` becomes a thin CLI over it, so the terminal
+- [x] `scripts/download_models.py` becomes a thin CLI over it, so the terminal
       path keeps working exactly as it does now
-- [ ] Wav2Lip stops being `manual`: it has verified mirrors now
+- [x] Wav2Lip stops being `manual`: it has verified mirrors now
 
 *Touches:* new `Backend_pipeline/models.py`, `scripts/download_models.py`,
 `engines.py`
 
 ### 5.2 Download endpoints — additive
 
-- [ ] `GET /api/models` — every model, its size, whether it is present, and
+- [x] `GET /api/models` — every model, its size, whether it is present, and
       whether it is required
-- [ ] `POST /api/models/download` — start fetching one or all missing models,
+- [x] `POST /api/models/download` — start fetching one or all missing models,
       in the background, refusing a second run while one is in flight
-- [ ] `GET /api/models/progress` — which file, how many bytes, which item of
+- [x] `GET /api/models/progress` — which file, how many bytes, which item of
       how many, and any error
-- [ ] Cancellable, and safe to close the window mid-download: partial files
+- [x] Cancellable, and safe to close the window mid-download: partial files
       are `.part` and resume
 
 *Touches:* `app.py`
 
 ### 5.3 Downloads on the setup page — additive
 
-- [ ] Each stage lists its options with size and a present/missing mark
-- [ ] A **Download** button per model and a **Download everything missing**
+- [x] Each stage lists its options with size and a present/missing mark
+- [x] A **Download** button per model and a **Download everything missing**
       for the impatient
-- [ ] A progress bar with the real byte count, not a fake timer
-- [ ] Free disk space shown against what is still needed
-- [ ] Choosing a model that is not present offers to fetch it rather than
+- [x] A progress bar with the real byte count, not a fake timer
+- [x] Free disk space shown against what is still needed
+- [x] Choosing a model that is not present offers to fetch it rather than
       failing later at render time
 
 *Touches:* `Setup.tsx`, `api.ts`
