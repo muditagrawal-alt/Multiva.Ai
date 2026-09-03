@@ -183,9 +183,9 @@ export function TitleBar({
   right?: ReactNode;
   /** Opens the settings panel. The gear is only rendered when given. */
   onSettings?: () => void;
-  /** The studio is a workspace for one project, so it is only reachable by
-      creating or opening one. Switching to it from the tab strip would open
-      an empty one with nothing to work on. */
+  /** The studio is a workspace for one project. With no project open there
+      is nothing for the tab to lead to, so it is not shown at all rather
+      than shown and refused. */
   canOpenStudio?: boolean;
 }) {
   return (
@@ -207,16 +207,7 @@ export function TitleBar({
             >
               {p.label}
             </span>
-          ) : p.key === "dub" && !canOpenStudio ? (
-            <span
-              key={p.key}
-              title="Create or open a project to work in the studio"
-              aria-disabled="true"
-              className="cursor-default rounded-[2px] px-2 py-[3px] text-[10px] uppercase tracking-[0.12em] text-c-mute/40"
-            >
-              {p.label}
-            </span>
-          ) : (
+          ) : p.key === "dub" && !canOpenStudio ? null : (
             <Link
               key={p.key}
               to={p.to}
