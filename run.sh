@@ -6,6 +6,7 @@
 #   ./run.sh --web            in a browser instead of the desktop window
 #   ./run.sh --provider groq  a hosted script model
 #   ./run.sh --port 8123      somewhere other than 8000
+#   ./run.sh --fresh          as a brand new user, without touching your setup
 #
 # Ctrl-C stops the engine. Nothing is installed without saying so first.
 
@@ -14,6 +15,7 @@ set -u
 cd "$(dirname "$0")"
 
 PORT=8000
+FRESH=0
 PROVIDER=ollama
 MODEL=""
 MODE=desktop
@@ -22,6 +24,7 @@ while [ $# -gt 0 ]; do
         --provider) PROVIDER="${2:-}"; shift 2 ;;
         --model)    MODEL="${2:-}";    shift 2 ;;
         --port)     PORT="${2:-}";     shift 2 ;;
+        --fresh)    FRESH=1;           shift ;;
         --web)      MODE=web;          shift ;;
         --desktop)  MODE=desktop;      shift ;;
         -h|--help)  sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -33,6 +36,17 @@ say()  { printf '  %s\n' "$*"; }
 fail() { printf '\n  %s\n\n' "$*" >&2; exit 1; }
 
 printf '\n  Multiva\n  %s\n' "------------------------------------------------"
+
+if [ "$FRESH" = "1" ]; then
+    SANDBOX="${TMPDIR:-/tmp}/multiva-fresh-$$"
+    mkdir -p "$SANDBOX/projects"
+    export MULTIVA_ENGINES="$SANDBOX/engines.json"
+    export MULTIVA_SETTINGS="$SANDBOX/llm.json"
+    export MULTIVA_OUTPUT_DIR="$SANDBOX/projects"
+    say "First-run mode. Your real settings are untouched."
+    say "Sandbox: $SANDBOX"
+    say "Models are shared, so nothing is downloaded twice."
+fi
 
 # --- what it cannot start without -----------------------------------------
 PY=./venv/bin/python
