@@ -212,7 +212,9 @@ def build_phrase_units(segments: list, translated: list, speech_runs: list,
     """
     units = []
 
-    for seg_i, (seg, text) in enumerate(zip(segments, translated)):
+    # strict: the timeline must cover every segment, not however many
+    # translations happened to come back.
+    for seg_i, (seg, text) in enumerate(zip(segments, translated, strict=True)):
         text = (text or "").strip()
         source_text = (seg.get("text") or "").strip()
         if not text:
@@ -255,7 +257,8 @@ def build_phrase_units(segments: list, translated: list, speech_runs: list,
         made = [{"start": lo, "end": hi,
                  "text": src.strip() or tgt.strip(),
                  "target": tgt.strip(), "segment": seg_i}
-                for (lo, hi), tgt, src in zip(merged, tgt_chunks, src_chunks)
+                for (lo, hi), tgt, src in zip(merged, tgt_chunks, src_chunks,
+                                              strict=True)
                 if tgt.strip()]
         # The cap bounds the phrase count on average, but a weighted split can
         # still starve the last part. This is where the guarantee has to hold.

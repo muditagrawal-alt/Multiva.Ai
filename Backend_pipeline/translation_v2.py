@@ -331,7 +331,10 @@ def translate_segments(segments: list, source_lang: str, target_lang: str,
     translated = translate_batch(flat, source_lang, target_lang, num_beams=num_beams)
 
     joined = [[] for _ in segments]
-    for idx, text in zip(owner, translated):
+    # strict: translate_batch returns one entry per input by construction.
+    # If that ever stops being true, losing the tail of a translation
+    # silently is the worst way to find out.
+    for idx, text in zip(owner, translated, strict=True):
         if text:
             joined[idx].append(text)
 

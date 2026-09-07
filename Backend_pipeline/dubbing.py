@@ -263,7 +263,9 @@ def plan_timeline(segments: list, texts: list, duration_model: DurationModel,
     plan = []
     cursor = 0.0
 
-    for i, (seg, text) in enumerate(zip(segments, texts)):
+    # strict: one translation per segment. A short list used to truncate
+    # the plan silently, which loses the end of the video with no error.
+    for i, (seg, text) in enumerate(zip(segments, texts, strict=True)):
         text = (text or "").strip()
         if not text:
             continue

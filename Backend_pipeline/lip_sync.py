@@ -308,7 +308,10 @@ class Wav2LipRunner:
                 batch_mels = mel_chunks[sl]
 
                 faces = []
-                for frame, (y1, y2, x1, x2) in zip(batch_frames, batch_boxes):
+                # strict: one box per frame. Fewer boxes than frames used to
+                # skip frames quietly, leaving them un-synced in the render.
+                for frame, (y1, y2, x1, x2) in zip(batch_frames, batch_boxes,
+                                                   strict=True):
                     crop = frame[y1:y2, x1:x2]
                     if crop.size == 0:
                         crop = frame
@@ -328,7 +331,8 @@ class Wav2LipRunner:
 
                 pred = pred.cpu().numpy().transpose(0, 2, 3, 1) * 255.0
 
-                for p, frame, (y1, y2, x1, x2) in zip(pred, batch_frames, batch_boxes):
+                for p, frame, (y1, y2, x1, x2) in zip(pred, batch_frames,
+                                                      batch_boxes, strict=True):
                     bw, bh = x2 - x1, y2 - y1
                     if bw <= 0 or bh <= 0:
                         proc.stdin.write(frame.tobytes())
