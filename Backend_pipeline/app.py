@@ -63,6 +63,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # The heavy stages (TTS + Wav2Lip) share one GPU. Running two jobs through them
 # at once thrashes MPS and makes both slower than running them back to back.
 _HEAVY = threading.Semaphore(int(os.getenv("PIPELINE_CONCURRENCY", 1)))
+BUSY_DETAIL = ("The engine is busy with a render. This edit needs the same "
+               "model, so try again once the render finishes.")
 
 KEEP_INTERMEDIATE = os.getenv("KEEP_INTERMEDIATE", "").lower() in ("1", "true", "yes")
 
@@ -1078,10 +1080,21 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
 
     ref = job["reference"]
     try:
-        with _HEAVY:
+        # Interactive edits do not queue behind a render. Waiting silently for
+        # the pipeline to free up ran past the client's timeout, so the studio
+        # reported a failure for an edit that then quietly succeeded minutes
+        # later. Saying the engine is busy is the truth and arrives at once.
+        if not _HEAVY.acquire(timeout=2):
+            unit.update(previous)
+            raise HTTPException(status_code=409, detail=BUSY_DETAIL)
+        try:
             wave = dubbing.synth_unit(unit, ref["path"], ref["text"],
                                       ref["duration"], job["target_language"],
                                       seed=unit.get("seed"))
+        finally:
+            _HEAVY.release()
+    except HTTPException:
+        raise
     except Exception as e:                                   # noqa: BLE001
         unit.update(previous)
         traceback.print_exc()
@@ -1522,10 +1535,17 @@ async def fit_segment(job_id: str, index: int, body: dict = Body(default={})):
 
     unit["text"] = best_text
     try:
-        with _HEAVY:
+        if not _HEAVY.acquire(timeout=2):
+            unit["text"] = original
+            raise HTTPException(status_code=409, detail=BUSY_DETAIL)
+        try:
             wave = dubbing.synth_unit(unit, ref["path"], ref["text"],
                                       ref["duration"], job["target_language"],
                                       seed=unit.get("seed"))
+        finally:
+            _HEAVY.release()
+    except HTTPException:
+        raise
     except Exception as e:                                   # noqa: BLE001
         unit["text"] = original
         traceback.print_exc()
