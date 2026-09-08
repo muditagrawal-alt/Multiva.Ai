@@ -1077,9 +1077,17 @@ async def revise_segment(job_id: str, index: int, body: dict = Body(default={}))
     seed = body.get("seed")
     if seed is not None:
         try:
+            # OverflowError is what infinity raises, and it is not a ValueError:
+            # {"seed": 1e400} used to escape this handler as a 500.
             seed = int(seed)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             raise HTTPException(status_code=400, detail="Seed must be a whole number")
+        # The generators seeded downstream take a 32-bit value. A larger one
+        # parses cleanly here and then fails inside synthesis instead.
+        if not 0 <= seed < 2 ** 32:
+            raise HTTPException(
+                status_code=400,
+                detail="Seed must be between 0 and 4294967295.")
         unit["seed"] = seed
 
     ref = job["reference"]
@@ -1864,17 +1872,32 @@ async def set_llm_settings(body: dict = Body(...)):
     Omitting `api_key` leaves any stored key untouched, so changing the model
     does not silently log you out; sending an empty one deletes it.
     """
-    provider = (body.get("provider") or "").strip()
+    # str() first: a non-string provider used to reach .strip() and 500.
+    provider = str(body.get("provider") or "").strip()
     if provider not in llm.PROVIDERS:
         raise HTTPException(
             status_code=400,
             detail=f"Unknown provider. Choose one of: {', '.join(llm.PROVIDERS)}")
+    # Anything from the body may not be a string, and .strip() on an int is a
+    # 500 rather than a bad request. Reject rather than coerce: str([]) is
+    # "[]", which sailed through as a hostname and left the script model
+    # pointing at nonsense until someone noticed it could not connect.
+    def _text(field):
+        value = body.get(field)
+        if value is None:
+            return ""
+        if not isinstance(value, str):
+            raise HTTPException(
+                status_code=400,
+                detail=f"{field} must be text.")
+        return value.strip()
+
     try:
         llm.save_settings(
             provider,
-            (body.get("model") or "").strip(),
+            _text("model"),
             key=body.get("api_key"),
-            ollama_host=(body.get("ollama_host") or "").strip() or None,
+            ollama_host=_text("ollama_host") or None,
             custom_url=body.get("custom_url"),
         )
     except OSError as e:
