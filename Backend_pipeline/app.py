@@ -1983,14 +1983,22 @@ async def rename_project(job_id: str, body: dict = Body(...)):
 @app.get("/videos/")
 async def get_videos(user_id: str = "anonymous"):
     """
-    Every project this user has on this machine.
+    Every finished project on this machine.
 
     The manifest is the only record. There is no remote index to fall out of
     sync with, and no outage that can hide someone's work.
+
+    `user_id` is recorded on each project but deliberately not filtered on.
+    It is a leftover from the hosted version, where accounts existed; here
+    there is one person and no sign-in, and the id it filtered by was a random
+    UUID in localStorage. Clearing site data, or opening the studio in another
+    browser, minted a new one and made every existing project vanish from this
+    list while its files sat untouched on disk. The parameter stays accepted so
+    older clients keep working.
     """
     rows = []
     for job_id, job in jobs.items():
-        if job.get("user_id") != user_id or job.get("status") != "done":
+        if job.get("status") != "done":
             continue
         created = job.get("saved_at")
         rows.append({
