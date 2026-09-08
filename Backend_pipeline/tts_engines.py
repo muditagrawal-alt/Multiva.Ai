@@ -500,6 +500,37 @@ _ENGINES = {}
 _REG_LOCK = threading.Lock()
 
 
+_AVAILABLE: dict = {}
+
+
+def engine_available(name: str) -> bool:
+    """
+    Whether the package behind an engine is actually installed.
+
+    XTTS is an optional extra: its licence is non-commercial and its
+    dependency tree is enormous, so requirements.txt leaves it out. Without
+    this check the app offered sixteen languages it could not speak, and the
+    failure arrived as a ModuleNotFoundError deep in a render the person had
+    already waited several minutes for.
+    """
+    if name in _AVAILABLE:
+        return _AVAILABLE[name]
+    ok = True
+    if name == L.ENGINE_XTTS:
+        try:
+            import importlib.util
+            ok = importlib.util.find_spec("TTS") is not None
+        except Exception:                                    # noqa: BLE001
+            ok = False
+    _AVAILABLE[name] = ok
+    return ok
+
+
+def language_available(target_lang: str) -> bool:
+    """Whether this language can actually be spoken on this machine."""
+    return engine_available(L.engine_for(target_lang))
+
+
 def get_engine(target_lang: str):
     """Return the warm engine instance responsible for `target_lang`."""
     name = L.engine_for(target_lang)

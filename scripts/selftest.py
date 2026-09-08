@@ -142,6 +142,22 @@ def main() -> int:
         print(f"        note: {boot['notes']}")
 
     print("\n  Settings")
+    # The app must not offer a language it cannot speak. XTTS is an optional
+    # extra, so every language says whether the engine behind it is installed
+    # rather than failing deep inside a render the user already waited for.
+    code, langs = call("GET", "/languages")
+    check("languages listed", code == 200 and isinstance(langs, list) and langs)
+    if code == 200 and isinstance(langs, list) and langs:
+        shape = all({"code", "name", "engine", "available"} <= set(l) for l in langs)
+        check("every language reports its engine and availability", shape,
+              str(langs[0])[:70])
+        unavailable = [l for l in langs if not l.get("available")]
+        check("anything unavailable says how to enable it",
+              all(l.get("needs") for l in unavailable),
+              f"{len(unavailable)} unavailable without a hint")
+        print(f"        {len(langs) - len(unavailable)} of {len(langs)} "
+              f"speakable on this machine")
+
     code, eng = call("GET", "/api/settings/engines")
     check("engine catalogue", code == 200 and "stages" in eng)
     code, mind = call("GET", "/api/settings/llm")

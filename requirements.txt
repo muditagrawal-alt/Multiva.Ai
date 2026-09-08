@@ -1,7 +1,7 @@
 # Core
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
-python-multipart>=0.0.9
+python-multipart>=0.0.31   # < 0.0.31 has advisories in the upload parser
 pydantic>=2.6.0
 
 # Torch stack
@@ -37,8 +37,16 @@ torchdiffeq>=0.2.3
 num2words>=0.5.13
 accelerate>=0.30.0
 
-# Foreign-language cloning (phase 2). Coqui Public Model License is
-# NON-COMMERCIAL — check this before shipping XTTS in a paid product.
+# Foreign-language cloning. XTTS speaks the 16 non-Indian languages the app
+# offers; IndicF5 covers the 12 Indian ones and needs nothing extra.
+#
+# Left out of the default install on purpose: the Coqui Public Model License
+# is NON-COMMERCIAL, and the package drags in a very large dependency tree.
+# Without it the studio marks those languages unavailable and refuses a dub
+# into one up front, so nothing fails halfway through a render. Translated
+# subtitles work in every language either way, because they never synthesize.
+#
+# To enable them:  pip install "TTS>=0.22.0"
 # TTS>=0.22.0
 
 # Cloud Storage & Database

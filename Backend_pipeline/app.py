@@ -672,6 +672,10 @@ async def process_video(
     if kind not in ("dub", "audio", "subtitles", "subtitles_translated"):
         raise HTTPException(status_code=400, detail=f"Unknown output: {kind}")
 
+    # Subtitles never reach a TTS engine, so they are fine in any language.
+    if kind in ("dub", "audio"):
+        _require_speakable(target_language)
+
     # The range still has to be checked against the real duration once the file
     # has been probed, but an out point at or before the in point is wrong on
     # its own terms. Catching it here fails in a second instead of accepting a
@@ -1680,6 +1684,9 @@ async def create_voiceover(
     except L.UnsupportedLanguage as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # A voice-over is nothing but synthesis, so it always needs the engine.
+    _require_speakable(language)
+
     content = await file.read()
     if len(content) > 200 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="Reference clip too large (max 200MB)")
@@ -1894,10 +1901,44 @@ async def test_llm_settings():
                          **llm.status()})
 
 
+XTTS_HINT = ('Install the XTTS extra to speak this language: '
+             'pip install "TTS>=0.22.0"')
+
+
+def _require_speakable(target_language: str) -> None:
+    """
+    Refuse a language nothing installed can speak, before any work starts.
+
+    XTTS is an optional extra - non-commercial licence, very large dependency
+    tree - so a default install speaks the twelve Indian languages and not the
+    other sixteen. Without this the app accepted the job and failed with a
+    ModuleNotFoundError after transcription and translation had already run.
+    """
+    if not tts_engines.language_available(target_language):
+        raise HTTPException(
+            status_code=400,
+            detail=(f"{L.display_name(target_language)} is spoken by XTTS, "
+                    f"which is not installed. {XTTS_HINT}. The Indian "
+                    f"languages need nothing extra."))
+
+
 @app.get("/languages")
 async def get_languages():
-    """Supported dubbing targets, Indian languages first."""
-    return JSONResponse(L.supported_targets())
+    """
+    Supported dubbing targets, Indian languages first.
+
+    Each says whether the engine that speaks it is installed, so the studio
+    can show what this machine can actually do rather than advertising
+    sixteen languages it would fail on.
+    """
+    rows = []
+    for entry in L.supported_targets():
+        row = dict(entry)
+        row["available"] = tts_engines.engine_available(entry.get("engine", ""))
+        if not row["available"]:
+            row["needs"] = XTTS_HINT
+        rows.append(row)
+    return JSONResponse(rows)
 
 
 @app.get("/api/health")
