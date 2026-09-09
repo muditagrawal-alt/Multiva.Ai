@@ -30,11 +30,14 @@ from, A2 is the result; both waveforms are decoded from the actual audio.*
 
 ## Install
 
-Python 3.10 and ffmpeg are the only prerequisites.
+Python 3.10, ffmpeg, and Node — Node builds the studio interface, which is not
+checked in. Rust is optional and only needed for the native desktop window;
+without it the studio opens in a browser, running entirely on your machine
+either way.
 
 ```bash
-# macOS:  brew install python@3.10 ffmpeg
-# Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg
+# macOS:  brew install python@3.10 ffmpeg node
+# Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg nodejs npm
 
 git clone https://github.com/muditagrawal-alt/Multiva.Ai
 cd Multiva.Ai
@@ -65,8 +68,9 @@ browser when it has not.
 ./run.sh --provider groq    # a hosted script model
 ```
 
-**As a desktop app.** Starts the engine itself, shows what is loading, and opens
-on your projects.
+**As a desktop app.** Needs the Rust toolchain, and is not prebuilt: there is no
+release to download yet, so the window has to be compiled once. `./run.sh`
+falls back to the browser until it exists.
 
 ```bash
 cd frontend && npm install && npm run build
