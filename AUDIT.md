@@ -8,6 +8,61 @@ production code.
 
 ---
 
+## Pass 3 — the clean clone
+
+The one thing every earlier pass skipped: cloning from GitHub into an empty
+directory and installing from scratch. This development venv has carried a
+working combination of packages since before the pins were written, which is
+exactly why the blocker below survived three audits.
+
+### `pip install -r requirements.txt` failed outright
+
+```
+ERROR: ResolutionImpossible
+    The user requested huggingface-hub<1.0 and >=0.30
+    transformers 5.16.1 depends on huggingface-hub<2.0 and >=1.5.0
+```
+
+**Nobody could install this project by following the README.** `transformers`
+was unbounded at `>=4.36.0`, so pip reached for 5.x, which needs
+`huggingface-hub>=1.5` and contradicts the `<1.0` pin three lines below it. The
+file already documented that hazard for `gradio` and missed it for the package
+the pin exists to serve.
+
+**Fixed:** bounded to `<5`.
+
+### Verified after the fix
+
+| Step | Result |
+|---|---|
+| `git clone` | 11 MB |
+| `pip install -r requirements.txt` | 169 packages, 2.0 GB, **0 errors** |
+| Resolved versions | transformers 4.57.6, huggingface-hub 0.36.2 |
+| `import app` and every pipeline module | clean, on a transformers the dev venv has never run |
+| `download_models.py --check` | correctly reports the 2 Wav2Lip weights missing |
+| `tts_engines.engine_available("xtts")` | `False` — the fix from pass 2 behaves on a real clean install |
+| `npm install && npm run build` | 4576 modules, `web/` at 736 KB |
+| Missing `web/` at startup | explained, with the command to fix it |
+
+A clean clone installs **169 packages against this venv's 296**, which is where
+most of the outstanding advisories were coming from.
+
+### Three files a new clone tripped over
+
+None referenced by anything, all removed:
+
+- **`requirements-base.txt`** — a 165-package freeze beside the 28-package
+  list, with no way to tell which to use
+- **`runtime.txt`** — a Heroku artifact
+- **`wav2lip_loader`** — dead code pointing at `models/wav2lip_gan.pth`, a path
+  that does not exist
+
+`Multiva Studio.command` was a second, diverging 78-line launcher that opened a
+browser while `run.sh` opens the desktop app. It is now nine lines that
+delegate.
+
+---
+
 ## Pass 2 — the production campaign
 
 ### Method
