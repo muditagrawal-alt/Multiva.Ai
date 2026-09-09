@@ -22,7 +22,9 @@ faster-whisper>=1.0.0
 ctranslate2>=4.0.0
 
 # Translation — NLLB-200 (replaces IndicTrans2)
-transformers>=4.36.0
+transformers>=4.49,<5   # <5 is not optional: transformers 5.x needs
+                        # huggingface-hub>=1.5, which contradicts the pin
+                        # below and makes the whole file uninstallable.
 sentencepiece>=0.1.99
 huggingface-hub>=0.30,<1.0  # <1.0: transformers 4.49 refuses hub 1.x
 

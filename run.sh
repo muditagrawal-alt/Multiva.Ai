@@ -7,6 +7,7 @@
 #   ./run.sh --provider groq  a hosted script model
 #   ./run.sh --port 8123      somewhere other than 8000
 #   ./run.sh --fresh          as a brand new user, without touching your setup
+#   ./run.sh --sandbox DIR    the same, but in a folder you keep and can inspect
 #
 # Ctrl-C stops the engine. Nothing is installed without saying so first.
 
@@ -16,6 +17,7 @@ cd "$(dirname "$0")"
 
 PORT=8000
 FRESH=0
+SANDBOX_DIR=""
 PROVIDER=ollama
 MODEL=""
 MODE=desktop
@@ -25,6 +27,7 @@ while [ $# -gt 0 ]; do
         --model)    MODEL="${2:-}";    shift 2 ;;
         --port)     PORT="${2:-}";     shift 2 ;;
         --fresh)    FRESH=1;           shift ;;
+        --sandbox)  FRESH=1; SANDBOX_DIR="${2:-}"; shift 2 ;;
         --web)      MODE=web;          shift ;;
         --desktop)  MODE=desktop;      shift ;;
         -h|--help)  sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -38,7 +41,10 @@ fail() { printf '\n  %s\n\n' "$*" >&2; exit 1; }
 printf '\n  Multiva\n  %s\n' "------------------------------------------------"
 
 if [ "$FRESH" = "1" ]; then
-    SANDBOX="${TMPDIR:-/tmp}/multiva-fresh-$$"
+    # A named sandbox persists between runs, so a test can be picked up where
+    # it was left and the files inspected afterwards. An unnamed one is
+    # thrown away with the temp directory.
+    SANDBOX="${SANDBOX_DIR:-${TMPDIR:-/tmp}/multiva-fresh-$$}"
     mkdir -p "$SANDBOX/projects"
     export MULTIVA_ENGINES="$SANDBOX/engines.json"
     export MULTIVA_SETTINGS="$SANDBOX/llm.json"
