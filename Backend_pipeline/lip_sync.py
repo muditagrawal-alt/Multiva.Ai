@@ -476,6 +476,22 @@ def _open_writer(out_path: str, w: int, h: int, fps: float, audio_path: str,
 _RUNNER = Wav2LipRunner()
 
 
+def refresh() -> str:
+    """
+    Re-read the checkpoint choice and drop the loaded weights.
+
+    Same contract as the other stages: the next render loads the new
+    checkpoint, and one already running keeps the weights it started with.
+    """
+    global _CKPT, CHECKPOINT, _RUNNER
+    _CKPT = engines.get("lipsync") or "wav2lip_gan.pth"
+    CHECKPOINT = os.path.join(WAV2LIP_DIR, "checkpoints", _CKPT)
+    if not os.path.exists(CHECKPOINT):
+        CHECKPOINT = os.path.join(WAV2LIP_DIR, "checkpoints", "wav2lip_gan.pth")
+    _RUNNER = Wav2LipRunner()
+    return _CKPT
+
+
 def generate_lip_synced_video(video_path: str, audio_path: str, out_path: str,
                               **kwargs) -> str:
     return _RUNNER.run(video_path, audio_path, out_path, **kwargs)

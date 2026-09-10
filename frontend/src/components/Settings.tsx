@@ -86,11 +86,14 @@ export function Settings({ onClose }: { onClose: () => void }) {
 
   async function chooseEngine(stage: string, id: string) {
     try {
-      setEnginesState(await saveEngines({ [stage]: id }));
+      const res = await saveEngines({ [stage]: id });
+      setEnginesState(res);
       // Stage choices decide which knobs apply, so the knobs have to be
       // re-read rather than left describing the previous model.
       setAdv(await getAdvanced());
-      setNote("Saved. Restart Multiva for the stage models to take effect.");
+      setNote(res?.takes_effect_after_current_job
+        ? "Saved. It applies to the next job — one is rendering now."
+        : "Saved and applied.");
     } catch (err) {
       setError((err as Error).message);
     }

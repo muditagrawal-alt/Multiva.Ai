@@ -48,6 +48,21 @@ COMPUTE_TYPE = _get_compute_type()
 _model = None
 
 
+def refresh() -> str:
+    """
+    Re-read the stage choice and drop the loaded model.
+
+    Called when the setup screen or settings panel changes which model runs
+    this stage. The next transcription loads the new one; a render already in
+    flight holds its own reference and finishes on the old one, which is what
+    you want mid-job.
+    """
+    global MODEL_SIZE, _model
+    MODEL_SIZE = engines.get("stt") or _DEFAULT_MODEL
+    _model = None
+    return MODEL_SIZE
+
+
 def _load_model():
     global _model
     if _model is not None:

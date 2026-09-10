@@ -409,6 +409,23 @@ def main() -> int:
                  "dub.srt", "dub.vtt", "source.vtt"):
         code, body = call("GET", f"/jobs/{job}/export/{kind}", raw=True)
         check(f"{kind}", code == 200 and len(body) > 10, f"{code}, {len(body)}b")
+    # A subtitled video: the same cues, carried by the file itself.
+    code, sv = call("POST", "/process_video/?original_language=en"
+                            "&target_language=hi&user_id=selftest&kind=subtitled",
+                    files={"file": (name, clip)})
+    if check("subtitled video accepted", code == 200, str(sv)[:70]):
+        sjob = sv["job_id"]
+        state, sd = wait_for(sjob, timeout=600)
+        check("subtitled video rendered", state == "done",
+              f"{state} {sd.get('error')}")
+        check("it says how the subtitles were attached",
+              sd.get("subtitle_mode") in ("burned", "muxed"),
+              str(sd.get("subtitle_mode")))
+        print(f"        subtitles {sd.get('subtitle_mode')}")
+        code, _ = call("GET", f"/jobs/{sjob}/video", raw=True)
+        check("subtitled video downloads", code == 200, f"got {code}")
+        call("DELETE", f"/videos/{sjob}")
+
     code, _ = call("GET", f"/jobs/{job}/export/nope.xyz", raw=True)
     check("unknown export rejected", code == 404, f"got {code}")
 

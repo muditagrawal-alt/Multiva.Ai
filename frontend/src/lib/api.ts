@@ -52,6 +52,8 @@ export interface JobStatus {
   /** Set when the render finished but could not be copied to the output
       folder — an unmounted drive, a permissions change. */
   filed_error?: string | null;
+  /** "burned" onto the picture, or "muxed" as a switchable track. */
+  subtitle_mode?: "burned" | "muxed" | null;
   job_id: string;
   status: "queued" | "processing" | "done" | "failed" | "cancelled";
   step: string;
@@ -389,6 +391,15 @@ export const fitPhrase = (id: string, index: number) =>
 export const phraseAudioUrl = (id: string, index: number) =>
   `/jobs/${encodeURIComponent(id)}/segments/${index}/audio`;
 
+/** A URL the browser will save rather than play. */
+export const downloadUrl = (id: string) =>
+  `/jobs/${encodeURIComponent(id)}/video?download=1`;
+
+/** Show the finished file in Finder / Explorer / the desktop file manager. */
+export const revealRender = (id: string) =>
+  request<{ revealed: string }>(`/jobs/${encodeURIComponent(id)}/reveal`,
+    { method: "POST" });
+
 export const rerenderVideo = (id: string) =>
   request<{ job_id: string; status: string }>(
     `/jobs/${encodeURIComponent(id)}/rerender`, { method: "POST" });
@@ -451,7 +462,14 @@ export interface EngineSettings {
 export const getEngines = () => request<EngineSettings>("/api/settings/engines");
 
 export const saveEngines = (choices: Record<string, string>) =>
-  request<EngineSettings & { restart_required: boolean }>(
+  request<EngineSettings & {
+    /** Always false now: stage changes are applied to the running engine. */
+    restart_required: boolean;
+    /** Which stages were reloaded in place. */
+    applied?: string[];
+    /** A job is rendering, so the change lands on the next one. */
+    takes_effect_after_current_job?: boolean;
+  }>(
     "/api/settings/engines", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

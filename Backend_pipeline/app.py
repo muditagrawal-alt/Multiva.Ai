@@ -2,6 +2,7 @@ import asyncio
 import os
 import re
 import shutil
+import subprocess
 import sys
 import threading
 import time
@@ -51,6 +52,11 @@ import voiceover
 import languages as L
 import reference_audio
 import tts_engines
+# Imported as modules as well as functions: applying a model change without a
+# restart means calling refresh() on the module that owns each stage.
+import lip_sync
+import speech_to_text_v2
+import translation_v2
 from lip_sync import generate_lip_synced_video
 from speech_to_text_v2 import transcribe_audio
 from translation_v2 import translate_segments
@@ -432,6 +438,30 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             print(f"[APP] Job {job_id} translated ({len(segments)} segments)")
             return
 
+        if kind == "subtitled":
+            # Same cues the .srt export would give, written onto the picture
+            # so the file carries its own captions.
+            _set(job_id, step="adding_subtitles")
+            subbed = os.path.join(workdir, f"{stem}_subtitled.mp4")
+            with _HEAVY:
+                mode = subtitles.attach(
+                    input_path,
+                    subtitles.srt(segments, list(translated)),
+                    subbed, workdir,
+                    language=target_language,
+                    crf=engines.tunable("OUTPUT_CRF"),
+                    preset=engines.tunable("OUTPUT_PRESET"))
+            filed = _file_render(job_id, subbed, stem, target_language)
+            _set(job_id, status="done", step="complete",
+                 translated_segments=list(translated),
+                 subtitle_mode=mode,
+                 output_path=subbed, url=f"/jobs/{job_id}/video",
+                 filed_at=filed, **common)
+            _save(job_id)
+            print(f"[APP] Job {job_id} subtitled, {mode} "
+                  f"({len(segments)} segments)")
+            return
+
         with _HEAVY:
             # ── 5. Build the dubbed track (exact length by construction) ──
             _set(job_id, step="synthesizing_voice")
@@ -669,7 +699,8 @@ async def process_video(
     except L.UnsupportedLanguage as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    if kind not in ("dub", "audio", "subtitles", "subtitles_translated"):
+    if kind not in ("dub", "audio", "subtitles", "subtitles_translated",
+                    "subtitled"):
         raise HTTPException(status_code=400, detail=f"Unknown output: {kind}")
 
     # Subtitles never reach a TTS engine, so they are fine in any language.
@@ -765,6 +796,9 @@ async def get_job_status(job_id: str):
         response["video_duration"] = job.get("video_duration")
         response["filed_at"] = job.get("filed_at")
         response["filed_error"] = job.get("filed_error")
+        # "burned" or "muxed": whether the captions are drawn on the picture
+        # or carried as a track the player switches on.
+        response["subtitle_mode"] = job.get("subtitle_mode")
         response["video_stale"] = bool(job.get("video_stale"))
         if job.get("reference_path"):
             response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
@@ -777,8 +811,14 @@ async def get_job_status(job_id: str):
 
 
 @app.get("/jobs/{job_id}/video")
-async def get_job_video(job_id: str):
-    """The finished render, served from where the pipeline wrote it."""
+async def get_job_video(job_id: str, download: bool = False):
+    """
+    The finished render, served from where the pipeline wrote it.
+
+    `download=1` asks the browser to save it rather than play it. Without the
+    Content-Disposition header a plain `download` attribute does nothing in a
+    webview, which is why the button appeared dead.
+    """
     job = jobs.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -786,7 +826,45 @@ async def get_job_video(job_id: str):
     if not path or not os.path.exists(path):
         raise HTTPException(status_code=404, detail="No render for this job")
     from fastapi.responses import FileResponse
-    return FileResponse(path, media_type="video/mp4")
+
+    if not download:
+        return FileResponse(path, media_type="video/mp4")
+
+    # Name it after the project and language, not the job id.
+    stem = _project_name(job, job_id).rsplit(".", 1)[0].strip() or "multiva"
+    stem = re.sub(r"[^\w\- ]+", "", stem).strip() or "multiva"
+    lang = job.get("target_language") or "dub"
+    return FileResponse(path, media_type="video/mp4",
+                        filename=f"{stem}_{lang}.mp4")
+
+
+@app.post("/jobs/{job_id}/reveal")
+async def reveal_render(job_id: str):
+    """
+    Show the finished file in the desktop file manager.
+
+    The render already exists on disk; on a local app the useful action is to
+    point at it, not to send the bytes back over HTTP to be saved again.
+    """
+    job = jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    target = job.get("filed_at") or job.get("output_path")
+    if not target or not os.path.exists(target):
+        raise HTTPException(status_code=404, detail="Nothing on disk to show yet")
+
+    if sys.platform == "darwin":
+        cmd = ["open", "-R", target]
+    elif sys.platform.startswith("win"):
+        cmd = ["explorer", "/select,", os.path.normpath(target)]
+    else:
+        cmd = ["xdg-open", os.path.dirname(target)]
+    try:
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:                                   # noqa: BLE001
+        raise HTTPException(status_code=500,
+                            detail=f"Could not open the file manager: {e}")
+    return JSONResponse({"revealed": target})
 
 
 @app.get("/jobs/{job_id}/audio/{which}")
@@ -1832,22 +1910,43 @@ async def get_engine_settings():
 @app.post("/api/settings/engines")
 async def set_engine_settings(body: dict = Body(...)):
     """
-    Store stage choices.
+    Store stage choices and apply them to the running engine.
 
-    These are read at import by the module that owns each stage and cached for
-    the life of the process, so the response says plainly that a restart is
-    needed rather than pretending the change is live.
+    Each stage used to read its model once at import and hold it for the life
+    of the process, so changing one meant restarting the application. Every
+    stage now re-reads its choice and drops its loaded weights on request, and
+    the next job picks the new one up. A job already running keeps its own
+    reference and finishes on what it started with, which is the behaviour you
+    want mid-render.
     """
     try:
         chosen = engines.save(body or {})
     except OSError as e:
         raise HTTPException(status_code=500, detail=f"Could not save settings: {e}")
+
+    applied, busy = [], any(j.get("status") == "processing" for j in jobs.values())
+    for stage, module in (("stt", speech_to_text_v2), ("mt", translation_v2),
+                          ("lipsync", lip_sync), ("tts", tts_engines)):
+        if stage not in (body or {}):
+            continue
+        try:
+            module.refresh()
+            applied.append(stage)
+        except Exception as e:                               # noqa: BLE001
+            print(f"[APP] Could not apply the {stage} change live: {e}")
+
+    if applied:
+        print(f"[APP] Applied without a restart: {', '.join(applied)}")
+
     return JSONResponse({
         "configured": True,
         "chosen": chosen,
-        # Only the stage models need a restart; the output folder takes effect
-        # on the next render.
-        "restart_required": any(k in (body or {}) for k in engines.CATALOG),
+        "applied": applied,
+        # Nothing needs a restart any more. Kept so an older client that reads
+        # this field is told the truth rather than a stale warning.
+        "restart_required": False,
+        # A change lands on the next job, so say so while one is in flight.
+        "takes_effect_after_current_job": busy,
         "stages": engines.catalog(),
         "output_dir": engines.output_dir(create=False),
         "default_output_dir": engines.default_output_dir(),

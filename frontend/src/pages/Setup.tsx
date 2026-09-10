@@ -7,7 +7,7 @@
    not exist is absent rather than greyed out.
 
    Two things it refuses to hide: how large a model is when it has not been
-   downloaded yet, and that stage changes only take effect on restart, because
+   downloaded yet. Stage changes apply immediately, because
    each stage's module reads its model once at import.
    =========================================================================== */
 
@@ -373,7 +373,7 @@ export default function Setup() {
               {saved && (
                 <span className="flex items-center gap-1.5 text-[11px] text-c-warn">
                   <Warning size={11} weight="fill" />
-                  Saved. Restart Multiva for the stage models to take effect.
+                  Saved and applied. No restart needed.
                 </span>
               )}
               {!saved && pending.length > 0 && (

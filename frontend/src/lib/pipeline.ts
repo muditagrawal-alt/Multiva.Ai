@@ -58,7 +58,8 @@ export type JobKind =
   | "voiceover"
   | "audio"
   | "subtitles"
-  | "subtitles_translated";
+  | "subtitles_translated"
+  | "subtitled";
 
 /**
  * The dub pipeline stopped at a stage, with the weights renormalised so the
@@ -72,12 +73,20 @@ function upTo(key: string): Stage[] {
 }
 
 export const SUBTITLE_STAGES = upTo("transcribing");
+
+/** Translated subtitles, then one pass to put them on the video. */
+export const SUBTITLED_STAGES: Stage[] = [
+  ...upTo("translating").map((s) => ({ ...s, weight: s.weight * 0.85 })),
+  { key: "adding_subtitles", label: "Adding the subtitles",
+    block: "SUBS", weight: 0.15 },
+];
 export const TRANSLATED_SUBTITLE_STAGES = upTo("translating");
 export const AUDIO_DUB_STAGES = upTo("synthesizing_voice");
 
 export const stagesFor = (kind: JobKind): Stage[] =>
   kind === "voiceover" ? VOICEOVER_STAGES
-    : kind === "subtitles" ? SUBTITLE_STAGES
+    : kind === "subtitled" ? SUBTITLED_STAGES
+      : kind === "subtitles" ? SUBTITLE_STAGES
       : kind === "subtitles_translated" ? TRANSLATED_SUBTITLE_STAGES
         : kind === "audio" ? AUDIO_DUB_STAGES
           : DUB_STAGES;

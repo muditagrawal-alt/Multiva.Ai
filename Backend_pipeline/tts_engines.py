@@ -503,6 +503,19 @@ _REG_LOCK = threading.Lock()
 _AVAILABLE: dict = {}
 
 
+def refresh() -> None:
+    """
+    Drop the warm voice engines so the next phrase picks up a new setting.
+
+    The nfe_step ("how much work per phrase") is read when an engine is
+    constructed, so changing it has to discard the instance, not just the
+    stored value.
+    """
+    with _REG_LOCK:
+        _ENGINES.clear()
+    _AVAILABLE.clear()
+
+
 def engine_available(name: str) -> bool:
     """
     Whether the package behind an engine is actually installed.

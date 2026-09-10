@@ -112,6 +112,14 @@ _tokenizer = None
 _model = None
 
 
+def refresh() -> str:
+    """Re-read the stage choice and drop the loaded model. See stt.refresh."""
+    global MODEL_NAME, _tokenizer, _model
+    MODEL_NAME = engines.get("mt") or "facebook/nllb-200-distilled-600M"
+    _tokenizer, _model = None, None
+    return MODEL_NAME
+
+
 def _load_model():
     global _tokenizer, _model
     if _model is not None:

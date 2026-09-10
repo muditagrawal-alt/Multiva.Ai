@@ -21,6 +21,7 @@ import {
 import {
   getLanguages, getHealth, submitVideo, submitVoiceover, cancelJob, getJob,
   getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase, clearPhrase,
+  downloadUrl, revealRender,
   undoPhrase, fitOf,
   getReferenceWindows, chooseReference,
   EXPORTS, exportUrl, langName,
@@ -87,9 +88,12 @@ const OUTPUTS: { kind: JobKind; label: string; runs: string }[] = [
     runs: "Transcribe, translate, clone the voice, re-sync the lips" },
   { kind: "audio", label: "Dub audio only",
     runs: "The same, without lip sync — for a speaker off camera" },
+  { kind: "subtitled", label: "Subtitled video",
+    runs: "Your video back with translated subtitles on it, timed to the "
+          + "dialogue. No voice cloning" },
   { kind: "subtitles_translated", label: "Translated subtitles",
-    runs: "Transcribe and translate. No voice, seconds not minutes" },
-  { kind: "subtitles", label: "Subtitles",
+    runs: "The subtitle file on its own, to use elsewhere" },
+  { kind: "subtitles", label: "Subtitles, source language",
     runs: "Transcribe only. The fastest thing here" },
   { kind: "voiceover", label: "Voice-over",
     runs: "Speak your own script in the cloned voice" },
@@ -928,7 +932,7 @@ export default function Studio() {
             )}
             </>)}
 
-            {page === "deliver" && (<>
+            {(page === "deliver" || page === "media") && (<>
             <Sub>Output</Sub>
             <div className="grid gap-px bg-c-edge">
               {OUTPUTS.map((o) => (
@@ -954,12 +958,24 @@ export default function Studio() {
                 </button>
               ))}
             </div>
+            </>)}
 
+            {page === "deliver" && (<>
             {view === "done" && job && (
               <>
                 <Sub>Result</Sub>
                 <Stat k="Produced" v={OUTPUTS.find((o) => o.kind === kind)?.label ?? kind} />
-                {job.url ? (
+                {job.subtitle_mode === "muxed" ? (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
+                    Subtitles are a track in the file — turn them on in your
+                    player. Drawing them onto the picture needs an ffmpeg built
+                    with libass; this one is not.
+                  </p>
+                ) : job.subtitle_mode === "burned" ? (
+                  <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
+                    Subtitles are drawn onto the picture.
+                  </p>
+                ) : job.url ? (
                   <p className="px-2.5 pb-1 pt-0.5 text-[10px] leading-relaxed text-c-mute">
                     Playing in the viewer above.
                   </p>
@@ -1305,14 +1321,32 @@ export default function Studio() {
                 </Tool>
               )
             )}
+            {/* Two different things, which one button was trying to be: save a
+                copy somewhere, or point at the copy already on disk. */}
             {job?.url && (
-              <a
-                href={job.url}
-                download
-                className="raised flex h-[22px] items-center justify-center gap-1.5 rounded-[2px] text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text"
-              >
-                <ArrowSquareOut size={12} /> Open output
-              </a>
+              <div className="grid grid-cols-2 gap-1">
+                <a
+                  href={downloadUrl(job.job_id)}
+                  download
+                  className="raised flex h-[22px] items-center justify-center gap-1.5 rounded-[2px] text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text"
+                >
+                  <DownloadSimple size={12} /> Download
+                </a>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await revealRender(job.job_id);
+                    } catch (err) {
+                      setError((err as Error).message);
+                    }
+                  }}
+                  title={job.filed_at ?? undefined}
+                  className="raised flex h-[22px] items-center justify-center gap-1.5 rounded-[2px] text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text"
+                >
+                  <ArrowSquareOut size={12} /> Show in folder
+                </button>
+              </div>
             )}
           </div>
         </Panel>
