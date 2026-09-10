@@ -35,7 +35,10 @@ node_modules/
 frontend/src-tauri/target/
 # The compiled SPA. app.py serves it, but it is produced by `npm run build`
 # and should not be versioned.
-web/
+# web/ is the built studio interface and IS committed. It is build output,
+# which normally would not be, but the alternative is making Node a
+# prerequisite for everyone who only wants to run the app. CI rebuilds it
+# and fails if what is committed has drifted from the source.
 
 # =========================
 # Model weights and caches

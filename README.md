@@ -30,14 +30,14 @@ from, A2 is the result; both waveforms are decoded from the actual audio.*
 
 ## Install
 
-Python 3.10, ffmpeg, and Node — Node builds the studio interface, which is not
-checked in. Rust is optional and only needed for the native desktop window;
-without it the studio opens in a browser, running entirely on your machine
-either way.
+Python 3.10 and ffmpeg. The studio interface ships built, so Node is only
+needed if you want to change it. Rust is only needed for the native desktop
+window; without it the studio opens in a browser, running entirely on your
+machine either way.
 
 ```bash
-# macOS:  brew install python@3.10 ffmpeg node
-# Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg nodejs npm
+# macOS:  brew install python@3.10 ffmpeg
+# Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg
 
 git clone https://github.com/muditagrawal-alt/Multiva.Ai
 cd Multiva.Ai

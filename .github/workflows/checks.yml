@@ -1,0 +1,80 @@
+name: checks
+
+# The three failures that actually shipped, and what catches each:
+#   requirements.txt became uninstallable  -> the resolve job
+#   the interface stopped building         -> the frontend job
+#   committed web/ drifted from source     -> the frontend job's diff check
+# The full 112-check suite needs 7.5 GB of models and a GPU, so it stays a
+# local command; these run on every push in under a couple of minutes.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  resolve:
+    name: requirements install cleanly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      # --dry-run resolves the whole graph without downloading 2 GB of wheels.
+      # This is exactly the check that would have caught transformers being
+      # unbounded against a huggingface-hub pin three lines below it.
+      - name: Resolve requirements.txt
+        run: python -m pip install --dry-run --report /dev/null -r requirements.txt
+
+  python:
+    name: python lint and syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python -m pip install --quiet ruff
+      - name: Every file parses
+        run: |
+          find Backend_pipeline scripts -name '*.py' -not -path '*/Wav2Lip/*' \
+            -exec python -m py_compile {} +
+      # Only rules that mean a real defect: syntax errors, undefined names,
+      # broken comparisons. Deliberately not B905 or ASYNC - the audit went
+      # through both, hardened the six zips that mattered, and recorded why the
+      # rest are correct as they stand. CI should fail on bugs, not on
+      # decisions already made and written down.
+      - name: Correctness lint
+        run: |
+          ruff check Backend_pipeline scripts \
+            --exclude Backend_pipeline/Wav2Lip \
+            --select E9,F63,F7,F82
+
+  frontend:
+    name: interface builds, and web/ is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Typecheck
+        run: npx tsc -b --force
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      # web/ is committed so nobody needs Node just to run the app. If it has
+      # drifted from the source it was built from, say so here rather than
+      # letting someone run a stale interface.
+      - name: web/ matches the source
+        run: |
+          if ! git diff --quiet -- web; then
+            echo "::error::web/ is out of date. Run 'cd frontend && npm run build' and commit the result."
+            git diff --stat -- web
+            exit 1
+          fi
