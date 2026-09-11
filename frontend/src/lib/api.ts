@@ -54,6 +54,8 @@ export interface JobStatus {
   filed_error?: string | null;
   /** "burned" onto the picture, or "muxed" as a switchable track. */
   subtitle_mode?: "burned" | "muxed" | null;
+  /** Which language was put on the picture. */
+  subtitle_language?: string | null;
   job_id: string;
   status: "queued" | "processing" | "done" | "failed" | "cancelled";
   step: string;
@@ -192,6 +194,9 @@ export interface RenderOptions {
   kind?: JobKind;
   /** What to call the project. Defaults to the file name. */
   name?: string;
+  /** For a subtitled video: which language goes on the picture. Defaults to
+      the target; the source language skips translation entirely. */
+  subtitleLanguage?: string;
 }
 
 export async function submitVideo(
@@ -210,6 +215,9 @@ export async function submitVideo(
   if (options.music) params.set("music_gain", String(options.musicGain ?? -18));
   if (options.kind && options.kind !== "dub") params.set("kind", options.kind);
   if (options.name) params.set("name", options.name);
+  if (options.subtitleLanguage) {
+    params.set("subtitle_language", options.subtitleLanguage);
+  }
 
   const body = new FormData();
   body.append("file", file);
@@ -394,6 +402,10 @@ export const phraseAudioUrl = (id: string, index: number) =>
 /** A URL the browser will save rather than play. */
 export const downloadUrl = (id: string) =>
   `/jobs/${encodeURIComponent(id)}/video?download=1`;
+
+/** The same for an output that is audio only: a voice-over, or an audio dub. */
+export const downloadAudioUrl = (id: string) =>
+  `/jobs/${encodeURIComponent(id)}/audio/dub?download=1`;
 
 /** Show the finished file in Finder / Explorer / the desktop file manager. */
 export const revealRender = (id: string) =>

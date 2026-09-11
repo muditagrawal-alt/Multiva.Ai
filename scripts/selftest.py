@@ -426,6 +426,30 @@ def main() -> int:
         check("subtitled video downloads", code == 200, f"got {code}")
         call("DELETE", f"/videos/{sjob}")
 
+    # Subtitling a clip in the language it is already spoken in skips
+    # translation entirely, and is a normal thing to want.
+    code, sv2 = call("POST", "/process_video/?original_language=en"
+                             "&target_language=hi&user_id=selftest"
+                             "&kind=subtitled&subtitle_language=en",
+                     files={"file": (name, clip)})
+    if check("a subtitle language can be chosen", code == 200, str(sv2)[:70]):
+        s2 = sv2["job_id"]
+        state, sd2 = wait_for(s2, timeout=600)
+        check("it renders in that language", state == "done",
+              f"{state} {sd2.get('error')}")
+        check("and reports which language went on",
+              sd2.get("subtitle_language") == "en",
+              str(sd2.get("subtitle_language")))
+        call("DELETE", f"/videos/{s2}")
+
+    # Whatever a run produced has to be savable, not only playable.
+    for path, what in ((f"/jobs/{job}/video?download=1", "the video"),
+                       (f"/jobs/{job}/audio/dub?download=1", "the audio"),
+                       (f"/jobs/{job}/export/dub.srt", "the subtitles")):
+        code, body = call("GET", path, raw=True)
+        check(f"{what} downloads", code == 200 and len(body) > 10,
+              f"{code}, {len(body) if isinstance(body, bytes) else '?'}b")
+
     code, _ = call("GET", f"/jobs/{job}/export/nope.xyz", raw=True)
     check("unknown export rejected", code == 404, f"got {code}")
 

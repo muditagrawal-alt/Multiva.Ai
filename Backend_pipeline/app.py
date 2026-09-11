@@ -439,6 +439,23 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             return
 
         if kind == "subtitled":
+            # Which language goes on the picture. Defaults to the language
+            # being translated into, but subtitling a clip in the language it
+            # is already spoken in is a normal thing to want, and that skips
+            # translation entirely.
+            sub_lang = ((jobs.get(job_id) or {}).get("subtitle_language")
+                        or target_language)
+            if sub_lang == (source_language or "").strip() or sub_lang == "source":
+                sub_texts = [(sg.get("text") or "").strip() for sg in segments]
+                sub_lang = source_language
+            elif sub_lang != target_language:
+                _set(job_id, step="translating")
+                sub_texts = list(translate_segments(
+                    segments, source_language, sub_lang))
+                from translation_v2 import fix_code_switching
+                sub_texts = fix_code_switching(sub_texts, sub_lang)
+            else:
+                sub_texts = list(translated)
             # Same cues the .srt export would give, written onto the picture
             # so the file carries its own captions.
             _set(job_id, step="adding_subtitles")
@@ -446,17 +463,17 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             with _HEAVY:
                 mode = subtitles.attach(
                     input_path,
-                    subtitles.cues(segments, list(translated)),
+                    subtitles.cues(segments, sub_texts),
                     subbed, workdir,
-                    srt_text=subtitles.srt(segments, list(translated)),
-                    language=target_language,
+                    srt_text=subtitles.srt(segments, sub_texts),
+                    language=sub_lang,
                     crf=engines.tunable("OUTPUT_CRF"),
                     preset=engines.tunable("OUTPUT_PRESET"))
-            filed = _file_render(job_id, subbed, stem, target_language,
+            filed = _file_render(job_id, subbed, stem, sub_lang,
                                  suffix="_subtitled")
             _set(job_id, status="done", step="complete",
                  translated_segments=list(translated),
-                 subtitle_mode=mode,
+                 subtitle_mode=mode, subtitle_language=sub_lang,
                  output_path=subbed, url=f"/jobs/{job_id}/video",
                  filed_at=filed, **common)
             _save(job_id)
@@ -685,8 +702,12 @@ async def process_video(
     target_language: str = Query(..., description="Target language code"),
     user_id: str = Query("anonymous", description="Owner of this job"),
     name: str = Query(None, description="What to call this project"),
-    kind: str = Query("dub", description="dub, audio, subtitles, "
+    kind: str = Query("dub", description="dub, audio, subtitled, subtitles, "
                                          "or subtitles_translated"),
+    subtitle_language: str = Query(
+        None, description="Language for a subtitled video. Defaults to the "
+                          "target; pass the source language to subtitle a clip "
+                          "in the language it is already spoken in."),
     trim_start: float = Query(None, description="In point in seconds"),
     trim_end: float = Query(None, description="Out point in seconds"),
     music_gain: float = Query(-18.0, description="Music bed level in dB"),
@@ -698,6 +719,10 @@ async def process_video(
     try:
         target_language = L.normalize(target_language)
         L.engine_for(target_language)
+        # A subtitle language is a language like any other, so a typo should
+        # be refused here rather than mid-render.
+        if subtitle_language and subtitle_language != "source":
+            subtitle_language = L.normalize(subtitle_language)
     except L.UnsupportedLanguage as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -742,6 +767,7 @@ async def process_video(
         "title": (name or "").strip() or None,
         "original_language": original_language,
         "target_language": target_language,
+        "subtitle_language": (subtitle_language or "").strip() or None,
         "user_id": user_id,
         "created_at": asyncio.get_event_loop().time(),
     }
@@ -801,6 +827,7 @@ async def get_job_status(job_id: str):
         # "burned" or "muxed": whether the captions are drawn on the picture
         # or carried as a track the player switches on.
         response["subtitle_mode"] = job.get("subtitle_mode")
+        response["subtitle_language"] = job.get("subtitle_language")
         response["video_stale"] = bool(job.get("video_stale"))
         if job.get("reference_path"):
             response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
@@ -870,8 +897,14 @@ async def reveal_render(job_id: str):
 
 
 @app.get("/jobs/{job_id}/audio/{which}")
-async def get_job_audio(job_id: str, which: str):
-    """Serve a finished job's reference clip or dubbed track for playback."""
+async def get_job_audio(job_id: str, which: str, download: bool = False):
+    """
+    A finished job's reference clip or dubbed track.
+
+    `download=1` saves it instead of playing it. A voice-over and an audio-only
+    dub produce nothing but this, so without it those outputs could be heard
+    and not kept.
+    """
     job = jobs.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -882,7 +915,11 @@ async def get_job_audio(job_id: str, which: str):
     if not path or not os.path.isfile(path):
         raise HTTPException(status_code=404, detail="Audio no longer on disk")
     from fastapi.responses import FileResponse
-    return FileResponse(path, media_type="audio/wav")
+    if not download:
+        return FileResponse(path, media_type="audio/wav")
+    lang = job.get("target_language") or "audio"
+    return FileResponse(path, media_type="audio/wav",
+                        filename=f"{_download_name(job_id)}_{lang}.wav")
 
 
 def voiceover_task(job_id: str, input_path: str, script: str,
@@ -1007,6 +1044,15 @@ def _push_history(job: dict, unit: dict) -> None:
                 os.remove(stale["wav"])
             except OSError:
                 pass
+
+
+def _download_name(job_id: str, stem: str = "") -> str:
+    """A filename a person can recognise: the project, not the job id."""
+    job = jobs.get(job_id) or {}
+    pretty = (job.get("title") or "").strip()
+    if not pretty:
+        pretty = re.sub(r"^[0-9a-f]{8,}[-_]", "", stem or job_id)
+    return re.sub(r"[^\w\- ]+", "", pretty).strip() or "multiva"
 
 
 def _file_render(job_id: str, source_path: str, stem: str, language: str,
@@ -1727,7 +1773,7 @@ async def export_job_text(job_id: str, kind: str):
 
     body = build(segments, translated)
     ext = kind.rsplit(".", 1)[-1]
-    name = f"{job_id[:8]}_{suffix}.{ext}"
+    name = f"{_download_name(job_id)}_{suffix}.{ext}"
     return Response(
         content=body,
         media_type=f"{media_type}; charset=utf-8",

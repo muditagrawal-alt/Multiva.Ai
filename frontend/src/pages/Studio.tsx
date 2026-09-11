@@ -21,7 +21,7 @@ import {
 import {
   getLanguages, getHealth, submitVideo, submitVoiceover, cancelJob, getJob,
   getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase, clearPhrase,
-  downloadUrl, revealRender,
+  downloadUrl, downloadAudioUrl, revealRender,
   undoPhrase, fitOf,
   getReferenceWindows, chooseReference,
   EXPORTS, exportUrl, langName,
@@ -121,6 +121,9 @@ export default function Studio() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [restarting, setRestarting] = useState(false);
   const [name, setName] = useState("");
+  // Which language goes on the picture for a subtitled video. Empty means the
+  // one being translated into.
+  const [subtitleLang, setSubtitleLang] = useState("");
   // A phrase lifted off the timeline. Words and delivery travel together:
   // pasting the words without the seed would speak them in a different draw.
   const [clip, setClip] = useState<{ text: string; seed: number | null } | null>(null);
@@ -551,6 +554,8 @@ export default function Studio() {
             musicGain,
             kind: mode,
             name: name || undefined,
+            subtitleLanguage: mode === "subtitled" && subtitleLang
+              ? subtitleLang : undefined,
           });
       jobId.current = job_id;
       watch(job_id);
@@ -865,7 +870,22 @@ export default function Studio() {
                 ))}
               </Sel>
             </Row>
-            <Stat k="Voice model" v={engine} />
+            {mode === "subtitled" && (
+              <Row label="Subtitles in"
+                   hint="Choose the source language to subtitle the clip in the language it is already spoken in — that skips translation">
+                <Sel value={subtitleLang || target}
+                     onChange={(e) => setSubtitleLang(e.target.value)}
+                     disabled={langs === null}>
+                  {(langs ?? FALLBACK).map((l) => (
+                    <option key={l.code} value={l.code}>{l.name}</option>
+                  ))}
+                </Sel>
+              </Row>
+            )}
+            {mode !== "subtitled" && mode !== "subtitles"
+              && mode !== "subtitles_translated" && (
+              <Stat k="Voice model" v={engine} />
+            )}
 
             {mode === "dub" && (
               <>
@@ -1323,6 +1343,15 @@ export default function Studio() {
             )}
             {/* Two different things, which one button was trying to be: save a
                 copy somewhere, or point at the copy already on disk. */}
+            {!job?.url && job?.dub_audio && view === "done" && (
+              <a
+                href={downloadAudioUrl(job.job_id)}
+                download
+                className="raised flex h-[22px] items-center justify-center gap-1.5 rounded-[2px] text-[11px] text-c-dim transition-colors hover:bg-c-hover hover:text-c-text"
+              >
+                <DownloadSimple size={12} /> Download audio
+              </a>
+            )}
             {job?.url && (
               <div className="grid grid-cols-2 gap-1">
                 <a
