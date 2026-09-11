@@ -446,12 +446,14 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             with _HEAVY:
                 mode = subtitles.attach(
                     input_path,
-                    subtitles.srt(segments, list(translated)),
+                    subtitles.cues(segments, list(translated)),
                     subbed, workdir,
+                    srt_text=subtitles.srt(segments, list(translated)),
                     language=target_language,
                     crf=engines.tunable("OUTPUT_CRF"),
                     preset=engines.tunable("OUTPUT_PRESET"))
-            filed = _file_render(job_id, subbed, stem, target_language)
+            filed = _file_render(job_id, subbed, stem, target_language,
+                                 suffix="_subtitled")
             _set(job_id, status="done", step="complete",
                  translated_segments=list(translated),
                  subtitle_mode=mode,
@@ -1007,7 +1009,8 @@ def _push_history(job: dict, unit: dict) -> None:
                 pass
 
 
-def _file_render(job_id: str, source_path: str, stem: str, language: str) -> str:
+def _file_render(job_id: str, source_path: str, stem: str, language: str,
+                 suffix: str = "") -> str:
     """
     Copy a finished render into the user's output folder.
 
@@ -1017,7 +1020,16 @@ def _file_render(job_id: str, source_path: str, stem: str, language: str) -> str
     """
     try:
         folder = engines.output_dir()
-        base = f"{stem}_{language}"
+        # Prefer what the person called the project. `stem` comes from the
+        # stored upload name, which carries the job id, so renders were landing
+        # as "a3f91c02-1b4_clip_hi.mp4" - unreadable, and the thing you scan
+        # for in Finder.
+        job = jobs.get(job_id) or {}
+        pretty = (job.get("title") or "").strip()
+        if not pretty:
+            pretty = re.sub(r"^[0-9a-f]{8,}[-_]", "", stem)
+        pretty = re.sub(r"[^\w\- ]+", "", pretty).strip() or stem or "multiva"
+        base = f"{pretty}_{language}{suffix}"
         target = os.path.join(folder, f"{base}.mp4")
         n = 2
         while os.path.exists(target):
