@@ -258,6 +258,18 @@ def main() -> int:
     code, tl = call("GET", f"/jobs/{job}/segments")
     check("timeline listed", code == 200 and tl.get("segments"))
     phrases = tl.get("segments", [])
+    # The transcript has to reach the end of the clip. large-v3 stopped early
+    # on real footage and the last sentence was missing from the subtitles and
+    # from the dub, with nothing saying so.
+    video_dur = tl.get("video_duration") or 0
+    covered = max((p["start"] + p["duration"] for p in phrases), default=0)
+    if video_dur:
+        check("the transcript reaches the end of the clip",
+              covered >= video_dur * 0.85,
+              f"covers {covered:.1f}s of {video_dur:.1f}s")
+        print(f"        transcript covers {covered / video_dur * 100:.0f}% "
+              f"of the clip")
+
     thin = [p for p in phrases if len(p["text"].split()) < 2]
     check("no one-word phrases", not thin, f"{[p['text'] for p in thin]}")
     print(f"        {len(phrases)} phrases")

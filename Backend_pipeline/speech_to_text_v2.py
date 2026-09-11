@@ -93,6 +93,37 @@ def _load_model():
             print(f"[STT-v2] Falling back to next model...")
 
 
+# A gap smaller than this at the end of a file is trailing silence, not
+# missing speech. Larger, and something was dropped.
+TAIL_GAP_SECONDS = 2.0
+MAX_TAIL_PASSES = 3
+# Only stop early when a pass recovers nothing at all. A larger threshold
+# looks sensible and is not: on one clip the first recovery pass gained 0.14s
+# and the two after it gained 2.6s between them, so anything that stops on a
+# small gain throws away most of what there was to get.
+MIN_TAIL_GAIN = 0.05
+
+# Shared by the first pass and any recovery pass, so the two cannot drift.
+_DECODE = dict(
+    beam_size=5,
+    best_of=5,
+    temperature=0.0,
+    compression_ratio_threshold=2.4,
+    log_prob_threshold=-1.0,
+    no_speech_threshold=0.6,
+    word_timestamps=True,
+    # Skip non-speech before it reaches the encoder. Faster on real footage
+    # (music beds, pauses, room tone) and it stops Whisper inventing text in
+    # silence, which used to produce phantom segments that the dubbing
+    # timeline would then dutifully allocate time to.
+    vad_filter=True,
+    vad_parameters=dict(min_silence_duration_ms=500),
+    # Each segment is dubbed independently, so carrying context between them
+    # buys nothing and risks a repetition loop poisoning the rest of the run.
+    condition_on_previous_text=False,
+)
+
+
 # ---------------------------------------------------------------------------
 # Public API — same interface as speech_to_text.py
 # ---------------------------------------------------------------------------
@@ -105,6 +136,13 @@ def transcribe_audio(audio_path: str, language: str = None) -> dict:
     """
     model = _load_model()
 
+    def _pass(clip=None):
+        """One decode over the file, or over a range of it."""
+        return model.transcribe(
+            audio_path,
+            **(dict(_DECODE, language=language, clip_timestamps=clip)
+               if clip else dict(_DECODE, language=language)))
+
     segments_iter, info = model.transcribe(
         audio_path,
         # Pinning the language matters when re-transcribing a dub for
@@ -113,22 +151,7 @@ def transcribe_audio(audio_path: str, language: str = None) -> dict:
         # then reads 1.00 on a perfectly good dub purely from a script
         # mismatch. Leave as None for normal transcription (auto-detect).
         language=language,
-        beam_size=5,
-        best_of=5,
-        temperature=0.0,
-        compression_ratio_threshold=2.4,
-        log_prob_threshold=-1.0,
-        no_speech_threshold=0.6,
-        word_timestamps=True,  # Key feature: word-level timestamps
-        # Skip non-speech before it reaches the encoder. Faster on real footage
-        # (music beds, pauses, room tone) and it stops Whisper inventing text in
-        # silence, which used to produce phantom segments that the dubbing
-        # timeline would then dutifully allocate time to.
-        vad_filter=True,
-        vad_parameters=dict(min_silence_duration_ms=500),
-        # Each segment is dubbed independently, so carrying context between them
-        # buys nothing and risks a repetition loop poisoning the rest of the run.
-        condition_on_previous_text=False,
+        **_DECODE,
     )
 
     # Collect segments and full text
@@ -158,6 +181,46 @@ def transcribe_audio(audio_path: str, language: str = None) -> dict:
 
         segments_list.append(seg_data)
 
+    # large-v3 stops early on some audio: on a 20.3s clip it gave up at 15.5s
+    # and the last sentence was simply gone - from the subtitles, and from the
+    # dub. No decoding setting moved it (VAD off, no_speech up, temperature
+    # fallback, condition_on_previous_text, hallucination threshold all made
+    # no difference), but asking it to start again where it stopped returns
+    # the missing speech with correct absolute timestamps.
+    for _ in range(MAX_TAIL_PASSES):
+        covered = max((sg["end"] for sg in segments_list), default=0.0)
+        gap = (info.duration or 0.0) - covered
+        if gap <= TAIL_GAP_SECONDS:
+            break
+        print(f"[STT-v2] {gap:.1f}s after {covered:.1f}s was never transcribed; "
+              f"going back for it")
+        try:
+            more_iter, _ = _pass(clip=[covered, info.duration])
+            found = 0
+            for segment in more_iter:
+                if segment.end <= covered + 0.05 or not segment.text.strip():
+                    continue
+                all_text_parts.append(segment.text)
+                seg_data = {"start": segment.start, "end": segment.end,
+                            "text": segment.text.strip()}
+                if segment.words:
+                    seg_data["words"] = [
+                        {"word": w.word.strip(), "start": w.start, "end": w.end,
+                         "probability": round(w.probability, 3)}
+                        for w in segment.words
+                    ]
+                segments_list.append(seg_data)
+                found += 1
+            if not found:
+                break          # genuinely silence; stop asking
+            gained = max((sg["end"] for sg in segments_list), default=0.0) - covered
+            if gained < MIN_TAIL_GAIN:
+                break          # grinding forward a fraction at a time; stop
+        except Exception as e:                               # noqa: BLE001
+            print(f"[STT-v2] Second pass failed, keeping what we have: {e}")
+            break
+
+    segments_list.sort(key=lambda sg: sg["start"])
     full_text = " ".join(all_text_parts).strip()
 
     print(f"[STT-v2] Transcribed {len(segments_list)} segments, "
