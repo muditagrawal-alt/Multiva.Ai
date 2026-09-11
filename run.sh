@@ -8,6 +8,11 @@
 #   ./run.sh --port 8123      somewhere other than 8000
 #   ./run.sh --fresh          as a brand new user, without touching your setup
 #   ./run.sh --sandbox DIR    the same, but in a folder you keep and can inspect
+#   ./run.sh --yes            set everything up without asking (unattended)
+#
+# On a fresh clone this offers to build the Python environment and fetch the
+# models itself, so nobody has to open an editor or type pip commands. It only
+# ever asks once, and says how much it is about to download.
 #
 # Ctrl-C stops the engine. Nothing is installed without saying so first.
 
@@ -17,6 +22,7 @@ cd "$(dirname "$0")"
 
 PORT=8000
 FRESH=0
+ASSUME_YES=0
 SANDBOX_DIR=""
 PROVIDER=ollama
 MODEL=""
@@ -27,6 +33,7 @@ while [ $# -gt 0 ]; do
         --model)    MODEL="${2:-}";    shift 2 ;;
         --port)     PORT="${2:-}";     shift 2 ;;
         --fresh)    FRESH=1;           shift ;;
+        --yes|-y)   ASSUME_YES=1;      shift ;;
         --sandbox)  FRESH=1; SANDBOX_DIR="${2:-}"; shift 2 ;;
         --web)      MODE=web;          shift ;;
         --desktop)  MODE=desktop;      shift ;;
@@ -54,15 +61,77 @@ if [ "$FRESH" = "1" ]; then
     say "Models are shared, so nothing is downloaded twice."
 fi
 
-# --- what it cannot start without -----------------------------------------
-PY=./venv/bin/python
-[ -x "$PY" ] || PY=./.venv/bin/python
-[ -x "$PY" ] || fail "No Python environment. Run:
-    python3.10 -m venv venv && ./venv/bin/pip install -r requirements.txt"
-
+# --- what it cannot install for you ---------------------------------------
+# ffmpeg needs a package manager and an administrator. Everything else below
+# this line, it will offer to do.
 command -v ffmpeg >/dev/null 2>&1 || fail "ffmpeg is not installed. Run:
     brew install ffmpeg        (macOS)
-    sudo apt install ffmpeg    (Ubuntu)"
+    sudo apt install ffmpeg    (Ubuntu)
+then start Multiva again."
+
+# Ask, unless nobody is there to answer.
+confirm() {
+    [ "$ASSUME_YES" = "1" ] && return 0
+    [ -t 0 ] || return 1
+    printf '  %s [Y/n] ' "$1"
+    read -r reply
+    case "$reply" in [Nn]*) return 1 ;; *) return 0 ;; esac
+}
+
+find_python() {
+    for c in python3.10 python3.11 python3.12 python3; do
+        command -v "$c" >/dev/null 2>&1 || continue
+        "$c" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] >= (3,10) else 1)' \
+            2>/dev/null && { echo "$c"; return 0; }
+    done
+    return 1
+}
+
+PY=./venv/bin/python
+[ -x "$PY" ] || PY=./.venv/bin/python
+if [ ! -x "$PY" ]; then
+    BOOT_PY=$(find_python) || fail "Python 3.10 or newer is not installed. Run:
+    brew install python@3.10        (macOS)
+    sudo apt install python3.10 python3.10-venv    (Ubuntu)
+then start Multiva again."
+
+    say ""
+    say "Multiva needs a Python environment before it can run."
+    say "It is about 2 GB, goes in venv/ inside this folder, and touches"
+    say "nothing else on your machine. Deleting that folder undoes it."
+    say ""
+    if ! confirm "Set it up now?"; then
+        fail "Nothing was changed. When you are ready:
+    $BOOT_PY -m venv venv && ./venv/bin/pip install -r requirements.txt"
+    fi
+    say "Building the environment. This takes a few minutes..."
+    "$BOOT_PY" -m venv venv || fail "Could not create the environment."
+    PY=./venv/bin/python
+    "$PY" -m pip install --quiet --upgrade pip
+    "$PY" -m pip install -r requirements.txt || fail "Some packages failed to
+install. The output above says which. Nothing else was changed."
+    say "Environment ready."
+fi
+
+# --- the models -----------------------------------------------------------
+# Roughly 7.5 GB, verified by checksum, resumable. Without them the first
+# render fails several minutes in, which is a bad way to find out.
+if ! "$PY" scripts/download_models.py --check 2>/dev/null | grep -q "0 item"; then
+    missing=$("$PY" scripts/download_models.py --check 2>/dev/null \
+              | grep -oE "^ +[0-9]+ item" | tr -dc "0-9")
+    say ""
+    say "${missing:-Some} model file(s) still need downloading, about 7.5 GB in"
+    say "total. It is resumable and checked against a SHA-256, and it only"
+    say "happens once."
+    say ""
+    if confirm "Download them now?"; then
+        "$PY" scripts/download_models.py || fail "The download did not finish.
+Run Multiva again to pick up where it stopped."
+    else
+        say "Skipping. Dubbing will fail until the models are here; you can"
+        say "fetch them from the studio's setup screen instead."
+    fi
+fi
 
 # --- the interface is a build artefact, not in the repository ---------------
 if [ ! -d web ]; then
