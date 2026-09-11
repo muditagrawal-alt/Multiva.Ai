@@ -160,6 +160,16 @@ def main() -> int:
 
     code, eng = call("GET", "/api/settings/engines")
     check("engine catalogue", code == 200 and "stages" in eng)
+
+    # The stage name was validated and the value was not, so a typo was stored
+    # and became the current model. Harmless while a restart was needed; not
+    # harmless now that stage changes apply immediately.
+    code, _ = call("POST", "/api/settings/engines", {"stt": "not-a-real-model"})
+    check("a model outside the catalogue is refused", code == 400, f"got {code}")
+    _, still = call("GET", "/api/settings/engines")
+    check("and the stage kept its real model",
+          still["stages"]["stt"]["current"] != "not-a-real-model",
+          str(still["stages"]["stt"]["current"]))
     code, mind = call("GET", "/api/settings/llm")
     check("script model settings", code == 200 and "provider" in mind)
 

@@ -416,10 +416,16 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             return
 
         # ── 3. Reference clip for cloning ──
-        _set(job_id, step="selecting_reference")
-        reference = reference_audio.build_reference(
-            input_path, segments, video_dur,
-            os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
+        # Only the outputs that actually speak need one. Subtitle jobs were
+        # building a voice reference they never used: wasted work, and a way
+        # for a subtitle run to fail inside voice-cloning code that has
+        # nothing to do with it.
+        reference = None
+        if kind in ("dub", "audio"):
+            _set(job_id, step="selecting_reference")
+            reference = reference_audio.build_reference(
+                input_path, segments, video_dur,
+                os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
 
         # ── 4. Translate segment by segment ──
         _set(job_id, step="translating")
@@ -1979,6 +1985,9 @@ async def set_engine_settings(body: dict = Body(...)):
     """
     try:
         chosen = engines.save(body or {})
+    except ValueError as e:
+        # A model that is not one of the stage's options.
+        raise HTTPException(status_code=400, detail=str(e))
     except OSError as e:
         raise HTTPException(status_code=500, detail=f"Could not save settings: {e}")
 

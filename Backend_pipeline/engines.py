@@ -161,7 +161,14 @@ def get(stage: str) -> str:
 
 
 def save(choices: dict) -> dict:
-    """Persist stage choices. Unknown stages are ignored rather than stored."""
+    """
+    Persist stage choices.
+
+    An unknown stage is ignored, and so is a model that is not one of that
+    stage's options: the stage name was checked and the value was not, so a
+    typo was stored and became `current`. Harmless while changes needed a
+    restart to take effect; not harmless now that they apply immediately.
+    """
     try:
         with open(SETTINGS_PATH, encoding="utf-8") as f:
             stored = json.load(f)
@@ -171,8 +178,15 @@ def save(choices: dict) -> dict:
         stored = {}
 
     for stage, value in (choices or {}).items():
-        if stage in CATALOG and isinstance(value, str) and value.strip():
-            stored[stage] = value.strip()
+        if stage not in CATALOG or not isinstance(value, str) or not value.strip():
+            continue
+        value = value.strip()
+        known = {o["id"] for o in CATALOG[stage]["options"]}
+        if value not in known:
+            raise ValueError(
+                f"{value!r} is not an option for {stage}. "
+                f"Choose one of: {', '.join(sorted(known))}")
+        stored[stage] = value
 
     folder = (choices or {}).get("output_dir")
     if isinstance(folder, str) and folder.strip():
