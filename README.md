@@ -56,6 +56,25 @@ Four models, in order, each handing the next what it needs and nothing more:
 
 Whisper stays on the CPU because CTranslate2 has no Metal backend; everything else shares the GPU, one heavy stage at a time. A second output of the same clip — a subtitled video after a dub, say — reuses the transcript and the translation, so it takes seconds rather than minutes.
 
+## System architecture
+
+<p align="center">
+  <img src="docs/media/architecture.gif" alt="Animated: a render travelling from the studio through the engine, the models, the disk and back" width="100%">
+</p>
+
+Three processes, all on one machine, and one optional call out of it:
+
+| Part | What it is | Talks to |
+|---|---|---|
+| **Desktop window** — `apps/studio/src-tauri`, Rust | A Tauri shell. Finds the checkout, starts the engine with the project's own Python, shows a splash until `/api/boot` says the models are loaded, then opens the studio. No web server of its own. | the engine, over `127.0.0.1` |
+| **Studio** — `apps/studio`, React 19 | The interface: Projects, Models, and the Media / Edit / Deliver pages of a project. Every action is an HTTP call; nothing is computed in the browser. Ships built in `web/`. | the engine |
+| **Engine** — `engine/app.py`, FastAPI | The job store and the pipeline. Accepts a clip, runs the stages one heavy step at a time, writes a manifest per project so everything reopens after a restart, and files the finished output where you asked. | the models, the disk |
+| **Models** | faster-whisper, NLLB-200, IndicF5 + vocos, Wav2Lip + s3fd, WavLM for scoring. Loaded once on first use and kept warm; swapping one in the Models page takes effect on the next render. | — |
+| **Disk** | `~/.multiva/` for settings (mode `0600`), `temp_uploads/job_*/` for each project's input, phrase cache and manifest, and your output folder for filed renders. There is no database. | — |
+| **Script model** — optional | Ollama on this machine by default, or a hosted key. Used for exactly one job: shortening a translated line that overruns its slot. Text only, one line at a time, never audio or video. | the engine, on request |
+
+**A render, end to end.** The studio POSTs the clip and the choices to `/process_video/` and polls `/jobs/{id}/status`. The engine probes and trims, extracts 16 kHz audio, transcribes with word timestamps, picks the cleanest 6–12 s window as the voice reference, translates segment by segment, synthesizes each phrase in the cloned voice onto a fixed-length track, re-syncs the mouth, checks A/V drift and voice match, files the result, and writes the manifest. Cancel is cooperative — every stage boundary is a checkpoint — and lands within about one phrase. A second output for the same project skips straight to the stage it actually needs.
+
 ---
 
 ## What you get

@@ -134,6 +134,13 @@ def main() -> int:
     # ---- engine ----------------------------------------------------------
     print("  Engine")
     code, health = call("GET", "/api/health")
+    if code == 0:
+        # Nothing answered. Every later check would fail the same way, and
+        # a traceback out of the first one that indexes a response says
+        # less than this does.
+        print(f"  Nothing is listening at {BASE}. Start the engine first:\n"
+              f"      ./run.sh\n  or point the test at it with MULTIVA_URL.\n")
+        return 1
     check("health responds", code == 200, str(health)[:60])
     check("no cloud storage reported", isinstance(health, dict)
           and "db" not in health and "r2" not in health, str(health)[:80])
