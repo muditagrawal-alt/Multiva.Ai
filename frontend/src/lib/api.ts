@@ -65,6 +65,12 @@ export interface JobStatus {
   step: string;
   /** Which pipeline produced this job. */
   kind?: JobKind;
+  /** The language this output was asked for. */
+  target_language?: string | null;
+  original_language?: string | null;
+  /** Whether the clip it was made from is still on disk, so another output
+      can be rendered from the project without importing it again. */
+  has_input?: boolean;
   /** Length of a rendered voice-over, in seconds. */
   voiceover_seconds?: number | null;
   url?: string | null;
@@ -205,8 +211,12 @@ export interface RenderOptions {
   projectId?: string;
 }
 
+/**
+ * Start a render. With no file, `options.projectId` must name a project
+ * whose clip is still on disk; the engine renders from that.
+ */
 export async function submitVideo(
-  file: File,
+  file: File | null,
   sourceLang: string,
   targetLang: string,
   options: RenderOptions = {}
@@ -227,7 +237,7 @@ export async function submitVideo(
   if (options.projectId) params.set("project_id", options.projectId);
 
   const body = new FormData();
-  body.append("file", file);
+  if (file) body.append("file", file);
   if (options.music) body.append("music", options.music);
 
   return request<{ job_id: string }>(`/process_video/?${params}`, {

@@ -549,6 +549,33 @@ def main() -> int:
         check("an unwritable folder is refused", code == 400, f"got {code}")
         call("DELETE", f"/videos/{s3}")
 
+    # A reopened project has no File in the browser, but its clip is still on
+    # the engine. Another output - in any language - renders from that, so
+    # nobody has to find the file again to add Tamil subtitles to a Telugu
+    # project. This is also where the language for a second output is
+    # checked: it is the one asked for, not the first output's.
+    check("a job says whether its clip is still on the engine",
+          st0.get("has_input") is True and st0.get("target_language") == args.lang,
+          f"has_input={st0.get('has_input')} target={st0.get('target_language')}")
+    code, sv4 = call("POST", f"/process_video/?original_language=en"
+                             f"&target_language=ta&user_id=selftest"
+                             f"&kind=subtitles_translated&project_id={pid}")
+    if check("an output renders from the project's clip with no upload",
+             code == 200, str(sv4)[:70]):
+        s4 = sv4["job_id"]
+        state, sd4 = wait_for(s4, timeout=600)
+        check("it rendered", state == "done", f"{state} {sd4.get('error')}")
+        check("in the language asked for, not the project's first",
+              sd4.get("target_language") == "ta", str(sd4.get("target_language")))
+        check("from the same project", sd4.get("project_id") == pid,
+              str(sd4.get("project_id")))
+        call("DELETE", f"/videos/{s4}")
+    code, _ = call("POST", "/process_video/?original_language=en&target_language=hi")
+    check("no clip and no project is refused", code == 400, f"got {code}")
+    code, _ = call("POST", "/process_video/?original_language=en&target_language=hi"
+                           "&project_id=no-such-project")
+    check("no clip and an unknown project is refused", code == 400, f"got {code}")
+
     # Whatever a run produced has to be savable, not only playable.
     for path, what in ((f"/jobs/{job}/video?download=1", "the video"),
                        (f"/jobs/{job}/audio/dub?download=1", "the audio"),

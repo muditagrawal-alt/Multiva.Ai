@@ -729,7 +729,7 @@ else:
 @app.post("/process_video/")
 async def process_video(
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
+    file: UploadFile = File(None),
     original_language: str = Query(..., description="Source language code"),
     target_language: str = Query(..., description="Target language code"),
     user_id: str = Query("anonymous", description="Owner of this job"),
@@ -747,8 +747,18 @@ async def process_video(
     music_gain: float = Query(-18.0, description="Music bed level in dB"),
     music: UploadFile = File(None),
 ):
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="No file provided")
+    # A reopened project has its clip on disk already. Rendering another
+    # output from it should not mean finding the file again, so with no
+    # upload the project's own input is used.
+    stored = None
+    if file is None or not file.filename:
+        stored = _project_input(project_id)
+        if stored is None:
+            raise HTTPException(
+                status_code=400,
+                detail="No file provided" if not project_id else
+                       "This project's source clip is no longer on disk. "
+                       "Import the clip to render something new from it.")
 
     try:
         target_language = L.normalize(target_language)
@@ -781,14 +791,20 @@ async def process_video(
             detail=f"The trimmed range is {trim_end - trim_start:.2f}s; "
                    f"at least a second is needed.")
 
-    content = await file.read()
+    if stored is not None:
+        with open(stored["input_path"], "rb") as f:
+            content = f.read()
+        filename = stored["filename"]
+    else:
+        content = await file.read()
+        filename = file.filename
     if len(content) > 200 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large (max 200MB)")
     if len(content) < 1000:
         raise HTTPException(status_code=400, detail="File too small or empty")
 
     job_id = str(uuid.uuid4())[:12]
-    safe_filename = f"{job_id}_{_safe_name(file.filename)}"
+    safe_filename = f"{job_id}_{_safe_name(filename)}"
     input_path = os.path.join(UPLOAD_DIR, safe_filename)
     with open(input_path, "wb") as f:
         f.write(content)
@@ -797,7 +813,7 @@ async def process_video(
         "status": "queued",
         "step": "uploaded",
         "kind": kind,
-        "filename": file.filename,
+        "filename": filename,
         "title": (name or "").strip() or None,
         # Several outputs from one clip are one project. A job that names no
         # project founds its own, so a lone render behaves as it always did.
@@ -840,7 +856,15 @@ async def get_job_status(job_id: str):
     response = {"job_id": job_id, "status": job["status"],
                 "step": job.get("step", "unknown"),
                 "kind": job.get("kind", "dub"),
-                "name": _project_name(job, job_id)}
+                "name": _project_name(job, job_id),
+                # What this output was asked for, so the studio can tell a
+                # request for the same thing from one for a different
+                # language.
+                "target_language": job.get("target_language"),
+                "original_language": (job.get("original_language")
+                                      or job.get("source_language")),
+                "has_input": bool(job.get("input_path")
+                                  and os.path.exists(job["input_path"]))}
 
     if job["status"] == "cancelled":
         response["error"] = job.get("error", "Cancelled.")
@@ -2217,6 +2241,35 @@ def _reusable_sibling(job_id: str, video_dur: float, source_language: str):
         if best is None or (j.get("saved_at") or 0) > (best.get("saved_at") or 0):
             best = j
     return best
+
+
+def _project_input(project_id) -> dict | None:
+    """
+    The clip a project was built from, if it is still on disk.
+
+    Every output keeps its own copy of the input, so the newest finished one
+    is the freshest. Returns the path and the name it was uploaded under.
+    """
+    pid = str(project_id or "").strip()
+    if not pid:
+        return None
+    best = None
+    for jid, j in jobs.items():
+        if j.get("project_id", jid) != pid:
+            continue
+        # A voice-over's input is the clip whose voice it copied, not a
+        # video to dub or subtitle.
+        if j.get("kind") == "voiceover":
+            continue
+        path = j.get("input_path")
+        if not path or not os.path.exists(path):
+            continue
+        if best is None or (j.get("saved_at") or 0) > (best.get("saved_at") or 0):
+            best = j
+    if best is None:
+        return None
+    return {"input_path": best["input_path"],
+            "filename": best.get("filename") or os.path.basename(best["input_path"])}
 
 
 def _project_for(requested, job_id: str) -> str:

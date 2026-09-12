@@ -204,7 +204,16 @@ export default function Studio() {
         if (!live) return;
         jobId.current = id;
         setJob(s);
-        setMode(s.kind === "voiceover" ? "voiceover" : "dub");
+        // The form shows what this output was: its kind and languages.
+        // Reopening a Telugu subtitled video used to present a Hindi dub,
+        // so the next render silently went out in the wrong language.
+        setMode(s.kind ?? "dub");
+        if (s.target_language) setTarget(s.target_language);
+        // Blank means "the output language", which is what most subtitled
+        // videos used; only a deliberate other choice is kept.
+        setSubtitleLang(
+          s.subtitle_language && s.subtitle_language !== s.target_language
+            ? s.subtitle_language : "");
         setOpened({ name: s.job_id });
         setStale(Boolean(s.video_stale));
         setView(s.status === "done" ? "done" : "idle");
@@ -602,7 +611,11 @@ export default function Studio() {
   }
 
   async function render() {
-    if (!file) { setFileError("Import a clip first."); return; }
+    if (!file && !fromProject) { setFileError("Import a clip first."); return; }
+    if (mode === "voiceover" && !file) {
+      setFileError("Import a clip whose voice to copy.");
+      return;
+    }
     if (mode === "voiceover" && !script.trim()) {
       setFileError("Write a script for the voice to read.");
       return;
@@ -614,7 +627,7 @@ export default function Studio() {
 
     try {
       const { job_id } = mode === "voiceover"
-        ? await submitVoiceover(file, script, target, name || undefined,
+        ? await submitVoiceover(file as File, script, target, name || undefined,
                                 projectId ?? undefined)
         : await submitVideo(file, source, target, {
             trimStart: trimIn,
@@ -650,7 +663,17 @@ export default function Studio() {
   // button, which is why editing a phrase and pressing Render re-ran the
   // entire pipeline.
   const rendered = view === "done" && !!job;
-  const wantsOther = rendered && job?.kind !== undefined && mode !== job.kind;
+  // The same kind in another language is another output too: a Hindi dub
+  // after a Telugu one, or Tamil subtitles after Telugu ones.
+  const wantsOther = rendered && job?.kind !== undefined && (
+    mode !== job.kind
+    || (job.target_language != null && mode !== "subtitles"
+        && target !== job.target_language)
+    || (mode === "subtitled"
+        && (subtitleLang || target) !== (job.subtitle_language ?? job.target_language)));
+  // A reopened project keeps its clip on the engine, so another output can be
+  // rendered from it without importing the file again.
+  const fromProject = !file && !!projectId && !!job?.has_input && mode !== "voiceover";
   const outputLabel = (OUTPUTS.find((o) => o.kind === mode)?.label ?? "output")
     .toLowerCase();
   const action: "render" | "rerender" | "switch" | "current" =
@@ -973,31 +996,6 @@ export default function Studio() {
               </>
             )}
 
-            <Sub>Output</Sub>
-            <Row label="Language">
-              <Sel value={target} onChange={(e) => setTarget(e.target.value)} disabled={langs === null}>
-                {(langs ?? FALLBACK).map((l) => (
-                  <option key={l.code} value={l.code}>{l.name}</option>
-                ))}
-              </Sel>
-            </Row>
-            {mode === "subtitled" && (
-              <Row label="Subtitles in"
-                   hint="Choose the source language to subtitle the clip in the language it is already spoken in — that skips translation">
-                <Sel value={subtitleLang || target}
-                     onChange={(e) => setSubtitleLang(e.target.value)}
-                     disabled={langs === null}>
-                  {(langs ?? FALLBACK).map((l) => (
-                    <option key={l.code} value={l.code}>{l.name}</option>
-                  ))}
-                </Sel>
-              </Row>
-            )}
-            {mode !== "subtitled" && mode !== "subtitles"
-              && mode !== "subtitles_translated" && (
-              <Stat k="Voice model" v={engine} />
-            )}
-
             {mode === "dub" && (
               <>
                 <Sub>Source range</Sub>
@@ -1089,6 +1087,33 @@ export default function Studio() {
                 </button>
               ))}
             </div>
+            {/* The language lives with the output it applies to. It used to
+                be on the Media page only, so after one render there was no
+                way to ask for the next output in a different language. */}
+            <Row label="Language">
+              <Sel value={target} onChange={(e) => setTarget(e.target.value)}
+                   disabled={langs === null || view === "working"}>
+                {(langs ?? FALLBACK).map((l) => (
+                  <option key={l.code} value={l.code}>{l.name}</option>
+                ))}
+              </Sel>
+            </Row>
+            {mode === "subtitled" && (
+              <Row label="Subtitles in"
+                   hint="Choose the source language to subtitle the clip in the language it is already spoken in — that skips translation">
+                <Sel value={subtitleLang || target}
+                     onChange={(e) => setSubtitleLang(e.target.value)}
+                     disabled={langs === null || view === "working"}>
+                  {(langs ?? FALLBACK).map((l) => (
+                    <option key={l.code} value={l.code}>{l.name}</option>
+                  ))}
+                </Sel>
+              </Row>
+            )}
+            {mode !== "subtitled" && mode !== "subtitles"
+              && mode !== "subtitles_translated" && (
+              <Stat k="Voice model" v={engine} />
+            )}
             </>)}
 
             {page === "deliver" && (<>
@@ -1414,10 +1439,12 @@ export default function Studio() {
               <Tool
                 primary
                 onClick={render}
-                disabled={!file || badRange}
-                title={!file && opened
-                  ? "Import a clip to render something new"
-                  : undefined}
+                disabled={(!file && !fromProject) || badRange}
+                title={!file && opened && !fromProject
+                  ? (mode === "voiceover"
+                      ? "Import a clip whose voice to copy"
+                      : "This project's clip is no longer on the engine; import it to render something new")
+                  : fromProject ? "Rendered from this project's clip" : undefined}
                 className="h-[26px] w-full"
               >
                 Render {outputLabel}
@@ -1444,9 +1471,9 @@ export default function Studio() {
               ) : (
                 <Tool
                   onClick={() => setRestarting(true)}
-                  disabled={!file}
+                  disabled={!file && !fromProject}
                   className="w-full"
-                  title={!file ? "The source clip is not loaded in this session" : undefined}
+                  title={!file && !fromProject ? "The source clip is not loaded in this session" : undefined}
                 >
                   Render from source
                 </Tool>
