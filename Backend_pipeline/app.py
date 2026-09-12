@@ -708,6 +708,8 @@ async def process_video(
     target_language: str = Query(..., description="Target language code"),
     user_id: str = Query("anonymous", description="Owner of this job"),
     name: str = Query(None, description="What to call this project"),
+    project_id: str = Query(None, description="An existing project this output "
+                                              "joins. Omit to start a new one."),
     kind: str = Query("dub", description="dub, audio, subtitled, subtitles, "
                                          "or subtitles_translated"),
     subtitle_language: str = Query(
@@ -771,6 +773,9 @@ async def process_video(
         "kind": kind,
         "filename": file.filename,
         "title": (name or "").strip() or None,
+        # Several outputs from one clip are one project. A job that names no
+        # project founds its own, so a lone render behaves as it always did.
+        "project_id": _project_for(project_id, job_id),
         "original_language": original_language,
         "target_language": target_language,
         "subtitle_language": (subtitle_language or "").strip() or None,
@@ -834,6 +839,7 @@ async def get_job_status(job_id: str):
         # or carried as a track the player switches on.
         response["subtitle_mode"] = job.get("subtitle_mode")
         response["subtitle_language"] = job.get("subtitle_language")
+        response["project_id"] = job.get("project_id", job_id)
         response["video_stale"] = bool(job.get("video_stale"))
         if job.get("reference_path"):
             response["reference_audio"] = f"/jobs/{job_id}/audio/reference"
@@ -1819,6 +1825,7 @@ async def create_voiceover(
     language: str = Query(..., description="Language of the script"),
     user_id: str = Query("anonymous"),
     name: str = Query(None, description="What to call this project"),
+    project_id: str = Query(None, description="An existing project this output joins"),
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No reference clip provided")
@@ -1853,6 +1860,9 @@ async def create_voiceover(
         "status": "queued", "step": "uploaded", "kind": "voiceover",
         "filename": file.filename, "target_language": language,
         "title": (name or "").strip() or None,
+        # Several outputs from one clip are one project. A job that names no
+        # project founds its own, so a lone render behaves as it always did.
+        "project_id": _project_for(project_id, job_id),
         "user_id": user_id,
         "created_at": asyncio.get_event_loop().time(),
     }
@@ -2153,20 +2163,97 @@ def _project_name(job: dict, job_id: str) -> str:
     return job.get("filename") or job_id
 
 
+def _project_for(requested, job_id: str) -> str:
+    """The project a new job joins, or its own id if it starts one."""
+    pid = str(requested or "").strip()
+    if pid and any(j.get("project_id") == pid or jid == pid
+                   for jid, j in jobs.items()):
+        return pid
+    return job_id
+
+
 @app.patch("/jobs/{job_id}")
 async def rename_project(job_id: str, body: dict = Body(...)):
-    """Rename a project."""
+    """
+    Name an output, and optionally say where it lives.
+
+    Naming and filing are the same act from the person's side: "call this X
+    and put it here". A new `output_dir` re-files the finished render there
+    and points `filed_at` at the copy; the working copy is untouched, because
+    playback and re-renders come from it.
+    """
     job = jobs.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="No such job")
-    name = str(body.get("name") or "").strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="A project needs a name")
-    if len(name) > 120:
-        raise HTTPException(status_code=400, detail="That name is too long")
-    job["title"] = name
+    name = body.get("name")
+    if name is not None:
+        if not isinstance(name, str):
+            raise HTTPException(status_code=400, detail="name must be text")
+        name = name.strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="A project needs a name")
+        if len(name) > 120:
+            raise HTTPException(status_code=400, detail="That name is too long")
+        job["title"] = name
+
+    folder = body.get("output_dir")
+    if folder is not None:
+        if not isinstance(folder, str):
+            raise HTTPException(status_code=400, detail="output_dir must be text")
+        folder = os.path.expanduser(folder.strip())
+        src = job.get("output_path")
+        if folder and src and os.path.isfile(src):
+            try:
+                os.makedirs(folder, exist_ok=True)
+                stem = _download_name(job_id)
+                lang = job.get("target_language") or "out"
+                suffix = {"subtitled": "_subtitled", "audio": "_audio"}.get(
+                    job.get("kind"), "")
+                ext = os.path.splitext(src)[1] or ".mp4"
+                target = os.path.join(folder, f"{stem}_{lang}{suffix}{ext}")
+                n = 2
+                while os.path.exists(target) and not os.path.samefile(target, src):
+                    target = os.path.join(folder, f"{stem}_{lang}{suffix}_{n}{ext}")
+                    n += 1
+                if not os.path.exists(target):
+                    shutil.copyfile(src, target)
+                job["filed_at"] = target
+                job.pop("filed_error", None)
+            except OSError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not save there: {e}")
+
     project.save(job_id, job)
-    return JSONResponse({"job_id": job_id, "name": name})
+    return JSONResponse({"job_id": job_id, "name": job.get("title"),
+                         "filed_at": job.get("filed_at")})
+
+
+@app.get("/projects/{project_id}/outputs")
+async def project_outputs(project_id: str):
+    """
+    Everything a project has produced, for the media pool.
+
+    Opening a project used to show the one job it was opened on and nothing
+    of the others made from the same clip. This is the list that fixes that.
+    """
+    rows = []
+    for jid, j in jobs.items():
+        if j.get("project_id", jid) != project_id or j.get("status") != "done":
+            continue
+        rows.append({
+            "job_id": jid,
+            "kind": j.get("kind") or "dub",
+            "name": _project_name(j, jid),
+            "url": j.get("url"),
+            "audio": f"/jobs/{jid}/audio/dub" if j.get("dub_path") else None,
+            "filed_at": j.get("filed_at"),
+            "target_language": j.get("target_language"),
+            "subtitle_language": j.get("subtitle_language"),
+            "saved_at": j.get("saved_at"),
+        })
+    rows.sort(key=lambda r: r.get("saved_at") or 0)
+    return JSONResponse({"project_id": project_id, "outputs": rows})
 
 
 @app.get("/videos/")
@@ -2185,14 +2272,26 @@ async def get_videos(user_id: str = "anonymous"):
     list while its files sat untouched on disk. The parameter stays accepted so
     older clients keep working.
     """
-    rows = []
+    # One row per project, not per output. Opening the row opens the job that
+    # founded the project; the studio then lists every output it holds.
+    by_project: dict = {}
     for job_id, job in jobs.items():
         if job.get("status") != "done":
             continue
+        pid = job.get("project_id", job_id)
+        group = by_project.setdefault(pid, [])
+        group.append((job.get("saved_at") or 0, job_id, job))
+
+    rows = []
+    for pid, group in by_project.items():
+        group.sort()
+        _, job_id, job = group[0]
         created = job.get("saved_at")
         rows.append({
-            "id": job_id,
+            "id": pid,
             "job_id": job_id,
+            "project_id": pid,
+            "outputs": len(group),
             "openable": True,
             "title": _project_name(job, job_id),
             "name": _project_name(job, job_id),

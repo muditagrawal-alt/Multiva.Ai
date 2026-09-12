@@ -260,6 +260,7 @@ export default function Home() {
                       </p>
                       <p className="tnum mt-1 truncate text-[10px] text-c-mute">
                         {r.duration || "unknown length"}
+                        {r.outputs && r.outputs > 1 ? ` · ${r.outputs} outputs` : ""}
                         {r.created_at ? ` · ${relativeTime(r.created_at)}` : ""}
                       </p>
 

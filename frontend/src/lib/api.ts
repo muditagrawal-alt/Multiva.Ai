@@ -17,6 +17,8 @@ export type ProcessingStatus =
 export interface VideoRecord {
   video_id?: string;
   id?: string;
+  /** How many outputs this project holds: a dub, a subtitled video, ... */
+  outputs?: number;
   user_id?: string;
   title?: string;
   original_language?: string;
@@ -56,6 +58,8 @@ export interface JobStatus {
   subtitle_mode?: "burned" | "muxed" | null;
   /** Which language was put on the picture. */
   subtitle_language?: string | null;
+  /** The project this output belongs to. Several outputs share one. */
+  project_id?: string;
   job_id: string;
   status: "queued" | "processing" | "done" | "failed" | "cancelled";
   step: string;
@@ -197,6 +201,8 @@ export interface RenderOptions {
   /** For a subtitled video: which language goes on the picture. Defaults to
       the target; the source language skips translation entirely. */
   subtitleLanguage?: string;
+  /** Join an existing project instead of founding a new one. */
+  projectId?: string;
 }
 
 export async function submitVideo(
@@ -218,6 +224,7 @@ export async function submitVideo(
   if (options.subtitleLanguage) {
     params.set("subtitle_language", options.subtitleLanguage);
   }
+  if (options.projectId) params.set("project_id", options.projectId);
 
   const body = new FormData();
   body.append("file", file);
@@ -380,13 +387,32 @@ export const clearPhrase = (id: string, index: number) =>
   request<PhraseResult & { cleared: true }>(
     `/jobs/${encodeURIComponent(id)}/segments/${index}`, { method: "DELETE" });
 
-/** Rename a project. */
-export const renameProject = (id: string, name: string) =>
-  request<{ job_id: string; name: string }>(`/jobs/${encodeURIComponent(id)}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
-  });
+/** Name an output, and optionally say which folder it should be saved to. */
+export const renameProject = (id: string, name: string, outputDir?: string) =>
+  request<{ job_id: string; name: string; filed_at?: string | null }>(
+    `/jobs/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(outputDir ? { name, output_dir: outputDir } : { name }),
+    });
+
+/* --- everything a project has produced ------------------------------------ */
+
+export interface ProjectOutput {
+  job_id: string;
+  kind: JobKind;
+  name: string;
+  url: string | null;
+  audio: string | null;
+  filed_at: string | null;
+  target_language: string | null;
+  subtitle_language: string | null;
+  saved_at: number | null;
+}
+
+export const getProjectOutputs = (projectId: string) =>
+  request<{ project_id: string; outputs: ProjectOutput[] }>(
+    `/projects/${encodeURIComponent(projectId)}/outputs`);
 
 /** Rewrite a phrase until it fits its slot when spoken. */
 export const fitPhrase = (id: string, index: number) =>
@@ -544,13 +570,15 @@ export async function submitVoiceover(
   file: File,
   script: string,
   language: string,
-  name?: string
+  name?: string,
+  projectId?: string
 ): Promise<{ job_id: string }> {
   const params = new URLSearchParams({
     language,
     user_id: userId(),
   });
   if (name) params.set("name", name);
+  if (projectId) params.set("project_id", projectId);
   const body = new FormData();
   body.append("file", file);
   body.append("script", script);

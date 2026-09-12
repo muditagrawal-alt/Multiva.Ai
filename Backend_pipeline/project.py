@@ -24,7 +24,7 @@ VERSION = 1
 # Job keys worth persisting. Deliberately explicit: the job dict also holds
 # transient things (cancel flags, progress strings) that must not come back.
 PERSISTED = (
-    "kind", "status", "step", "filename", "title",
+    "kind", "status", "step", "filename", "title", "project_id",
     "user_id", "video_id", "url", "output_path", "dub_path",
     "reference_path", "reference_text", "reference_seconds",
     "source_language", "target_language", "segment_count",

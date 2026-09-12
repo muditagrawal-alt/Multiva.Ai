@@ -463,6 +463,46 @@ def main() -> int:
               str(sd2.get("subtitle_language")))
         call("DELETE", f"/videos/{s2}")
 
+    # A project holds every output made from its clip. Coming back to one used
+    # to show the single job it was opened on, so a dub and a subtitled video
+    # of the same clip could never be seen together.
+    code, st0 = call("GET", f"/jobs/{job}/status")
+    pid = st0.get("project_id")
+    original_name = st0.get("name") or "selftest"
+    check("a job reports its project", bool(pid), str(st0.get("project_id")))
+    code, sv3 = call("POST", f"/process_video/?original_language=en"
+                             f"&target_language=hi&user_id=selftest"
+                             f"&kind=subtitles&project_id={pid}",
+                     files={"file": (name, clip)})
+    if check("an output can join an existing project", code == 200, str(sv3)[:70]):
+        s3 = sv3["job_id"]
+        state, sd3 = wait_for(s3, timeout=600)
+        check("it rendered", state == "done", f"{state} {sd3.get('error')}")
+        check("and belongs to the same project", sd3.get("project_id") == pid,
+              f"{sd3.get('project_id')} != {pid}")
+        code, outs = call("GET", f"/projects/{pid}/outputs")
+        ids = {o["job_id"] for o in outs.get("outputs", [])}
+        check("the project lists both outputs", code == 200 and {job, s3} <= ids,
+              f"listed {len(ids)}")
+        code, rows = call("GET", "/videos/")
+        mine = [r for r in rows if r.get("project_id") == pid]
+        check("and the projects page shows one row for them",
+              len(mine) == 1 and mine[0].get("outputs", 0) >= 2,
+              f"{len(mine)} rows, outputs={mine[0].get('outputs') if mine else '-'}")
+        # Naming an output can also say where it lives.
+        import tempfile
+        chosen = tempfile.mkdtemp()
+        code, rn = call("PATCH", f"/jobs/{s3}", {"name": "Named output",
+                                                  "output_dir": chosen})
+        check("an output can be named", code == 200 and rn.get("name") == "Named output",
+              str(rn)[:70])
+        # A text-only output has no file to move, so the folder is ignored
+        # for it; the refusal is checked on the dub, which has a video.
+        code, _ = call("PATCH", f"/jobs/{job}", {"name": original_name,
+                                                  "output_dir": "/nonexistent/x"})
+        check("an unwritable folder is refused", code == 400, f"got {code}")
+        call("DELETE", f"/videos/{s3}")
+
     # Whatever a run produced has to be savable, not only playable.
     for path, what in ((f"/jobs/{job}/video?download=1", "the video"),
                        (f"/jobs/{job}/audio/dub?download=1", "the audio"),

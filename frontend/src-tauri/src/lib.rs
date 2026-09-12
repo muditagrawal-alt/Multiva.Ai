@@ -280,6 +280,8 @@ fn show_studio(app: &tauri::AppHandle, port: u16) {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_log::Builder::new().build())
+        // The folder sheet behind "Browse…" when naming an output.
+        .plugin(tauri_plugin_dialog::init())
         .manage(Server::default())
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {

@@ -21,7 +21,8 @@ import {
 import {
   getLanguages, getHealth, submitVideo, submitVoiceover, cancelJob, getJob,
   getPhrases, revisePhrase, phraseAudioUrl, rerenderVideo, fitPhrase, clearPhrase,
-  downloadUrl, downloadAudioUrl, revealRender,
+  downloadUrl, downloadAudioUrl, revealRender, getProjectOutputs, renameProject,
+  type ProjectOutput,
   undoPhrase, fitOf,
   getReferenceWindows, chooseReference,
   EXPORTS, exportUrl, langName,
@@ -36,6 +37,7 @@ import { Timeline } from "@/components/timeline";
 import { CloneProgress } from "@/components/progress";
 import { stagesFor, readProgress, percent, type JobKind } from "@/lib/pipeline";
 import { Settings } from "@/components/Settings";
+import { inWindow, pickFolder } from "@/lib/native";
 import { cx } from "@/lib/cx";
 
 const MAX_MB = 200;
@@ -124,6 +126,15 @@ export default function Studio() {
   // Which language goes on the picture for a subtitled video. Empty means the
   // one being translated into.
   const [subtitleLang, setSubtitleLang] = useState("");
+  // The project this studio session belongs to. Set when an existing project
+  // is opened, or by the first render of a new one; every render after that
+  // joins it, so a dub and a subtitled video of the same clip live together.
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [outputs, setOutputs] = useState<ProjectOutput[]>([]);
+  // After a render: what to call it, and where it should live.
+  const [naming, setNaming] = useState<{ jobId: string; kind: JobKind } | null>(null);
+  const [outputName, setOutputName] = useState("");
+  const [outputDir, setOutputDir] = useState("");
   // A phrase lifted off the timeline. Words and delivery travel together:
   // pasting the words without the seed would speak them in a different draw.
   const [clip, setClip] = useState<{ text: string; seed: number | null } | null>(null);
@@ -199,6 +210,9 @@ export default function Studio() {
         setView(s.status === "done" ? "done" : "idle");
         setTab(s.url || s.dub_audio ? "dub" : "source");
         if (s.status === "done") setPage("deliver");
+        const pid = s.project_id ?? id;
+        setProjectId(pid);
+        getProjectOutputs(pid).then((r) => live && setOutputs(r.outputs)).catch(() => {});
         if (s.editable) {
           getPhrases(id).then((t) => live && setPhrases(t.segments)).catch(() => {});
           getReferenceWindows(id).then((r) => live && setWindows(r.candidates)).catch(() => {});
@@ -302,6 +316,7 @@ export default function Studio() {
     setOpened(null);
     setTrimIn(null); setTrimOut(null); setMusic(null); setPhraseNote("");
     setPage("media"); setRestarting(false);
+    setProjectId(null); setOutputs([]); setNaming(null);
     setPreview((old) => { if (old) URL.revokeObjectURL(old); return ""; });
   }
 
@@ -329,6 +344,13 @@ export default function Studio() {
           setView("done");
           setTab(s.url || s.dub_audio ? "dub" : "source");
           setPage("deliver");
+          const pid = s.project_id ?? job_id;
+          setProjectId(pid);
+          getProjectOutputs(pid).then((r) => setOutputs(r.outputs)).catch(() => {});
+          // Ask what to call it now, while it is fresh, rather than leaving a
+          // job id in the media pool.
+          setOutputName(s.name || "");
+          setNaming({ jobId: job_id, kind: (s.kind ?? "dub") as JobKind });
           setStale(Boolean(s.video_stale));
           if (s.editable) {
             getPhrases(job_id).then((t) => setPhrases(t.segments)).catch(() => setPhrases(null));
@@ -375,6 +397,52 @@ export default function Studio() {
     const audio = new Audio(phraseAudioUrl(jobId.current, index));
     phrasePlayer.current = audio;
     void audio.play().catch(() => setPhraseNote("That phrase has no audio yet."));
+  }
+
+  // Show one of the project's outputs. Loading its job puts its video or
+  // audio in the viewer and its phrases on the timeline, exactly as if it had
+  // just been rendered.
+  async function openOutput(o: ProjectOutput) {
+    if (job?.job_id === o.job_id) return;
+    try {
+      const s = await getJob(o.job_id);
+      jobId.current = o.job_id;
+      setJob(s);
+      setView("done");
+      setStale(Boolean(s.video_stale));
+      setTab(s.url || s.dub_audio ? "dub" : "source");
+      setSelected(null);
+      if (s.editable) {
+        getPhrases(o.job_id).then((t) => setPhrases(t.segments)).catch(() => setPhrases(null));
+      } else {
+        setPhrases(null);
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
+
+  // Name the output that just finished, and optionally move it. Both fields
+  // default to what would happen anyway, so pressing Enter changes nothing.
+  async function nameOutput() {
+    if (!naming) return;
+    const id = naming.jobId;
+    const nm = outputName.trim();
+    const dir = outputDir.trim();
+    try {
+      if (nm || dir) {
+        const r = await renameProject(id, nm || (job?.name ?? "output"), dir || undefined);
+        setJob((j) => (j && j.job_id === id
+          ? { ...j, name: r.name, filed_at: r.filed_at ?? j.filed_at } : j));
+        if (projectId) {
+          getProjectOutputs(projectId).then((x) => setOutputs(x.outputs)).catch(() => {});
+        }
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setNaming(null);
+    }
   }
 
   async function refreshPhrases() {
@@ -546,7 +614,8 @@ export default function Studio() {
 
     try {
       const { job_id } = mode === "voiceover"
-        ? await submitVoiceover(file, script, target, name || undefined)
+        ? await submitVoiceover(file, script, target, name || undefined,
+                                projectId ?? undefined)
         : await submitVideo(file, source, target, {
             trimStart: trimIn,
             trimEnd: trimOut,
@@ -556,6 +625,7 @@ export default function Studio() {
             name: name || undefined,
             subtitleLanguage: mode === "subtitled" && subtitleLang
               ? subtitleLang : undefined,
+            projectId: projectId ?? undefined,
           });
       jobId.current = job_id;
       watch(job_id);
@@ -719,6 +789,47 @@ export default function Studio() {
                   Clear
                 </Tool>
               </div>
+
+              {/* Everything this project has produced. Coming back to a
+                  project used to show only the job it was opened on, so a dub
+                  and a subtitled video of the same clip could never be seen
+                  together. Hover for where it lives; click to play it. */}
+              {outputs.length > 0 && (
+                <>
+                  <Sub>Outputs</Sub>
+                  {outputs.map((o) => {
+                    const active = job?.job_id === o.job_id;
+                    const label = OUTPUTS.find((x) => x.kind === o.kind)?.label ?? o.kind;
+                    return (
+                      <button
+                        key={o.job_id}
+                        type="button"
+                        title={o.filed_at
+                          ? `Saved at ${o.filed_at}`
+                          : "Not saved to the output folder"}
+                        onClick={() => openOutput(o)}
+                        className={cx(
+                          "flex w-full items-center gap-2 border-b border-c-edge px-2 py-1.5 text-left transition-colors",
+                          active ? "bg-c-accent-dim/40" : "hover:bg-c-hover"
+                        )}
+                      >
+                        <div className={cx(
+                          "grid h-[26px] w-[46px] shrink-0 place-items-center rounded-[2px] bg-black text-[8px] uppercase tracking-[0.1em]",
+                          o.url ? "text-c-good" : o.audio ? "text-c-warn" : "text-c-mute"
+                        )}>
+                          {o.url ? "video" : o.audio ? "audio" : "text"}
+                        </div>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[11px] text-c-text">{o.name}</span>
+                          <span className="block truncate text-[10px] text-c-mute">
+                            {label}{o.subtitle_language ? ` · ${o.subtitle_language}` : ""}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </>
           )}
 
@@ -1442,6 +1553,86 @@ export default function Studio() {
       </StatusBar>
 
       {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+
+      {/* Name what just finished, and say where it should live. Defaults are
+          what would happen anyway, so Enter is a fine answer. */}
+      {naming && (
+        <div
+          className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4"
+          onClick={() => setNaming(null)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-[420px] rounded-[2px] border border-c-rule bg-c-panel p-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Name this output"
+          >
+            <h2 className="text-[13px] text-c-text">
+              {OUTPUTS.find((o) => o.kind === naming.kind)?.label ?? "Output"} finished
+            </h2>
+            <p className="mt-1 text-[11px] leading-relaxed text-c-mute">
+              Give it a name you will recognise in the media pool and in Finder.
+            </p>
+            <label htmlFor="output-name" className="mt-3 block text-[10px] uppercase tracking-[0.12em] text-c-mute">
+              Name
+            </label>
+            <input
+              id="output-name"
+              autoFocus
+              value={outputName}
+              onChange={(e) => setOutputName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") nameOutput();
+                if (e.key === "Escape") setNaming(null);
+              }}
+              placeholder={projectName}
+              maxLength={120}
+              className="mt-1 h-[28px] w-full rounded-[2px] border border-c-rule bg-c-well px-2 text-[12px] text-c-text outline-none focus:border-c-accent"
+            />
+            <label htmlFor="output-dir" className="mt-3 block text-[10px] uppercase tracking-[0.12em] text-c-mute">
+              Save to
+            </label>
+            {/* A native folder sheet where the window can offer one; the
+                field stays either way, so a path can always be typed. */}
+            <div className="mt-1 flex gap-1">
+              <input
+                id="output-dir"
+                value={outputDir}
+                onChange={(e) => setOutputDir(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") nameOutput(); }}
+                placeholder={job?.filed_at
+                  ? job.filed_at.split("/").slice(0, -1).join("/")
+                  : "Your output folder from setup"}
+                className="h-[28px] min-w-0 flex-1 rounded-[2px] border border-c-rule bg-c-well px-2 font-mono text-[11px] text-c-text outline-none focus:border-c-accent"
+              />
+              {inWindow() && (
+                <Tool
+                  className="h-[28px] shrink-0"
+                  onClick={async () => {
+                    const picked = await pickFolder(
+                      outputDir || (job?.filed_at
+                        ? job.filed_at.split("/").slice(0, -1).join("/")
+                        : undefined));
+                    if (picked) setOutputDir(picked);
+                  }}
+                >
+                  Browse…
+                </Tool>
+              )}
+            </div>
+            <p className="mt-1 text-[10px] leading-relaxed text-c-mute">
+              Leave blank to keep it in your output folder. A folder here copies
+              it there as well.
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <Tool primary onClick={nameOutput} className="h-[26px]">Save</Tool>
+              <Tool onClick={() => setNaming(null)} className="h-[26px]">Keep as is</Tool>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
