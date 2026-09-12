@@ -33,7 +33,7 @@ The whole thing, start to finish, on a 46-second clip: choosing the models, star
 |---|---|
 | **Languages** | Hindi, Marathi, Bengali, Assamese, Tamil, Telugu, Kannada, Malayalam, Gujarati, Punjabi, Odia, Urdu (IndicF5) · English, Spanish, French, German, Japanese, Chinese, Arabic and 9 more (XTTS, optional) |
 | **Runs on** | Apple silicon (MPS), CUDA, or CPU. Developed on an M4 / 24 GB |
-| **Speed** | Roughly 12–15× realtime. An offline batch tool, not a live one |
+| **Speed** | About 10× realtime on an M4: the 46 s demo clip renders in 8 min. An offline batch tool, not a live one |
 | **Cloning** | Zero-shot from 6–12 s of the speaker. No training, no fine-tuning |
 | **Storage** | Local only. No database, no object store, no telemetry |
 
@@ -229,7 +229,7 @@ That is why this repo has an evaluation harness. Every failure here had the same
 
 ## Known limits
 
-- **Roughly 12–15× realtime.** A 2-minute video takes about 25 minutes. TTS dominates, and batching does not help (measured) because the cost is DiT sampling itself.
+- **About 10× realtime.** Measured on an M4 / 24 GB with warm models: the 46-second demo clip takes 8:16, so a 2-minute clip takes about 20 minutes. Voice synthesis is 69% of that (IndicF5 samples a diffusion transformer per phrase; batching does not help, measured), transcription 14% (Whisper on CPU), lip sync 13%. An audio-only dub skips the lip sync; a second output of the same clip reuses the transcript and translation and takes seconds.
 - **One voice per video.** Whisper does not diarize, so multi-speaker footage gets a single cloned voice. This is the largest capability gap.
 - **Talking-head video only.** Wav2Lip needs a visible, roughly front-facing face, and generates a 96×96 mouth — on 1080p footage this is the most visible weakness.
 - **IndicF5 articulates faster than some speakers.** `fix_duration` sets total length; the model pads rather than slows when given more.

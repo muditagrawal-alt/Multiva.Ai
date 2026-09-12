@@ -1393,7 +1393,7 @@ export default function Studio() {
             {mode === "dub" && <Stat k="Lip sync" v="Wav2Lip" />}
             <p className="px-2.5 pb-1 pt-1.5 text-[10px] leading-relaxed text-c-mute">
               {mode === "dub"
-                ? "All four run on this machine. Synthesis is the slow stage, at roughly six times realtime."
+                ? "All four run on this machine. Synthesis is the slow stage, at roughly seven times realtime; the whole render lands near ten."
                 : "Both run on this machine. The reference clip is only read for its voice, never for its words."}
             </p>
 

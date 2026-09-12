@@ -229,7 +229,8 @@ not.
   non-commercial and its dependency tree is enormous. The twelve Indian
   languages work out of the box. To enable the rest:
   `pip install "TTS>=0.22.0"`. Subtitles work in every language regardless.
-- **Roughly 12–15× realtime.** A 2-minute video takes about 25 minutes.
+- **About 10× realtime.** The 46-second clip takes about 8 minutes; a
+  2-minute video about 20. Voice synthesis is two thirds of it.
 - **One heavy job at a time.** Editing a phrase while a render runs will say
   the engine is busy rather than queueing.
 - **Talking-head video only.** Wav2Lip needs a visible, roughly front-facing
