@@ -21,7 +21,7 @@ plan.
 - **`main` is fully contained in `studio-rebuild`.** Making this branch the
   default is a fast-forward: no commit and no file is lost.
   `git merge-base --is-ancestor main studio-rebuild` returns true.
-- **The three contributors wrote 20 real commits** — 7, 7 and 6 each,
+- **The three earlier contributors wrote 20 real commits** — 7, 7 and 6 each,
   between 2026-02-20 and 2026-04-19 — and all are ancestors of this
   branch. Their code (`Database/`, the old HTML frontend, `Demo.py`) is already
   deleted; the commits are not. Needs a decision, see 0.2.
