@@ -279,6 +279,24 @@ def main() -> int:
         print(f"        transcript covers {covered / video_dur * 100:.0f}% "
               f"of the clip")
 
+    # A transcript that got stuck - "भाजपा के लिए" six times in a row - was
+    # translated and spoken as if it were said. Nothing should repeat like
+    # that, and no translation should come back with no letters in it.
+    from collections import Counter
+    # Several phrases can come from one source segment, so its text is
+    # deduplicated first or the segment itself reads as a loop.
+    sources = list(dict.fromkeys(p.get("source_text") or "" for p in phrases))
+    for label, texts in (("transcript", sources),
+                         ("translation", [p["text"] for p in phrases])):
+        words = " ".join(texts).split()
+        tri = Counter(tuple(words[i:i + 3]) for i in range(max(0, len(words) - 2)))
+        loops = [g for g, c in tri.items() if c >= 3]
+        check(f"no repetition loop in the {label}", not loops,
+              f"{' '.join(loops[0])!r} x{tri[loops[0]]}" if loops else "")
+    empty = [p["text"] for p in phrases
+             if sum(1 for c in p["text"] if c.isalpha()) < 2]
+    check("every phrase has words in it", not empty, str(empty[:2]))
+
     thin = [p for p in phrases if len(p["text"].split()) < 2]
     check("no one-word phrases", not thin, f"{[p['text'] for p in thin]}")
     print(f"        {len(phrases)} phrases")

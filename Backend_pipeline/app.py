@@ -378,11 +378,24 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             input_path, os.path.join(workdir, f"{stem}_stt.wav"), 16000, 1)
 
         # ── 2. Transcribe with word timestamps ──
-        _set(job_id, step="transcribing")
-        result = transcribe_audio(stt_audio)
-        segments = result.get("segments") or []
-        original_text = result.get("text", "")
-        _set(job_id, original_text=original_text)
+        # Or take a sibling's, if this project already transcribed this clip.
+        sibling = _reusable_sibling(job_id, video_dur,
+                                    original_language if original_language != "auto" else None)
+        if sibling and sibling.get("word_segments"):
+            segments = list(sibling["word_segments"])
+            original_text = sibling.get("original_text") or " ".join(
+                (sg.get("text") or "") for sg in segments).strip()
+            _set(job_id, step="transcribing", original_text=original_text,
+                 reused_from=sibling.get("job_id") or "sibling")
+            print(f"[APP] Job {job_id} reused the transcript from a sibling "
+                  f"({len(segments)} segments), skipping transcription")
+        else:
+            sibling = None
+            _set(job_id, step="transcribing")
+            result = transcribe_audio(stt_audio)
+            segments = result.get("segments") or []
+            original_text = result.get("text", "")
+            _set(job_id, original_text=original_text)
 
         if not segments:
             raise RuntimeError(
@@ -391,13 +404,17 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
         # Prefer what the user selected; fall back to detection. The old code
         # ignored the UI value entirely and trusted Whisper, which mis-detects
         # on short or accented audio and then mistranslates the whole video.
-        source_language = original_language or result.get("language")
+        # With a reused transcript there was no detection; the sibling's
+        # language is the detection.
+        detected = (sibling.get("source_language") if sibling
+                    else result.get("language"))
+        source_language = original_language or detected
         try:
             source_language = L.normalize(source_language)
         except L.UnsupportedLanguage:
-            source_language = L.normalize(result.get("language") or "en")
+            source_language = L.normalize(detected or "en")
         print(f"[APP] Source language: {source_language} "
-              f"(detected {result.get('language')}, requested {original_language})")
+              f"(detected {detected}, requested {original_language})")
 
         seg_rows = [{"start": float(sg.get("start", 0.0)),
                      "end": float(sg.get("end", 0.0)),
@@ -428,10 +445,19 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                 os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
 
         # ── 4. Translate segment by segment ──
-        _set(job_id, step="translating")
-        translated = translate_segments(segments, source_language, target_language)
-        from translation_v2 import fix_code_switching
-        translated = fix_code_switching(translated, target_language)
+        # A sibling that translated into the same language has this too.
+        if (sibling and sibling.get("target_language") == target_language
+                and sibling.get("translated_segments")
+                and len(sibling["translated_segments"]) == len(segments)):
+            translated = list(sibling["translated_segments"])
+            _set(job_id, step="translating")
+            print(f"[APP] Job {job_id} reused the {target_language} translation "
+                  f"from the same sibling, skipping translation")
+        else:
+            _set(job_id, step="translating")
+            translated = translate_segments(segments, source_language, target_language)
+            from translation_v2 import fix_code_switching
+            translated = fix_code_switching(translated, target_language)
         _set(job_id, translated_text=" ".join(t for t in translated if t).strip())
 
         if not any(t.strip() for t in translated):
@@ -2161,6 +2187,36 @@ def _project_name(job: dict, job_id: str) -> str:
     if name:
         return name
     return job.get("filename") or job_id
+
+
+def _reusable_sibling(job_id: str, video_dur: float, source_language: str):
+    """
+    A finished job in the same project that already transcribed this clip.
+
+    A dub and a subtitled video of one clip used to run Whisper and NLLB
+    twice each - minutes of work for the same answer, and two chances for
+    the transcripts to disagree. The second output takes the first one's
+    transcript, and its translation too if the target language matches.
+
+    The match is deliberately strict: same project, same clip length to the
+    hundredth, same source language. A trim changes the length and so is a
+    different clip.
+    """
+    me = jobs.get(job_id) or {}
+    pid = me.get("project_id", job_id)
+    best = None
+    for jid, j in jobs.items():
+        if jid == job_id or j.get("project_id", jid) != pid:
+            continue
+        if j.get("status") != "done" or not j.get("segments"):
+            continue
+        if abs(float(j.get("video_duration") or 0) - float(video_dur)) > 0.01:
+            continue
+        if source_language and j.get("source_language") not in (None, source_language):
+            continue
+        if best is None or (j.get("saved_at") or 0) > (best.get("saved_at") or 0):
+            best = j
+    return best
 
 
 def _project_for(requested, job_id: str) -> str:

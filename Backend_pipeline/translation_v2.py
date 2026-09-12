@@ -312,7 +312,31 @@ def translate_batch(texts: list, source_lang: str, target_lang: str,
         for k, text in enumerate(decoded):
             out[order[start + k]] = text.strip()
 
+    # NLLB degrades on a heavily padded row. A four-word Hindi segment
+    # batched beside a thirty-token one came back as "-  -", on CPU and MPS
+    # alike, while the same words alone translate correctly every time. A
+    # result with no letters in it is not a translation; do that one again
+    # by itself, where there is no padding to poison it.
+    for i in order:
+        if _degenerate(out[i]) and (texts[i] or "").strip():
+            solo = tokenizer([texts[i].strip()], return_tensors="pt",
+                             truncation=True, max_length=512).to(DEVICE)
+            with torch.no_grad():
+                again = model.generate(
+                    **solo, forced_bos_token_id=tgt_id, max_new_tokens=512,
+                    num_beams=beams, num_return_sequences=1,
+                    no_repeat_ngram_size=4, repetition_penalty=1.1)
+            retried = tokenizer.batch_decode(again, skip_special_tokens=True)[0].strip()
+            print(f"[Translation-v2] Re-translated a segment alone: "
+                  f"{out[i]!r} -> {retried[:40]!r}")
+            out[i] = retried
+
     return out
+
+
+def _degenerate(text: str) -> bool:
+    """A translation with fewer than two letters in it is not one."""
+    return sum(1 for c in (text or "") if c.isalpha()) < 2
 
 
 def translate_segments(segments: list, source_lang: str, target_lang: str,
