@@ -30,14 +30,14 @@ from, A2 is the result; both waveforms are decoded from the actual audio.*
 
 ## Install
 
-Python 3.10 and ffmpeg. The studio interface ships built, so Node is only
-needed if you want to change it. Rust is only needed for the native desktop
-window; without it the studio opens in a browser, running entirely on your
-machine either way.
+Python 3.10, ffmpeg, and Rust. Multiva is a desktop application: the studio
+is a native window, and Rust builds it once. The interface files ship built,
+so Node is only needed if you want to change them.
 
 ```bash
 # macOS:  brew install python@3.10 ffmpeg
 # Ubuntu: sudo apt install python3.10 python3.10-venv ffmpeg
+# Rust, any platform:  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 git clone https://github.com/muditagrawal-alt/Multiva.Ai
 cd Multiva.Ai
@@ -57,36 +57,22 @@ are all local.
 
 ## Run it
 
-**One command.** Checks what is needed, builds the interface the first time,
-starts Ollama if it is installed, and opens the studio window once the engine
-is ready. It opens the desktop app when one has been built and falls back to a
-browser when it has not.
+**One command.** Checks what is needed, sets up anything missing - the
+Python environment, the models, the window itself - starts Ollama if it is
+installed, and opens the studio once the engine is ready.
 
 ```bash
-./run.sh                    # desktop window, local model through Ollama
-./run.sh --web              # in a browser instead
-./run.sh --provider groq    # a hosted script model
+./run.sh
+./run.sh --provider groq
 ```
 
-**As a desktop app.** Needs the Rust toolchain, and is not prebuilt: there is no
-release to download yet, so the window has to be compiled once. `./run.sh`
-falls back to the browser until it exists.
+Everything runs on this machine. There is no browser mode and no hosted
+version: the engine listens on `127.0.0.1` only, and the only thing that can
+ever leave the machine is one line of translated text, if you choose a hosted
+script model.
 
-```bash
-cd frontend && npm install && npm run build
-cd src-tauri && cargo run          # cargo tauri build for an installer
-```
-
-**Or as a local service**, if you would rather use a browser. The interface is
-a build artefact and is not in the repository, so build it once first.
-
-```bash
-cd frontend && npm install && npm run build && cd ..
-
-cd Backend_pipeline
-../venv/bin/python -m uvicorn app:app --port 8000
-# then open http://127.0.0.1:8000/app/
-```
+The first run builds the window, which takes a few minutes and happens once.
+Every run after that opens in seconds.
 
 **Check the whole thing works**, end to end, against a clip of your own:
 

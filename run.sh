@@ -3,7 +3,6 @@
 # Start Multiva: check what it needs, start what is missing, open the studio.
 #
 #   ./run.sh                  desktop app, local model through Ollama
-#   ./run.sh --web            in a browser instead of the desktop window
 #   ./run.sh --provider groq  a hosted script model
 #   ./run.sh --port 8123      somewhere other than 8000
 #   ./run.sh --fresh          as a brand new user, without touching your setup
@@ -26,7 +25,6 @@ ASSUME_YES=0
 SANDBOX_DIR=""
 PROVIDER=ollama
 MODEL=""
-MODE=desktop
 while [ $# -gt 0 ]; do
     case "$1" in
         --provider) PROVIDER="${2:-}"; shift 2 ;;
@@ -35,8 +33,6 @@ while [ $# -gt 0 ]; do
         --fresh)    FRESH=1;           shift ;;
         --yes|-y)   ASSUME_YES=1;      shift ;;
         --sandbox)  FRESH=1; SANDBOX_DIR="${2:-}"; shift 2 ;;
-        --web)      MODE=web;          shift ;;
-        --desktop)  MODE=desktop;      shift ;;
         -h|--help)  sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Unknown option: $1"; exit 2 ;;
     esac
@@ -170,32 +166,40 @@ else
     say "Script model: ${PROVIDER}${MODEL:+ / $MODEL} (hosted)."
 fi
 
-# --- the desktop window, unless a browser was asked for --------------------
+# --- the desktop window ------------------------------------------------------
+# This is a desktop application. There is no browser mode: the studio runs on
+# this machine, and it opens as a window on this machine. If the window has
+# not been built yet, build it - that needs the Rust toolchain, which is the
+# one thing beyond Python and ffmpeg the desktop app depends on.
 APP_BUNDLE="frontend/src-tauri/target/release/bundle/macos/Multiva Studio.app"
 APP_LINUX="frontend/src-tauri/target/release/multiva-studio"
 DESKTOP=""
-if [ "$MODE" = "desktop" ]; then
-    if [ -d "$APP_BUNDLE" ]; then
-        DESKTOP="$APP_BUNDLE"
-    elif [ -x "$APP_LINUX" ]; then
-        DESKTOP="$APP_LINUX"
-    else
-        say "No desktop build found, opening in a browser instead."
-        say "Build the desktop app with:  cd frontend/src-tauri && cargo build --release"
-        MODE=web
+[ -d "$APP_BUNDLE" ] && DESKTOP="$APP_BUNDLE"
+[ -z "$DESKTOP" ] && [ -x "$APP_LINUX" ] && DESKTOP="$APP_LINUX"
+
+if [ -z "$DESKTOP" ]; then
+    command -v cargo >/dev/null 2>&1 || fail "The desktop window has not been built, and Rust is not installed.
+Install it from https://rustup.rs, then start Multiva again and it will build itself.
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+    say ""
+    say "The desktop window has not been built yet. Building it takes a few"
+    say "minutes the first time and happens once."
+    say ""
+    if ! confirm "Build it now?"; then
+        fail "Nothing was changed. When you are ready:
+    cd frontend && npx tauri build"
     fi
+    ( cd frontend && npx --yes tauri build ) || fail "The build did not finish. The output above says why."
+    [ -d "$APP_BUNDLE" ] && DESKTOP="$APP_BUNDLE"
+    [ -z "$DESKTOP" ] && [ -x "$APP_LINUX" ] && DESKTOP="$APP_LINUX"
+    [ -n "$DESKTOP" ] || fail "The build finished but produced no window. Check frontend/src-tauri/target/release."
+    say "Window built."
 fi
 
 # --- do not fight something already on the port ----------------------------
 if lsof -ti:"$PORT" >/dev/null 2>&1; then
-    say "Something is already serving port ${PORT}; opening that instead."
-    if [ -n "$DESKTOP" ]; then
-        open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
-    else
-        open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-            || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-            || say "Open http://127.0.0.1:${PORT}/app/"
-    fi
+    say "An engine is already running on port ${PORT}; opening the window on it."
+    open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
     exit 0
 fi
 
@@ -204,14 +208,8 @@ fi
     for _ in $(seq 1 300); do
         if curl -sf --max-time 2 "http://127.0.0.1:${PORT}/api/boot" 2>/dev/null \
              | grep -q '"ready": *true'; then
-            if [ -n "$DESKTOP" ]; then
-                printf '\n  Engine ready. Opening the studio window.\n\n'
-                open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
-            else
-                printf '\n  Studio ready at http://127.0.0.1:%s/app/\n\n' "$PORT"
-                open "http://127.0.0.1:${PORT}/app/" 2>/dev/null \
-                    || xdg-open "http://127.0.0.1:${PORT}/app/" 2>/dev/null
-            fi
+            printf '\n  Engine ready. Opening the studio window.\n\n'
+            open "$DESKTOP" 2>/dev/null || "$DESKTOP" >/dev/null 2>&1 &
             exit 0
         fi
         sleep 1
