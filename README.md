@@ -26,7 +26,7 @@ The whole thing, start to finish, on a 46-second clip: choosing the models, star
     <img src="docs/media/demo-poster.png" alt="Watch the demo: from setup to a finished Hindi dub" width="100%">
   </a>
   <br>
-  <sub>▶ <a href="docs/media/demo.mp4">docs/media/demo.mp4</a> — 1:52, 1440×900, with sound. The ten-minute render is shown at 43×; everything else is real time.</sub>
+  <sub>▶ <a href="docs/media/demo.mp4">docs/media/demo.mp4</a> — 1:52, with sound and captions that explain each step. The ten-minute render is shown at 43×; everything else is real time.</sub>
 </p>
 
 | | |
