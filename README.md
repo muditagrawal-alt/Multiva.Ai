@@ -287,6 +287,11 @@ That, not the reference window, is where the next real gain is.
   Bundling Python and the weights is not done.
 - Translation quality on poetry and heavy code-switching is weak; NLLB is a
   sentence-level model.
+- **Burned subtitles use the fonts already on the machine.** Each cue is
+  drawn in whichever installed font holds its letters: macOS ships one per
+  Indian script, Windows has Nirmala, and Ubuntu needs
+  `sudo apt install fonts-noto-core fonts-noto-cjk` before Indic captions
+  come out as letters rather than boxes. The self test checks this per script.
 
 ---
 

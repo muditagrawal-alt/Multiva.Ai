@@ -72,38 +72,143 @@ def plain(segments: list, texts: list | None = None) -> str:
     return "\n".join(body for _, _, body in cues(segments, texts)) + "\n"
 
 
-# Fonts that actually have the glyphs. Devanagari and Arabic need real
-# shaping, not a fallback box per codepoint, so the search is ordered by what
-# covers the most scripts.
+# Every font that might hold the glyphs. The choice is made per cue, by
+# checking which of these actually covers the characters in the text - a
+# fixed order was the bug: Devanagari Sangam MN exists on every Mac and has
+# no Telugu in it at all, so every Telugu subtitle rendered as a row of
+# boxes. Per-script fonts come first so they win over the broad ones when
+# coverage is equal; they are drawn for that script.
 _FONT_CANDIDATES = [
+    # Latin first: a Latin-only cue then lands in a Latin face rather than
+    # whichever Indic font happens to carry ASCII as well.
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+    # macOS, one per script
     "/System/Library/Fonts/Supplemental/Devanagari Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Telugu Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Tamil Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Kannada Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Malayalam Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Bangla Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Gujarati Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Gurmukhi Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Oriya Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Sinhala Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Myanmar Sangam MN.ttc",
+    "/System/Library/Fonts/Supplemental/Khmer Sangam MN.ttf",
+    "/System/Library/Fonts/Supplemental/Lao Sangam MN.ttf",
+    "/System/Library/Fonts/GeezaPro.ttc",
+    "/System/Library/Fonts/ThonburiUI.ttc",
+    "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    # Linux, one per script
+    "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansTelugu-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansTamil-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansKannada-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansMalayalam-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansBengali-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansGujarati-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansGurmukhi-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansOriya-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansSinhala-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf",
+    # Windows: Nirmala carries every Indian script
+    "C:/Windows/Fonts/Nirmala.ttc",
+    # broad, for whatever is left
     "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
     "/Library/Fonts/Arial Unicode.ttf",
-    "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    "C:/Windows/Fonts/Nirmala.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
     "C:/Windows/Fonts/arialuni.ttf",
+    "C:/Windows/Fonts/msyh.ttc",
 ]
+
+_CMAP_CACHE: dict = {}
+
+
+def _cmap(path: str):
+    """The codepoints a font file can draw, read once and kept."""
+    if path in _CMAP_CACHE:
+        return _CMAP_CACHE[path]
+    try:
+        import logging
+        from fontTools.ttLib import TTFont
+        # fontTools grumbles about padding bytes in some system fonts; it
+        # is nothing anyone can act on.
+        logging.getLogger("fontTools").setLevel(logging.ERROR)
+        cmap = set(TTFont(path, fontNumber=0, lazy=True).getBestCmap().keys())
+    except Exception:                                        # noqa: BLE001
+        cmap = set()
+    _CMAP_CACHE[path] = cmap
+    return cmap
 
 # Beyond this many cues the filtergraph gets unreasonable, and a muxed track
 # is the better trade.
 MAX_BURN_CUES = 80
 
 
-def _font(size: int):
+def _font(size: int, text: str = ""):
+    """
+    The installed font that can draw the most of `text`.
+
+    Ties go to whichever is listed first, which puts a script's own font
+    ahead of a broad one. With no text to judge by, the first font that
+    exists is fine.
+    """
     from PIL import ImageFont
-    for path in _FONT_CANDIDATES:
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size)
-            except Exception:                                # noqa: BLE001
-                continue
-    return None
+    present = [p for p in _FONT_CANDIDATES if os.path.exists(p)]
+    if not present:
+        return None
+    # Letters only. Spaces, digits and punctuation are in every font and
+    # would only dilute the score.
+    need = {ord(c) for c in text if c.isalpha()}
+    best, best_hit = present[0], -1
+    if need:
+        for path in present:
+            hit = len(need & _cmap(path))
+            if hit > best_hit:
+                best, best_hit = path, hit
+            if hit == len(need):
+                break
+        if best_hit == 0:
+            print(f"[Subtitles] No installed font covers this text; "
+                  f"it will show as boxes: {text[:40]!r}")
+    try:
+        return ImageFont.truetype(best, size)
+    except Exception:                                        # noqa: BLE001
+        return None
+
+
+def _pieces(draw, word: str, font, max_width: int) -> list:
+    """
+    A word no wider than the line, in as many pieces as that takes.
+
+    Chinese, Japanese and Thai have no spaces to wrap on, so a whole cue
+    arrives as one "word"; a URL read out loud does the same in any language.
+    Without this they run off both edges of the picture.
+    """
+    if draw.textlength(word, font=font) <= max_width:
+        return [word]
+    import unicodedata
+    pieces, cur = [], ""
+    for ch in word:
+        # A vowel sign or tone mark stays with the letter it sits on.
+        joins = unicodedata.category(ch) in ("Mn", "Mc")
+        if cur and not joins and draw.textlength(cur + ch, font=font) > max_width:
+            pieces.append(cur)
+            cur = ch
+        else:
+            cur += ch
+    if cur:
+        pieces.append(cur)
+    return pieces
 
 
 def _wrap(draw, text: str, font, max_width: int) -> list:
     """Greedy wrap on spaces, measured in the font actually being drawn."""
-    words, lines, line = text.split(), [], ""
+    words = [p for w in text.split() for p in _pieces(draw, w, font, max_width)]
+    lines, line = [], ""
     for w in words:
         trial = f"{line} {w}".strip()
         if draw.textlength(trial, font=font) <= max_width or not line:
@@ -126,7 +231,7 @@ def _render_cue(text: str, video_w: int, font_size: int, path: str) -> bool:
     """
     from PIL import Image, ImageDraw
 
-    font = _font(font_size)
+    font = _font(font_size, text)
     if font is None:
         return False
 

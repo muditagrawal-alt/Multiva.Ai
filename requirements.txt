@@ -58,6 +58,14 @@ accelerate>=0.30.0
 # 4.49 requires <1.0, and installing gradio 6 breaks NLLB + IndicF5 at import.
 gradio>=5,<6
 
+# Subtitles are drawn onto the picture with Pillow (ffmpeg from Homebrew has
+# no libass). fontTools reads each installed font's character map, so the
+# one that actually holds the script gets picked - Telugu in a Telugu font,
+# not boxes in a Devanagari one. Both arrive with torchvision/matplotlib
+# already; pinned here so a future dependency change cannot drop them.
+pillow>=10.0.0
+fonttools>=4.40.0
+
 # Utilities
 requests>=2.31.0
 typing-extensions>=4.12.0

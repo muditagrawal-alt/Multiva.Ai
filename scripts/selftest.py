@@ -230,6 +230,34 @@ def main() -> int:
     code, _ = call("POST", "/api/settings/llm", {"provider": "not-a-provider"})
     check("unknown provider rejected", code == 400, f"got {code}")
 
+    # ---- subtitle fonts ---------------------------------------------------
+    # Each script needs a font that actually holds its letters. This is the
+    # one place a Telugu render turned into a row of boxes while every HTTP
+    # check stayed green, so it is checked here on the fonts of this machine.
+    print("\n  Subtitle fonts")
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..",
+                                    "Backend_pipeline"))
+    try:
+        import subtitles as _subs
+        for lang, sample in (
+                ("hi", "नमस्ते, मेरा नाम मुदित है"), ("bn", "আমার নাম মুদিত"),
+                ("ta", "என் பெயர் முதித்"), ("te", "నా పేరు ముడిత్ B.Tech"),
+                ("kn", "ನನ್ನ ಹೆಸರು ಮುದಿತ್"), ("ml", "എന്റെ പേര് മുദിത്"),
+                ("gu", "મારું નામ મુદિત"), ("pa", "ਮੇਰਾ ਨਾਮ ਮੁਦਿਤ"),
+                ("or", "ମୋ ନାମ ମୁଦିତ"), ("ur", "میرا نام مدت ہے"),
+                ("ar", "اسمي موديت"), ("ja", "私の名前はムディットです"),
+                ("zh", "我叫穆迪特"), ("ru", "меня зовут Мудит"),
+                ("en", "my name is Mudit")):
+            font = _subs._font(32, sample)
+            need = {ord(c) for c in sample if c.isalpha()}
+            missing = need - _subs._cmap(font.path) if font else need
+            check(f"{lang} subtitles have a font with every letter",
+                  not missing,
+                  f"{os.path.basename(font.path) if font else 'no font'} "
+                  f"lacks {len(missing)} of {len(need)}")
+    except ImportError as exc:
+        check("subtitle renderer imports", False, str(exc))
+
     if args.quick or not args.clip:
         if not args.clip:
             print("\n  No clip given; skipping everything that renders.")
