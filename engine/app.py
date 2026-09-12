@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Ensure Backend_pipeline and root directory are in sys.path
+# Ensure engine/ and the repository root are in sys.path
 _CURRENT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _CURRENT_DIR.parent
 for _p in (str(_CURRENT_DIR), str(_PROJECT_ROOT)):
@@ -727,7 +727,7 @@ else:
     # fresh clone reaches /app/ before it exists. Saying so at startup beats
     # a 404 with nothing behind it.
     print("[APP] No web/ directory: the studio interface has not been built.")
-    print("[APP] Build it with:  cd frontend && npm install && npm run build")
+    print("[APP] Build it with:  cd apps/studio && npm install && npm run build")
     print("[APP] The API itself is fine; only the browser interface is missing.")
 
 

@@ -53,7 +53,7 @@ fn venv_python(root: &Path) -> Option<PathBuf> {
 /// A checkout is identified by the file the API actually lives in, not by name,
 /// so a renamed or relocated folder still works.
 fn looks_like_checkout(dir: &Path) -> bool {
-    dir.join("Backend_pipeline/app.py").is_file()
+    dir.join("engine/app.py").is_file()
 }
 
 /// Search order: explicit override, then upward from the executable, then
@@ -105,7 +105,7 @@ fn port_is_open(port: u16) -> bool {
 
 fn spawn_api(root: &Path, python: &Path, port: u16) -> std::io::Result<Child> {
     let mut cmd = Command::new(python);
-    cmd.current_dir(root.join("Backend_pipeline"))
+    cmd.current_dir(root.join("engine"))
         .args(["-m", "uvicorn", "app:app", "--port", &port.to_string()])
         // MPS has gaps in kernel coverage; let torch fall back rather than crash.
         .env("PYTORCH_ENABLE_MPS_FALLBACK", "1")
@@ -258,7 +258,7 @@ fn boot(app: tauri::AppHandle) {
 
     emit(&app, "error",
          "The engine did not finish loading in time. Run it manually to see why:\n\
-          cd Backend_pipeline && ../venv/bin/python -m uvicorn app:app --port 8000", 0, true);
+          cd engine && ../venv/bin/python -m uvicorn app:app --port 8000", 0, true);
 }
 
 fn show_studio(app: &tauri::AppHandle, port: u16) {

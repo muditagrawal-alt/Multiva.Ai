@@ -12,7 +12,7 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   build: {
-    outDir: "../web",
+    outDir: "../../web",
     emptyOutDir: true,
   },
   server: {

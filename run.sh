@@ -133,9 +133,9 @@ fi
 if [ ! -d web ]; then
     say "Building the studio interface (first run only)..."
     command -v npm >/dev/null 2>&1 || fail "npm is not installed, and web/ has not been built."
-    ( cd frontend && npm install --silent && npm run build >/dev/null ) \
+    ( cd apps/studio && npm install --silent && npm run build >/dev/null ) \
         || fail "The interface failed to build. Run it by hand:
-    cd frontend && npm install && npm run build"
+    cd apps/studio && npm install && npm run build"
     say "Interface built."
 fi
 
@@ -171,8 +171,8 @@ fi
 # this machine, and it opens as a window on this machine. If the window has
 # not been built yet, build it - that needs the Rust toolchain, which is the
 # one thing beyond Python and ffmpeg the desktop app depends on.
-APP_BUNDLE="frontend/src-tauri/target/release/bundle/macos/Multiva Studio.app"
-APP_LINUX="frontend/src-tauri/target/release/multiva-studio"
+APP_BUNDLE="apps/studio/src-tauri/target/release/bundle/macos/Multiva Studio.app"
+APP_LINUX="apps/studio/src-tauri/target/release/multiva-studio"
 DESKTOP=""
 [ -d "$APP_BUNDLE" ] && DESKTOP="$APP_BUNDLE"
 [ -z "$DESKTOP" ] && [ -x "$APP_LINUX" ] && DESKTOP="$APP_LINUX"
@@ -187,12 +187,12 @@ Install it from https://rustup.rs, then start Multiva again and it will build it
     say ""
     if ! confirm "Build it now?"; then
         fail "Nothing was changed. When you are ready:
-    cd frontend && npx tauri build"
+    cd apps/studio && npx tauri build"
     fi
-    ( cd frontend && npx --yes tauri build ) || fail "The build did not finish. The output above says why."
+    ( cd apps/studio && npx --yes tauri build ) || fail "The build did not finish. The output above says why."
     [ -d "$APP_BUNDLE" ] && DESKTOP="$APP_BUNDLE"
     [ -z "$DESKTOP" ] && [ -x "$APP_LINUX" ] && DESKTOP="$APP_LINUX"
-    [ -n "$DESKTOP" ] || fail "The build finished but produced no window. Check frontend/src-tauri/target/release."
+    [ -n "$DESKTOP" ] || fail "The build finished but produced no window. Check apps/studio/src-tauri/target/release."
     say "Window built."
 fi
 
@@ -220,7 +220,7 @@ say "Starting the engine on port ${PORT}. Models load on first use."
 say "Ctrl-C stops it."
 printf '  %s\n\n' "------------------------------------------------"
 
-cd Backend_pipeline
+cd engine
 export MULTIVA_LLM_PROVIDER="$PROVIDER"
 [ -n "$MODEL" ] && export MULTIVA_LLM_MODEL="$MODEL"
 export PYTORCH_ENABLE_MPS_FALLBACK=1

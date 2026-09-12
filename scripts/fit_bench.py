@@ -26,7 +26,7 @@ import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "Backend_pipeline"))
+sys.path.insert(0, os.path.join(ROOT, "engine"))
 
 # Lines that actually overran a slot in real dubs, with the English they came
 # from. Hindi is the hard case: it is where the local models fall down.

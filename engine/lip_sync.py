@@ -31,7 +31,7 @@ import cv2
 import numpy as np
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-WAV2LIP_DIR = os.path.join(THIS_DIR, "Wav2Lip")
+WAV2LIP_DIR = os.path.join(THIS_DIR, "vendor", "wav2lip")
 import engines
 
 # Only checkpoints actually present on disk are offered by the catalogue,

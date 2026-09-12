@@ -485,7 +485,7 @@ export interface EngineOption {
   ready: boolean;
   /** How it is obtained: fetched from the Hub, or placed by hand. */
   source: "download" | "manual" | "builtin";
-  /** Where a manual file belongs, relative to Backend_pipeline. */
+  /** Where a manual file belongs, relative to engine/. */
   local?: string;
 }
 

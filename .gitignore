@@ -32,7 +32,7 @@ conda-env/
 # Node / Rust build output
 # =========================
 node_modules/
-frontend/src-tauri/target/
+apps/studio/src-tauri/target/
 # The compiled SPA. app.py serves it, but it is produced by `npm run build`
 # and should not be versioned.
 # web/ is the built studio interface and IS committed. It is build output,
@@ -55,8 +55,7 @@ checkpoints/
 *.ckpt
 *.safetensors
 # Vendored third-party model code, cloned during setup.
-Backend_pipeline/IndicF5/
-Backend_pipeline/Wav2Lip/
+engine/IndicF5/
 
 # =========================
 # Runtime working directories
@@ -76,6 +75,8 @@ logs/
 output_videos/
 test_videos/
 *.wav
+# The four clips the voice-match floor is anchored on travel with the engine.
+!engine/assets/floor/*.wav
 *.mp3
 *.flac
 *.m4a

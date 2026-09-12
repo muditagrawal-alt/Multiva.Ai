@@ -11,7 +11,7 @@ user would do actually works.
     python scripts/selftest.py path/to/clip.mp4 --quick   # skip the renders
 
 Requires the engine to be running:
-    cd Backend_pipeline && ../venv/bin/python -m uvicorn app:app --port 8000
+    cd engine && ../venv/bin/python -m uvicorn app:app --port 8000
 """
 
 from __future__ import annotations
@@ -237,7 +237,7 @@ def main() -> int:
     # check stayed green, so it is checked here on the fonts of this machine.
     print("\n  Subtitle fonts")
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..",
-                                    "Backend_pipeline"))
+                                    "engine"))
     try:
         import subtitles as _subs
         for lang, sample in (

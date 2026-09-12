@@ -68,7 +68,9 @@ SV_MODEL = "microsoft/wavlm-base-plus-sv"
 
 # Different-speaker clips used as the negative control. These ship with the
 # vendored IndicF5 checkout.
-NEGATIVE_GLOB = os.path.join(THIS_DIR, "IndicF5", "prompts", "*.wav")
+# Four unrelated speakers the similarity floor is anchored on. They ship with
+# the engine so a fresh clone scores voice match the same way this one does.
+NEGATIVE_GLOB = os.path.join(THIS_DIR, "assets", "floor", "*.wav")
 
 # Pauses in this band carry speech rhythm; longer ones are structural breaks.
 MICRO_PAUSE = (0.05, 0.30)

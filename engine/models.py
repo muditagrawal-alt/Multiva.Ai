@@ -41,14 +41,14 @@ MODELS = [
 # (label, path relative to the repo, size, bytes, sha256, mirrors)
 WEIGHTS = [
     ("Lip sync",
-     "Backend_pipeline/Wav2Lip/checkpoints/wav2lip_gan.pth",
+     "engine/vendor/wav2lip/checkpoints/wav2lip_gan.pth",
      "436 MB", 435801865,
      "ca9ab7b7b812c0e80a6e70a5977c545a1e8a365a6c49d5e533023c034d7ac3d8",
      ["https://huggingface.co/camenduru/Wav2Lip/resolve/main/checkpoints/wav2lip_gan.pth",
       "https://huggingface.co/numz/wav2lip_studio/resolve/main/Wav2lip/wav2lip_gan.pth",
       "https://huggingface.co/Nekochu/Wav2Lip/resolve/main/wav2lip_gan.pth"]),
     ("Face detection",
-     "Backend_pipeline/Wav2Lip/face_detection/detection/sfd/s3fd.pth",
+     "engine/vendor/wav2lip/face_detection/detection/sfd/s3fd.pth",
      "86 MB", 89843225,
      "619a31681264d3f7f7fc7a16a42cbbe8b23f31a256f75a366e5a1bcd59b33543",
      # The canonical host for this file is adrianbulat.com, which is where

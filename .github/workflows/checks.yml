@@ -2,8 +2,8 @@ name: checks
 
 # The three failures that actually shipped, and what catches each:
 #   requirements.txt became uninstallable  -> the resolve job
-#   the interface stopped building         -> the frontend job
-#   committed web/ drifted from source     -> the frontend job's diff check
+#   the interface stopped building         -> the studio job
+#   committed web/ drifted from source     -> the studio job's diff check
 # The full 112-check suite needs 7.5 GB of models and a GPU, so it stays a
 # local command; these run on every push in under a couple of minutes.
 
@@ -38,7 +38,7 @@ jobs:
       - run: python -m pip install --quiet ruff
       - name: Every file parses
         run: |
-          find Backend_pipeline scripts -name '*.py' -not -path '*/Wav2Lip/*' \
+          find engine scripts -name '*.py' -not -path '*/vendor/*' \
             -exec python -m py_compile {} +
       # Only rules that mean a real defect: syntax errors, undefined names,
       # broken comparisons. Deliberately not B905 or ASYNC - the audit went
@@ -47,11 +47,11 @@ jobs:
       # decisions already made and written down.
       - name: Correctness lint
         run: |
-          ruff check Backend_pipeline scripts \
-            --exclude Backend_pipeline/Wav2Lip \
+          ruff check engine scripts \
+            --exclude engine/vendor \
             --select E9,F63,F7,F82
 
-  frontend:
+  studio:
     name: interface builds, and web/ is current
     runs-on: ubuntu-latest
     steps:
@@ -60,21 +60,21 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: apps/studio/package-lock.json
       - run: npm ci
-        working-directory: frontend
+        working-directory: apps/studio
       - name: Typecheck
         run: npx tsc -b --force
-        working-directory: frontend
+        working-directory: apps/studio
       - run: npm run build
-        working-directory: frontend
+        working-directory: apps/studio
       # web/ is committed so nobody needs Node just to run the app. If it has
       # drifted from the source it was built from, say so here rather than
       # letting someone run a stale interface.
       - name: web/ matches the source
         run: |
           if ! git diff --quiet -- web; then
-            echo "::error::web/ is out of date. Run 'cd frontend && npm run build' and commit the result."
+            echo "::error::web/ is out of date. Run 'cd apps/studio && npm run build' and commit the result."
             git diff --stat -- web
             exit 1
           fi

@@ -35,7 +35,7 @@ DEVICE = _get_device()
 # ---------------------------------------------------------------------------
 # Language code mapping
 # ---------------------------------------------------------------------------
-# Map short codes (used by frontend/Whisper) to NLLB flores-200 codes
+# Map short codes (used by the studio and Whisper) to NLLB flores-200 codes
 LANG_TO_FLORES = {
     "en": "eng_Latn",
     "hi": "hin_Deva",

@@ -68,10 +68,10 @@ CATALOG = {
         "default": "wav2lip_gan.pth",
         "options": [
             {"id": "wav2lip_gan.pth", "label": "Wav2Lip GAN", "size": "436 MB",
-             "local": "Wav2Lip/checkpoints/wav2lip_gan.pth",
+             "local": "vendor/wav2lip/checkpoints/wav2lip_gan.pth",
              "note": "Sharper mouth detail. The default."},
             {"id": "wav2lip.pth", "label": "Wav2Lip", "size": "436 MB",
-             "local": "Wav2Lip/checkpoints/wav2lip.pth",
+             "local": "vendor/wav2lip/checkpoints/wav2lip.pth",
              "note": "Slightly more accurate sync, softer detail."},
         ],
     },

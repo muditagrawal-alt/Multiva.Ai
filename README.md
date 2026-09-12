@@ -126,7 +126,7 @@ To do the steps by hand instead:
 python3.10 -m venv venv
 ./venv/bin/pip install -r requirements.txt
 ./venv/bin/python scripts/download_models.py      # --check reports without downloading
-cd frontend && npx tauri build                    # the window, once
+cd apps/studio && npx tauri build                 # the window, once
 ```
 
 ## Run
@@ -193,7 +193,7 @@ Measured across 21 clips (Hindi, English and mixed; 368p–1080p; portrait and l
 Every render also scores itself: the studio reports speaker similarity and A/V drift per job, so a bad run is visible before you play it.
 
 ```bash
-cd Backend_pipeline
+cd engine
 ../venv/bin/python eval_harness.py --all                     # score existing runs
 ../venv/bin/python eval_harness.py --build ../test_videos \
     --target hi --seconds 12 --no-lipsync --json after.json  # full sweep
@@ -244,14 +244,18 @@ That is why this repo has an evaluation harness. Every failure here had the same
 ## Project layout
 
 ```
-Backend_pipeline/   the engine: FastAPI service, the four stages, subtitles, projects
+apps/studio/        the studio: React 19 + Vite + Tailwind v4, and the Tauri shell in src-tauri/
+engine/             the engine: FastAPI service, the four stages, subtitles, projects
   app.py            every route, the job store, the pipeline
-  ARCHITECTURE.md   stage by stage, and the traps that silently break this
-frontend/           the studio (React 19, Vite, Tailwind v4) and the Tauri shell
+  vendor/wav2lip/   the Wav2Lip source the lip-sync stage imports (weights are downloaded)
+  assets/floor/     the four unrelated voices the voice-match score is anchored on
 web/                the built interface, committed so Node is not required
 scripts/            selftest.py · download_models.py · fit_bench.py · reference_experiment.py
+docs/               ARCHITECTURE.md · TESTING.md · the plans and audits · media/
 run.sh              the one command
 ```
+
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) walks the pipeline stage by stage and lists the traps that will silently break it if disturbed. [docs/TESTING.md](docs/TESTING.md) is the manual test script.
 
 ## Contact
 
