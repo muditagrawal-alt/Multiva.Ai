@@ -19,14 +19,14 @@
 
 ## Demo
 
-The whole thing, start to finish, on a 46-second clip: choosing the models, starting a project, importing the clip, rendering a Hindi dub, naming the output, and playing the result — voice match 95% on that run, A/V drift 0 ms. Recorded from the real interface, not mocked.
+The whole thing, start to finish, on a 46-second clip: choosing the models, starting a project, importing the clip, rendering a Hindi dub, naming the output, and playing the result — voice match 95% on that run, A/V drift 0 ms. Recorded from the real interface, not mocked; captions explain each step.
 
 <p align="center">
   <a href="docs/media/demo.mp4">
     <img src="docs/media/demo-poster.png" alt="Watch the demo: from setup to a finished Hindi dub" width="100%">
   </a>
   <br>
-  <sub>▶ <a href="docs/media/demo.mp4">docs/media/demo.mp4</a> — 1:52, with sound and captions that explain each step. The ten-minute render is shown at 43×; everything else is real time.</sub>
+  <sub>▶ <a href="docs/media/demo.mp4">docs/media/demo.mp4</a> — 1:26, with sound. The ten-minute render is shown at 43×; the original and the dub play for a few seconds each; everything else is real time.</sub>
 </p>
 
 | | |
