@@ -107,13 +107,19 @@ def source_flores(code: str) -> str:
     return EXTRA_SOURCE_FLORES[c]
 
 
-def target_flores(code: str) -> str:
-    """flores-200 code to translate INTO for this synthesis target."""
+def target_flores(code: str, for_speech: bool = True) -> str:
+    """
+    flores-200 code to translate INTO for this target.
+
+    `for_speech` picks the script the voice model can read, which for Urdu
+    is Devanagari. Text that will only ever be read - subtitles, a translated
+    script - wants the language's own script instead.
+    """
     c = normalize(code)
     if c not in LANGUAGES:
         raise UnsupportedLanguage(f"{code!r} is not a supported dubbing target")
     e = LANGUAGES[c]
-    return e.get("translate_to", e["flores"])
+    return e.get("translate_to", e["flores"]) if for_speech else e["flores"]
 
 
 def engine_for(code: str) -> str:

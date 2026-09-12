@@ -1,8 +1,9 @@
 # Backend architecture
 
 Everything runs locally. There is no inference API call anywhere in this
-pipeline; the only network traffic is an optional Supabase row and an optional
-R2 upload, both of which the app degrades gracefully without.
+pipeline and no cloud storage behind it. The one optional outbound call is the
+script model, when a hosted provider is chosen over Ollama, and it carries a
+single line of already-translated text.
 
 ## Entry points
 
@@ -38,7 +39,7 @@ is what the splash screen displays.
 6. **synthesizing_voice** — phrase-level, laid onto a fixed-length track (`dubbing`)
 7. **lip_syncing** — mouth region only, single encode (`lip_sync`)
 8. **verifying** — A/V drift and voice match
-9. **uploading_result** — optional R2
+9. **filing** — the finished render is copied to the project's output folder
 
 Two stages report a real counter (`synthesizing_voice (3/8)`,
 `lip_syncing (240/512 frames)`), which is what drives the progress bar and
@@ -68,9 +69,8 @@ is the part that costs minutes.
 
 `project.py` writes a `project.json` beside the files a job already keeps, and
 the server scans for manifests at startup. Without it, restarting turned every
-finished dub back into a download link. `/videos/` is local-first: manifests are
-the source of truth and the database is enrichment, so a cloud outage never
-hides local work.
+finished dub back into a download link. `/videos/` reads the manifests and
+nothing else: one row per project, however many outputs it holds.
 
 ## Cancellation
 

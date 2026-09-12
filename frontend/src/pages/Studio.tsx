@@ -780,7 +780,7 @@ export default function Studio() {
                   ) : null}
                 </div>
                 <span className="console-text min-w-0 flex-1 truncate text-[11px] text-c-text">
-                  {file?.name ?? job?.job_id ?? "project"}
+                  {file?.name ?? job?.name ?? "project"}
                 </span>
               </button>
 
@@ -1153,7 +1153,11 @@ export default function Studio() {
                 progress={progress}
                 view={view}
                 stages={stages}
-                label={kind === "voiceover" ? "Voice-over rendered" : "Voice cloned and dub rendered"}
+                label={
+                  kind === "voiceover" ? "Voice-over rendered"
+                    : kind === "subtitled" ? "Subtitles drawn onto the picture"
+                      : kind === "subtitles" || kind === "subtitles_translated" ? "Subtitles ready"
+                        : "Voice cloned and dub rendered"}
                 error={error}
                 onRetry={render}
                 onCancel={view === "working" && !cancelling ? stopRun : undefined}

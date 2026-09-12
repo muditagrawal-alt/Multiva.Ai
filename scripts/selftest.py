@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -244,17 +245,27 @@ def main() -> int:
                 ("ta", "என் பெயர் முதித்"), ("te", "నా పేరు ముడిత్ B.Tech"),
                 ("kn", "ನನ್ನ ಹೆಸರು ಮುದಿತ್"), ("ml", "എന്റെ പേര് മുദിത്"),
                 ("gu", "મારું નામ મુદિત"), ("pa", "ਮੇਰਾ ਨਾਮ ਮੁਦਿਤ"),
-                ("or", "ମୋ ନାମ ମୁଦିତ"), ("ur", "میرا نام مدت ہے"),
+                ("or", "ମୋ ନାମ ମୁଦିତ ସ୍ପିକର"), ("ur", "میرا نام مدت ہے"),
                 ("ar", "اسمي موديت"), ("ja", "私の名前はムディットです"),
                 ("zh", "我叫穆迪特"), ("ru", "меня зовут Мудит"),
                 ("en", "my name is Mudit")):
             font = _subs._font(32, sample)
             need = {ord(c) for c in sample if c.isalpha()}
             missing = need - _subs._cmap(font.path) if font else need
-            check(f"{lang} subtitles have a font with every letter",
-                  not missing,
+            # Coverage is not enough: Oriya Sangam MN holds every Odia
+            # letter and still throws on a conjunct, so the cue is drawn.
+            drawn = False
+            try:
+                drawn = _subs._render_cue(sample, 640, 28,
+                                          os.path.join(tempfile.gettempdir(),
+                                                       f"multiva_cue_{lang}.png"))
+            except Exception as exc:                         # noqa: BLE001
+                missing = missing or {0}
+                drawn = str(exc)
+            check(f"{lang} subtitles draw in a font with every letter",
+                  not missing and drawn is True,
                   f"{os.path.basename(font.path) if font else 'no font'} "
-                  f"lacks {len(missing)} of {len(need)}")
+                  f"lacks {len(missing)} of {len(need)}; drawn={drawn}")
     except ImportError as exc:
         check("subtitle renderer imports", False, str(exc))
 
@@ -536,7 +547,6 @@ def main() -> int:
               len(mine) == 1 and mine[0].get("outputs", 0) >= 2,
               f"{len(mine)} rows, outputs={mine[0].get('outputs') if mine else '-'}")
         # Naming an output can also say where it lives.
-        import tempfile
         chosen = tempfile.mkdtemp()
         code, rn = call("PATCH", f"/jobs/{s3}", {"name": "Named output",
                                                   "output_dir": chosen})

@@ -94,6 +94,9 @@ _FONT_CANDIDATES = [
     "/System/Library/Fonts/Supplemental/Bangla Sangam MN.ttc",
     "/System/Library/Fonts/Supplemental/Gujarati Sangam MN.ttc",
     "/System/Library/Fonts/Supplemental/Gurmukhi Sangam MN.ttc",
+    # Oriya Sangam MN makes FreeType choke on conjuncts under raqm, so
+    # the Noto face that ships beside it comes first.
+    "/System/Library/Fonts/NotoSansOriya.ttc",
     "/System/Library/Fonts/Supplemental/Oriya Sangam MN.ttc",
     "/System/Library/Fonts/Supplemental/Sinhala Sangam MN.ttc",
     "/System/Library/Fonts/Supplemental/Myanmar Sangam MN.ttc",
@@ -150,34 +153,35 @@ MAX_BURN_CUES = 80
 
 def _font(size: int, text: str = ""):
     """
-    The installed font that can draw the most of `text`.
+    The installed font that can draw the most of `text`, and actually does.
 
     Ties go to whichever is listed first, which puts a script's own font
-    ahead of a broad one. With no text to judge by, the first font that
-    exists is fine.
+    ahead of a broad one. Each candidate is asked to draw the text before
+    it is chosen: a font can hold every letter and still fail to shape a
+    conjunct, and that failure is an exception from FreeType rather than a
+    box, so it has to be caught here and the next font tried.
     """
-    from PIL import ImageFont
+    from PIL import Image, ImageDraw, ImageFont
     present = [p for p in _FONT_CANDIDATES if os.path.exists(p)]
     if not present:
         return None
     # Letters only. Spaces, digits and punctuation are in every font and
     # would only dilute the score.
     need = {ord(c) for c in text if c.isalpha()}
-    best, best_hit = present[0], -1
-    if need:
-        for path in present:
-            hit = len(need & _cmap(path))
-            if hit > best_hit:
-                best, best_hit = path, hit
-            if hit == len(need):
-                break
-        if best_hit == 0:
-            print(f"[Subtitles] No installed font covers this text; "
-                  f"it will show as boxes: {text[:40]!r}")
-    try:
-        return ImageFont.truetype(best, size)
-    except Exception:                                        # noqa: BLE001
-        return None
+    ranked = sorted(present, key=lambda p: -len(need & _cmap(p))) if need else present
+    if need and not (need & _cmap(ranked[0])):
+        print(f"[Subtitles] No installed font covers this text; "
+              f"it will show as boxes: {text[:40]!r}")
+    probe = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+    for path in ranked:
+        try:
+            font = ImageFont.truetype(path, size)
+            probe.text((0, 0), text or "Aa", font=font)
+            return font
+        except Exception as exc:                             # noqa: BLE001
+            print(f"[Subtitles] {os.path.basename(path)} could not draw "
+                  f"this text ({exc}); trying the next font")
+    return None
 
 
 def _pieces(draw, word: str, font, max_width: int) -> list:

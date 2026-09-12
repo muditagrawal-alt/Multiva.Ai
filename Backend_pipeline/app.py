@@ -445,17 +445,25 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
                 os.path.join(workdir, f"{stem}_ref.wav"), sample_rate=24000)
 
         # ── 4. Translate segment by segment ──
-        # A sibling that translated into the same language has this too.
+        # Text that is only read goes into the language's own script; text
+        # that will be spoken goes into the one the voice model reads. The
+        # two differ for Urdu, so a sibling's translation is only reused
+        # when it was made for the same purpose.
+        for_speech = kind in ("dub", "audio")
         if (sibling and sibling.get("target_language") == target_language
                 and sibling.get("translated_segments")
-                and len(sibling["translated_segments"]) == len(segments)):
+                and len(sibling["translated_segments"]) == len(segments)
+                and (L.target_flores(target_language, True)
+                     == L.target_flores(target_language, False)
+                     or (sibling.get("kind") in ("dub", "audio")) == for_speech)):
             translated = list(sibling["translated_segments"])
             _set(job_id, step="translating")
             print(f"[APP] Job {job_id} reused the {target_language} translation "
                   f"from the same sibling, skipping translation")
         else:
             _set(job_id, step="translating")
-            translated = translate_segments(segments, source_language, target_language)
+            translated = translate_segments(segments, source_language,
+                                            target_language, for_speech=for_speech)
             from translation_v2 import fix_code_switching
             translated = fix_code_switching(translated, target_language)
         _set(job_id, translated_text=" ".join(t for t in translated if t).strip())
@@ -483,7 +491,7 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             elif sub_lang != target_language:
                 _set(job_id, step="translating")
                 sub_texts = list(translate_segments(
-                    segments, source_language, sub_lang))
+                    segments, source_language, sub_lang, for_speech=False))
                 from translation_v2 import fix_code_switching
                 sub_texts = fix_code_switching(sub_texts, sub_lang)
             else:

@@ -265,6 +265,7 @@ def _split_long(text: str, limit: int = MAX_SEGMENT_CHARS) -> list:
 
 
 def translate_batch(texts: list, source_lang: str, target_lang: str,
+                    for_speech: bool = True,
                     batch_size: int = 8, num_beams: int = None) -> list:
     """
     Translate many short texts. Returns a list the same length as `texts`,
@@ -273,7 +274,7 @@ def translate_batch(texts: list, source_lang: str, target_lang: str,
     import languages as _L
 
     src = _L.source_flores(source_lang)
-    tgt = _L.target_flores(target_lang)
+    tgt = _L.target_flores(target_lang, for_speech)
 
     if src == tgt:
         return [t or "" for t in texts]
@@ -340,11 +341,15 @@ def _degenerate(text: str) -> bool:
 
 
 def translate_segments(segments: list, source_lang: str, target_lang: str,
-                       num_beams: int = None) -> list:
+                       num_beams: int = None, for_speech: bool = True) -> list:
     """
     Translate Whisper segments one by one, preserving alignment with the input
     list. Over-long segments are split, translated, and rejoined so a segment
     never silently loses its tail.
+
+    `for_speech=False` translates into the language's own script even where
+    the voice model would need another: Urdu subtitles come out in Urdu, not
+    the Devanagari the dub is spoken from.
 
     Returns a list of translated strings, one per input segment.
     """
@@ -360,7 +365,8 @@ def translate_segments(segments: list, source_lang: str, target_lang: str,
     if not flat:
         return [""] * len(segments)
 
-    translated = translate_batch(flat, source_lang, target_lang, num_beams=num_beams)
+    translated = translate_batch(flat, source_lang, target_lang,
+                                 for_speech=for_speech, num_beams=num_beams)
 
     joined = [[] for _ in segments]
     # strict: translate_batch returns one entry per input by construction.
@@ -373,7 +379,7 @@ def translate_segments(segments: list, source_lang: str, target_lang: str,
     result = [" ".join(parts).strip() for parts in joined]
 
     src = _L.source_flores(source_lang)
-    tgt = _L.target_flores(target_lang)
+    tgt = _L.target_flores(target_lang, for_speech)
     kept = sum(1 for r in result if r)
     print(f"[Translation-v2] {src} -> {tgt}: {kept}/{len(segments)} segments "
           f"({len(flat)} sub-parts, beams={num_beams or os.getenv('NLLB_NUM_BEAMS', 2)})")
