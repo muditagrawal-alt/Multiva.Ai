@@ -102,6 +102,15 @@ MAX_TAIL_PASSES = 3
 # and the two after it gained 2.6s between them, so anything that stops on a
 # small gain throws away most of what there was to get.
 MIN_TAIL_GAIN = 0.05
+# Going back for the tail is only right when there is speech in it. On a clip
+# whose speech genuinely ends early, a forced second pass over the silence
+# hallucinated "Sure.", "Thank you." and a Norwegian subtitle credit, each
+# of which was then synthesized into the dub. The tail has to hold at least
+# this much VAD-detected speech, and this fraction of its length, first.
+MIN_TAIL_SPEECH_SECONDS = 1.0
+MIN_TAIL_SPEECH_FRACTION = 0.3
+# A recovered segment shorter than this is not a phrase anyone said.
+MIN_RECOVERED_SEGMENT = 0.3
 
 # Shared by the first pass and any recovery pass, so the two cannot drift.
 _DECODE = dict(
@@ -127,6 +136,22 @@ _DECODE = dict(
 # ---------------------------------------------------------------------------
 # Public API — same interface as speech_to_text.py
 # ---------------------------------------------------------------------------
+
+def _speech_in(audio_path: str, from_seconds: float) -> float:
+    """Seconds of VAD-detected speech from `from_seconds` to the end."""
+    try:
+        from faster_whisper.audio import decode_audio
+        from faster_whisper.vad import VadOptions, get_speech_timestamps
+        audio = decode_audio(audio_path, sampling_rate=16000)
+        tail = audio[int(from_seconds * 16000):]
+        if len(tail) == 0:
+            return 0.0
+        spans = get_speech_timestamps(tail, VadOptions(min_silence_duration_ms=500))
+        return sum(t["end"] - t["start"] for t in spans) / 16000.0
+    except Exception as e:                                   # noqa: BLE001
+        print(f"[STT-v2] Could not measure speech in the tail: {e}")
+        return 0.0
+
 
 def transcribe_audio(audio_path: str, language: str = None) -> dict:
     """
@@ -192,13 +217,20 @@ def transcribe_audio(audio_path: str, language: str = None) -> dict:
         gap = (info.duration or 0.0) - covered
         if gap <= TAIL_GAP_SECONDS:
             break
-        print(f"[STT-v2] {gap:.1f}s after {covered:.1f}s was never transcribed; "
-              f"going back for it")
+        speech = _speech_in(audio_path, covered)
+        if speech < MIN_TAIL_SPEECH_SECONDS or speech < gap * MIN_TAIL_SPEECH_FRACTION:
+            print(f"[STT-v2] {gap:.1f}s after {covered:.1f}s holds only "
+                  f"{speech:.1f}s of speech; leaving it")
+            break
+        print(f"[STT-v2] {gap:.1f}s after {covered:.1f}s was never transcribed "
+              f"({speech:.1f}s of speech in it); going back for it")
         try:
             more_iter, _ = _pass(clip=[covered, info.duration])
             found = 0
             for segment in more_iter:
                 if segment.end <= covered + 0.05 or not segment.text.strip():
+                    continue
+                if segment.end - segment.start < MIN_RECOVERED_SEGMENT:
                     continue
                 all_text_parts.append(segment.text)
                 seg_data = {"start": segment.start, "end": segment.end,

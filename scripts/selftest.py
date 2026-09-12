@@ -268,15 +268,14 @@ def main() -> int:
     code, tl = call("GET", f"/jobs/{job}/segments")
     check("timeline listed", code == 200 and tl.get("segments"))
     phrases = tl.get("segments", [])
-    # The transcript has to reach the end of the clip. large-v3 stopped early
-    # on real footage and the last sentence was missing from the subtitles and
-    # from the dub, with nothing saying so.
+    # Reported, not asserted. Coverage alone cannot tell a truncated transcript
+    # from a clip whose speech ends early: the test clip's speech stops at
+    # 13.3s of 17.2s, and the earlier assertion that it reach 85% was wrong in
+    # exactly the way that caused a hallucination. Whether a tail with speech
+    # in it gets recovered is checked where the decision is made, against VAD.
     video_dur = tl.get("video_duration") or 0
     covered = max((p["start"] + p["duration"] for p in phrases), default=0)
     if video_dur:
-        check("the transcript reaches the end of the clip",
-              covered >= video_dur * 0.85,
-              f"covers {covered:.1f}s of {video_dur:.1f}s")
         print(f"        transcript covers {covered / video_dur * 100:.0f}% "
               f"of the clip")
 
