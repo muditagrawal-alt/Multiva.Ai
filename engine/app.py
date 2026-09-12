@@ -669,7 +669,6 @@ def process_video_task(job_id: str, input_path: str, original_language: str,
             # of them. Deleting these turned "edit a word" into a failed job.
             keep = {job.get("output_path"), job.get("reference_path"),
                     job.get("dub_path"), job.get("input_path")}
-            output = job.get("output_path")
             for name in os.listdir(workdir) if os.path.isdir(workdir) else []:
                 path = os.path.join(workdir, name)
                 # The manifest is the index for everything kept above, not an

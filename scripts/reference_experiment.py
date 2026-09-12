@@ -102,7 +102,7 @@ def main() -> int:
         reference = {"path": ref_path, "text": ref_text, "duration": actual}
         t0 = time.time()
         try:
-            plan = dubbing.build_dubbed_track(
+            dubbing.build_dubbed_track(
                 segments, translated, reference, target, dur,
                 os.path.join(args.out, f"{stem}_dub{i}.wav"),
                 source_lang=source_lang, source_audio=stt_audio)

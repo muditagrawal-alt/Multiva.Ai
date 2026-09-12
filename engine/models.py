@@ -170,7 +170,7 @@ def fetch_weight(label, path, size, want_bytes, want_sha, mirrors,
             state = verify(part, want_bytes, want_sha)
             if state == "ok":
                 os.replace(part, path)
-                print(f"          verified and installed")
+                print("          verified and installed")
                 return True
             print(f"          rejected: {state}")
             _discard(part)

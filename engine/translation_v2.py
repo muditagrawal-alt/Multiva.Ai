@@ -136,7 +136,7 @@ def _load_model():
             _model = _model.half()
 
         _model.eval()
-        print(f"[Translation-v2] Model loaded successfully")
+        print("[Translation-v2] Model loaded successfully")
         return _tokenizer, _model
 
     except Exception as e:

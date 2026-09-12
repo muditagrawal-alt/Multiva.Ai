@@ -7,7 +7,6 @@ Drop-in replacement for speech_to_text.py with:
   - Automatic fallback to smaller models if large-v3 fails
 """
 
-import os
 import torch
 
 # ---------------------------------------------------------------------------
@@ -90,7 +89,7 @@ def _load_model():
                 raise RuntimeError(
                     f"Could not load any Whisper model. Last error: {e}"
                 ) from e
-            print(f"[STT-v2] Falling back to next model...")
+            print("[STT-v2] Falling back to next model...")
 
 
 # A gap smaller than this at the end of a file is trailing silence, not

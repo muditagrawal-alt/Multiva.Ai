@@ -53,7 +53,7 @@ accelerate>=0.30.0
 
 # Cloud Storage & Database
 
-# Test harness UI (Backend_pipeline/gradio_app.py)
+# Test harness UI (engine/gradio_app.py)
 # MUST stay on 5.x: gradio 6 requires huggingface-hub>=1.16, but transformers
 # 4.49 requires <1.0, and installing gradio 6 breaks NLLB + IndicF5 at import.
 gradio>=5,<6

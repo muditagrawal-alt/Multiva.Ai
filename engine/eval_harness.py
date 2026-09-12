@@ -88,7 +88,7 @@ class SpeakerScorer:
 
     def _load(self):
         if self._model is None:
-            import torch
+            import torch  # noqa: F401  torch must load before transformers does
             from transformers import AutoFeatureExtractor, WavLMForXVector
             print(f"[EVAL] Loading {SV_MODEL}...")
             self._fe = AutoFeatureExtractor.from_pretrained(SV_MODEL)

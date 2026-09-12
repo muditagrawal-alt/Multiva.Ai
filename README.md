@@ -276,6 +276,10 @@ run.sh              the one command
 
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) walks the pipeline stage by stage and lists the traps that will silently break it if disturbed. [docs/TESTING.md](docs/TESTING.md) is the manual test script.
 
+## Brand and media
+
+The Multiva name and mark, and everything under `docs/media/` — the demo video, the screenshots, the diagrams — are © Mudit Agrawal, all rights reserved. They are here so the README can show the product; they are not licensed for reuse. See [docs/media/README.md](docs/media/README.md).
+
 ## Contact
 
 Built and maintained by one person. If something breaks, a language sounds wrong, or you want another model supported, open an issue — that is the fastest way to reach me.

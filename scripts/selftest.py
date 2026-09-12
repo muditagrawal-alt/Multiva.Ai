@@ -695,8 +695,8 @@ def main() -> int:
     music = tone_wav(seconds=6)
     code, started = call(
         "POST",
-        f"/process_video/?original_language=en&target_language=hi"
-        f"&user_id=selftest&trim_start=2.0&trim_end=9.0&music_gain=-20",
+        "/process_video/?original_language=en&target_language=hi"
+        "&user_id=selftest&trim_start=2.0&trim_end=9.0&music_gain=-20",
         files={"file": (name, clip), "music": ("bed.wav", music)})
     trimmed = started.get("job_id")
     check("trimmed job with a music bed accepted", code == 200 and trimmed,
@@ -717,8 +717,8 @@ def main() -> int:
 
     # A trim that selects nothing is a mistake worth catching at the door.
     code, _ = call("POST",
-                   f"/process_video/?original_language=en&target_language=hi"
-                   f"&trim_start=9.0&trim_end=2.0",
+                   "/process_video/?original_language=en&target_language=hi"
+                   "&trim_start=9.0&trim_end=2.0",
                    files={"file": (name, clip)})
     check("an inverted trim is rejected", code == 400, f"got {code}")
 

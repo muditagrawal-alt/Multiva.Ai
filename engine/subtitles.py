@@ -12,7 +12,6 @@ No model runs here. This is formatting over data the pipeline already has.
 from __future__ import annotations
 
 import os
-import re
 
 
 def _clock(seconds: float, comma: bool) -> str:

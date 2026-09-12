@@ -155,7 +155,7 @@ class IndicF5Engine:
                 return self._model
 
             _ensure_mps_fallback()
-            import torch
+            import torch  # noqa: F401  torch must load before transformers does
             from transformers import AutoModel
 
             self.device = _pick_device()

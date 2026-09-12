@@ -21,7 +21,6 @@ verification below is a genuine assertion rather than a formality.
 """
 
 import json
-import os
 import subprocess
 
 
