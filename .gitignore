@@ -84,6 +84,8 @@ test_videos/
 *.mov
 *.mkv
 *.avi
+# The README's demo is the one video that belongs in the repository.
+!docs/media/demo.mp4
 
 # =========================
 # Editors and OS
